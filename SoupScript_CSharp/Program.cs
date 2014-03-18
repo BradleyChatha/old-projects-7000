@@ -97,6 +97,10 @@ namespace SoupScript_CSharp
                         IfCondition = (Convert.ToDouble(GetVar(Data[1])) >= Convert.ToDouble(GetVar(Data[3])));
                     }
                 }
+                else if (s.StartsWith("endif"))
+                {
+                    IfCondition = true;
+                }
 
                 if (IfCondition)
                 {
