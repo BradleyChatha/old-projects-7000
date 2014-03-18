@@ -73,6 +73,11 @@ namespace SoupScript_CSharp
                     Variables[s.Split(' ')[1]] = Console.ReadLine();
                 }
 
+                else if (s.StartsWith("File:Read"))
+                {
+                    Console.WriteLine(File.ReadAllText(s.Split(" ".ToCharArray(), 2)[1]));
+                }
+
                 Line++;
             }
         }
