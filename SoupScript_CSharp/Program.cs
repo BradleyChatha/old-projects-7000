@@ -64,6 +64,8 @@ namespace SoupScript_CSharp
 
         static void Compile(String file)
         {
+            Console.WriteLine();
+
             if (!File.Exists(file))
             {
                 Console.WriteLine("\nERROR: File not found!\n");
@@ -200,11 +202,11 @@ namespace SoupScript_CSharp
         {
             char Check;
 
-            if (type.Equals("int"))
+            if (type.StartsWith("int"))
             {
                 Check = '&';
             }
-            else if (type.Equals("string"))
+            else if (type.StartsWith("string"))
             {
                 Check = '$';
             }
@@ -213,7 +215,7 @@ namespace SoupScript_CSharp
                 Check = '@';
             }
 
-            if (type[0] != Check)
+            if (type.Split(' ')[1][0] != Check)
             {
                 Console.WriteLine("\nat {0}:\n\tExpecting {1} at the start of Variable name", Line, Check);
                 return false;
