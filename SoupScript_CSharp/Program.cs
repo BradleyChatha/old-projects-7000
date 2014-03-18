@@ -103,10 +103,21 @@ namespace SoupScript_CSharp
                     return;
                 }
 
+                else if (s.StartsWith("+"))
+                {
+                    String[] Data = s.Split(" ".ToCharArray(), 3);
+
+                    Console.WriteLine("{0} + {1} = {2}", Data[1], Data[2], (Convert.ToInt32(Data[1]) + Convert.ToInt32(Data[2])));
+                }
+
                 Line++;
             }
 
             Console.WriteLine("\nScript ended at line {0}.\n", Line);
+        }
+
+        static void FixStrings(String key1, String key2)
+        {
         }
 
         static bool AddVar(String type)
