@@ -111,6 +111,8 @@ namespace SoupScript_CSharp
                 else if (s.StartsWith("endif"))
                 {
                     IfCondition = true;
+                    Line++;
+                    continue;
                 }
 
                 if (IfCondition)
