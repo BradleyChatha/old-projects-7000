@@ -41,6 +41,18 @@ namespace SoupScript_CSharp
             }
         }
 
+        static String GetVar(String key)
+        {
+            if (Variables.ContainsKey(key))
+            {
+                return Variables[key];
+            }
+            else
+            {
+                return key;
+            }
+        }
+
         static void Compile(String file)
         {
             if (!File.Exists(file))
@@ -50,85 +62,103 @@ namespace SoupScript_CSharp
             }
 
             String[] Contents = File.ReadAllLines(file);
+            bool IfCondition = true;
 
             for (int i = 0; i < Contents.Length; i++)
             {
                 String s = Contents[i];
 
-                if (s.StartsWith("con:write"))
+                if (s.StartsWith("if"))
                 {
-                    String ToWrite = s.Split(new char[] { ' ' }, 2)[1];
-                    Console.WriteLine(ToWrite);
-                }
+                    String[] Data = s.Split(" ".ToCharArray(), 4);
 
-                else if (s.StartsWith("int") || s.StartsWith("string") || s.StartsWith("float"))
-                {
-                    if (!AddVar(s))
+                    if (Data[2].Equals("=="))
                     {
-                        return;
+                        IfCondition = (GetVar(Data[1]).Equals(GetVar(Data[3])));
+                    }
+                    else if (Data[2].Equals("!="))
+                    {
+                        IfCondition = (!GetVar(Data[1]).Equals(GetVar(Data[3])));
                     }
                 }
 
-                else if (s.StartsWith("con:in"))
+                if (IfCondition)
                 {
-                    Variables[s.Split(' ')[1]] = Console.ReadLine();
-                }
+                    if (s.StartsWith("con:write"))
+                    {
+                        String ToWrite = s.Split(new char[] { ' ' }, 2)[1];
+                        Console.WriteLine(ToWrite);
+                    }
 
-                else if (s.StartsWith("File:Read"))
-                {
-                    Console.WriteLine(File.ReadAllText(s.Split(" ".ToCharArray(), 2)[1]));
-                }
+                    else if (s.StartsWith("int") || s.StartsWith("string") || s.StartsWith("float"))
+                    {
+                        if (!AddVar(s))
+                        {
+                            return;
+                        }
+                    }
 
-                else if (s.StartsWith("File:Write"))
-                {
-                    String[] Data = s.Split(" ".ToCharArray(), 3);
-                    File.WriteAllText(Data[1], Data[2]);
-                }
+                    else if (s.StartsWith("con:in"))
+                    {
+                        Variables[s.Split(' ')[1]] = Console.ReadLine();
+                    }
 
-                else if (s.StartsWith("Msg:YN:show"))
-                {
-                    String[] Data = s.Split(" ".ToCharArray(), 2);
-                    MessageBox.Show(Data[1], "", MessageBoxButtons.YesNo);
-                }
+                    else if (s.StartsWith("File:Read"))
+                    {
+                        Console.WriteLine(File.ReadAllText(s.Split(" ".ToCharArray(), 2)[1]));
+                    }
 
-                else if (s.StartsWith("Msg:show"))
-                {
-                    String[] Data = s.Split(" ".ToCharArray(), 2);
-                    MessageBox.Show(Data[1], "", MessageBoxButtons.OK);
-                }
+                    else if (s.StartsWith("File:Write"))
+                    {
+                        String[] Data = s.Split(" ".ToCharArray(), 3);
+                        File.WriteAllText(Data[1], Data[2]);
+                    }
 
-                else if (s.StartsWith("End"))
-                {
-                    Console.WriteLine("\nScript ended at line {0}.\n", Line);
-                    return;
-                }
+                    else if (s.StartsWith("Msg:YN:show"))
+                    {
+                        String[] Data = s.Split(" ".ToCharArray(), 2);
+                        MessageBox.Show(Data[1], "", MessageBoxButtons.YesNo);
+                    }
 
-                else if (s.StartsWith("+"))
-                {
-                    String[] Data = s.Split(" ".ToCharArray(), 3);
+                    else if (s.StartsWith("Msg:show"))
+                    {
+                        String[] Data = s.Split(" ".ToCharArray(), 2);
+                        MessageBox.Show(Data[1], "", MessageBoxButtons.OK);
+                    }
 
-                    Console.WriteLine("{0} + {1} = {2}", Data[1], Data[2], (Convert.ToInt32(Data[1]) + Convert.ToInt32(Data[2])));
-                }
+                    else if (s.StartsWith("End"))
+                    {
+                        Console.WriteLine("\nScript ended at line {0}.\n", Line);
+                        return;
+                    }
 
-                else if (s.StartsWith("-"))
-                {
-                    String[] Data = s.Split(" ".ToCharArray(), 3);
+                    else if (s.StartsWith("+"))
+                    {
+                        String[] Data = s.Split(" ".ToCharArray(), 3);
 
-                    Console.WriteLine("{0} - {1} = {2}", Data[1], Data[2], (Convert.ToInt32(Data[1]) - Convert.ToInt32(Data[2])));
-                }
+                        Console.WriteLine("{0} + {1} = {2}", Data[1], Data[2], (Convert.ToInt32(Data[1]) + Convert.ToInt32(Data[2])));
+                    }
 
-                else if (s.StartsWith("*"))
-                {
-                    String[] Data = s.Split(" ".ToCharArray(), 3);
+                    else if (s.StartsWith("-"))
+                    {
+                        String[] Data = s.Split(" ".ToCharArray(), 3);
 
-                    Console.WriteLine("{0} * {1} = {2}", Data[1], Data[2], (Convert.ToInt32(Data[1]) * Convert.ToInt32(Data[2])));
-                }
+                        Console.WriteLine("{0} - {1} = {2}", Data[1], Data[2], (Convert.ToInt32(Data[1]) - Convert.ToInt32(Data[2])));
+                    }
 
-                else if (s.StartsWith("/"))
-                {
-                    String[] Data = s.Split(" ".ToCharArray(), 3);
+                    else if (s.StartsWith("*"))
+                    {
+                        String[] Data = s.Split(" ".ToCharArray(), 3);
 
-                    Console.WriteLine("{0} / {1} = {2}", Data[1], Data[2], (Convert.ToInt32(Data[1]) / Convert.ToInt32(Data[2])));
+                        Console.WriteLine("{0} * {1} = {2}", Data[1], Data[2], (Convert.ToInt32(Data[1]) * Convert.ToInt32(Data[2])));
+                    }
+
+                    else if (s.StartsWith("/"))
+                    {
+                        String[] Data = s.Split(" ".ToCharArray(), 3);
+
+                        Console.WriteLine("{0} / {1} = {2}", Data[1], Data[2], (Convert.ToInt32(Data[1]) / Convert.ToInt32(Data[2])));
+                    }
                 }
 
                 Line++;
