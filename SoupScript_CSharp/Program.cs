@@ -9,6 +9,9 @@ namespace SoupScript_CSharp
 {
     class Program
     {
+        static int Line = 0;
+        static Dictionary<String, String> Variables = new Dictionary<String, String>();
+
         static void Main(string[] args)
         {
             while (true)
@@ -49,8 +52,54 @@ namespace SoupScript_CSharp
 
             for (int i = 0; i < Contents.Length; i++)
             {
+                String s = Contents[i];
 
+                if (s.StartsWith("con:write"))
+                {
+                    String ToWrite = s.Split(new char[] { ' ' }, 2)[1];
+                    Console.WriteLine(ToWrite);
+                }
+
+                else if (s.StartsWith("int") || s.StartsWith("string") || s.StartsWith("float"))
+                {
+                    if (!AddVar(s))
+                    {
+                        return;
+                    }
+                }
+
+
+
+                Line++;
             }
+        }
+
+        static bool AddVar(String type)
+        {
+            char Check;
+
+            if (type.Equals("int"))
+            {
+                Check = '&';
+            }
+            else if (type.Equals("string"))
+            {
+                Check = '$';
+            }
+            else
+            {
+                Check = '@';
+            }
+
+            if (type[0] != Check)
+            {
+                Console.WriteLine("\nat {0}:\n\tExpecting {1} at the start of Variable name", Line, Check);
+                return false;
+            }
+
+            Variables.Add(type.Split(' ')[1], type.Split(new char[] { '=' }, 2)[1].Trim());
+
+            return true;
         }
     }
 }
