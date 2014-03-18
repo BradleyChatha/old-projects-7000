@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using System.IO;
 
 namespace SoupScript_CSharp
@@ -76,6 +77,12 @@ namespace SoupScript_CSharp
                 else if (s.StartsWith("File:Read"))
                 {
                     Console.WriteLine(File.ReadAllText(s.Split(" ".ToCharArray(), 2)[1]));
+                }
+
+                else if (s.StartsWith("File:Write"))
+                {
+                    String[] Data = s.Split(" ".ToCharArray(), 3);
+                    File.WriteAllText(Data[1], Data[2]);
                 }
 
                 Line++;
