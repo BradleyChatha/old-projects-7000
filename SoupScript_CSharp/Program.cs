@@ -85,6 +85,12 @@ namespace SoupScript_CSharp
                     File.WriteAllText(Data[1], Data[2]);
                 }
 
+                else if (s.StartsWith("Msg:YN:show"))
+                {
+                    String[] Data = s.Split(" ".ToCharArray(), 2);
+                    MessageBox.Show(Data[1], "", MessageBoxButtons.YesNo);
+                }
+
                 Line++;
             }
         }
