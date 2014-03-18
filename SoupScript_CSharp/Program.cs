@@ -15,12 +15,21 @@ namespace SoupScript_CSharp
 
         static void Main(string[] args)
         {
+            bool First = false;
+
             while (true)
             {
+                if (First)
+                {
+                    Console.WriteLine("Press any key to continue...");
+                    Console.ReadKey();
+                }
+
                 Console.Clear();
 
                 Console.Write("Enter command: ");
                 Command(Console.ReadLine());
+                First = true;
             }
         }
 
