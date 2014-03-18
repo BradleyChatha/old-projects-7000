@@ -110,6 +110,13 @@ namespace SoupScript_CSharp
                     Console.WriteLine("{0} + {1} = {2}", Data[1], Data[2], (Convert.ToInt32(Data[1]) + Convert.ToInt32(Data[2])));
                 }
 
+                else if (s.StartsWith("-"))
+                {
+                    String[] Data = s.Split(" ".ToCharArray(), 3);
+
+                    Console.WriteLine("{0} - {1} = {2}", Data[1], Data[2], (Convert.ToInt32(Data[1]) - Convert.ToInt32(Data[2])));
+                }
+
                 Line++;
             }
 
