@@ -97,8 +97,16 @@ namespace SoupScript_CSharp
                     MessageBox.Show(Data[1], "", MessageBoxButtons.OK);
                 }
 
+                else if (s.StartsWith("End"))
+                {
+                    Console.WriteLine("\nScript ended at line {0}.\n", Line);
+                    return;
+                }
+
                 Line++;
             }
+
+            Console.WriteLine("\nScript ended at line {0}.\n", Line);
         }
 
         static bool AddVar(String type)
