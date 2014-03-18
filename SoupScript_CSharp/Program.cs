@@ -68,7 +68,10 @@ namespace SoupScript_CSharp
                     }
                 }
 
-
+                else if (s.StartsWith("con:in"))
+                {
+                    Variables[s.Split(' ')[1]] = Console.ReadLine();
+                }
 
                 Line++;
             }
