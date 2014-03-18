@@ -80,6 +80,14 @@ namespace SoupScript_CSharp
                     {
                         IfCondition = (!GetVar(Data[1]).Equals(GetVar(Data[3])));
                     }
+                    else if (Data[2].Equals("<"))
+                    {
+                        IfCondition = (Convert.ToDouble(GetVar(Data[1])) < Convert.ToDouble(GetVar(Data[3])));
+                    }
+                    else if (Data[2].Equals(">"))
+                    {
+                        IfCondition = (Convert.ToDouble(GetVar(Data[1])) > Convert.ToDouble(GetVar(Data[3])));
+                    }
                 }
 
                 if (IfCondition)
