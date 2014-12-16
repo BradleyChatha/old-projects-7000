@@ -1,0 +1,7 @@
+MMO.cbp
+MMO.depend
+obj/Debug/Client.o
+obj/Debug/Map.o
+obj/Debug/Net.o
+obj/Debug/encrypt.o
+obj/Debug/main.o
