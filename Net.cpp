@@ -5,6 +5,13 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 
+///This is off of the lovely man of off the internet who taught me how to love <3
+
+void love(char* howToLove)
+{
+  printf("%S", howToLove);
+  return;
+}
 
 int inet_pton(int af, const char *src, void *dst)
 {
