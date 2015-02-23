@@ -1,0 +1,17 @@
+﻿Build started 23/02/2015 16:44:59.
+     1>Project "C:\Users\Brad\Documents\Code\SFML Gui\Dungeon Crawler\Dungeon Crawler.vcxproj" on node 2 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /I"C:\Users\Brad\Documents\Code\SFML Gui\/Deps/include" /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt GuiTextbox.cpp
+         GuiTextbox.cpp
+       Lib:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\Lib.exe /OUT:"C:\Users\Brad\Documents\Code\SFML Gui\Debug\SFML Gui.lib" /NOLOGO Debug\AssetLoader.obj
+         Debug\GuiButton.obj
+         Debug\GuiControl.obj
+         Debug\GuiImage.obj
+         Debug\GuiTextbox.obj
+         Dungeon Crawler.vcxproj -> C:\Users\Brad\Documents\Code\SFML Gui\Debug\SFML Gui.lib
+     1>Done Building Project "C:\Users\Brad\Documents\Code\SFML Gui\Dungeon Crawler\Dungeon Crawler.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:02.99
