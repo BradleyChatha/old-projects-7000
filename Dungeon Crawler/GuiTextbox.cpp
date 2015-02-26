@@ -79,7 +79,8 @@ void GuiTextbox::Update(RenderWindow* window)
 			}
 			else
 			{
-				Bebs.resize(Bebs.size() - 1);
+				if(Bebs.size() > 0)
+					Bebs.resize(Bebs.size() - 1);
 			}
 		}
 
