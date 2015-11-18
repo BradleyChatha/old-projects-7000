@@ -1,0 +1,13 @@
+{
+	"name": "leaguething",
+	"description": "A minimal D application.",
+	"copyright": "Copyright © 2015, Sealab",
+	"authors": ["Sealab"],
+
+	"targetPath": "bin",
+	"libs": ["sqlite3"],
+
+	"dependencies": {
+		"d2sqlite3": "~>0.7.3"
+	}
+}
