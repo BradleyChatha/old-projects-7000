@@ -1,0 +1,8 @@
+name "tk"
+description "A minimal D application."
+copyright "Copyright © 2016, sherb_000"
+authors "sherb_000"
+
+targetPath "bin"
+
+dependency "jengine" version="~develop"
