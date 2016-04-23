@@ -4,5 +4,6 @@ copyright "Copyright © 2016, sherb_000"
 authors "sherb_000"
 
 targetPath "bin"
+targetName "Tunnelers Kingdom"
 
 dependency "jengine" version="~develop"

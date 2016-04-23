@@ -2,10 +2,13 @@
 
 import std.stdio;
 import Common;
+import tk.World.Chunk;
 import tk.Entities.Player;
 
 class MainGame : GameState
 {
+    Chunk c;
+
     public override
     {
         /++
@@ -25,7 +28,7 @@ class MainGame : GameState
                 case SwapAction.Pop: break;
                 case SwapAction.Push: break;
                 case SwapAction.Dethroned: break;
-                case SwapAction.Throned: writeln("Now in State #1"); break;
+                case SwapAction.Throned: break;
             }
         }
         
@@ -36,6 +39,18 @@ class MainGame : GameState
         {
             PhysicalWorld.setup();
             PhysicalWorld.add(theAllocator.make!Player, "Player"); // Once you allocate something and add it to the PhysicalWorld, you don't have to bother deallocating it yourself
+
+            ChunkMap map;
+
+            for(int i = 0; i < chunkSize; i++)
+            {
+                for(int j = 0; j < chunkSize; j++)
+                {
+                    map[i][j] = 1;
+                }
+            }
+
+            c = new Chunk(Vector2i(0, 0), map);
 
             super.onInit();
         }
@@ -49,8 +64,10 @@ class MainGame : GameState
         void onUpdate(ref float gameTime)
         {
             PhysicalWorld.onUpdate(gameTime);
+
+            c.draw();
         }
-        
+
         /++
          + Called everytime an event is to be processed.
          + 

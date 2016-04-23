@@ -14,13 +14,3 @@ public:
 private:
     Random rgn;
 }
-
-class Dirt : Tile
-{
-    this()
-    {
-        super(0);
-    }
-
-  
-}
