@@ -61,10 +61,7 @@ protected:
 enum TileType : byte
 {
     Tile_Dirt = 1,
-    Tile_Stone,
-
-    /// This will have the value of the total amount of tile types <3
-    Tile_Count
+    Tile_Stone
 }
 
 void loadTiles()

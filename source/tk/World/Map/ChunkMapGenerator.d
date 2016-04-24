@@ -20,40 +20,20 @@ public:
         {
             for(int j = 0; j < chunkSize; j++)
             {
-                // 75% chance of dirt
-                auto dirt = randomBool(0.75);
+                ///tile < 1 && tile > 3 == Dirt
+                uint tile = uniform(1, 5);
 
-                if(dirt)
-                    map[i][j] = TileType.Tile_Dirt;
-                else
-                    map[i][j] = TileType.Tile_Stone;
+                writeln(tile);
+
+                ///Dirt, most common.
+                if(tile >= 1 && tile <= 3)
+                    map[i][j] = 1;
+                else if(tile >= 4)
+                    map[i][j] = 2;
             }
         }
 
         return map;
-    }
-
-private:
-
-    /++
-     + Generates a random boolean, with a certain probability of being true.
-     + 
-     + Parameters:
-     +  probability = The probability of returning $(D true). Must be between 0 and 1.
-     + 
-     + Returns:
-     +  Either true or false. 
-     + ++/
-    static bool randomBool(float probability)
-    {
-        if(probability < 0)
-            probability = 0;
-        else if(probability > 1.0)
-            probability = 1.0;
-
-        auto result = uniform(0.0f, 1.0f);
-
-        return (result < probability);
     }
 }
 
