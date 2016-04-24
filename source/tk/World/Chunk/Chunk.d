@@ -2,9 +2,11 @@
 
 import Common;
 import jengine.graphics.camera;
+import tk.Entities.Player;
 import tk.World.Tiles.Tile;
 
 enum chunkSize = 32;
+enum tileSize  = 32;
 alias ChunkMap = byte[chunkSize][chunkSize];
 
 class Chunk
@@ -37,6 +39,26 @@ class Chunk
         }
     }
 
+    /++
+     + Determines if the given player is inside the chunk.
+     + 
+     + Parameters:
+     +  player = The player to test for.
+     + 
+     + Returns:
+     +  $(D true) if $(B point) is inside the chunk.
+     +  $(D false) otherwise.
+     + ++/
+    @safe @nogc
+    bool hasPlayer(Player player) nothrow
+    {
+        // Find the top-left position of the chunk
+        const topLeft = this.tiles[0][0].position.asVector!int;
+        const size    = (tileSize * chunkSize);
+
+        return Rectangle(topLeft.x, topLeft.y, topLeft.x + size, topLeft.y + size).intersectsWith(player.sprite.box.box);
+    }
+
 private:
 
     void loadMap(Vector2i topLeftChunk, ChunkMap map)
@@ -50,23 +72,19 @@ private:
         {
             for(int j = 0; j < chunkSize; j++)
             {
-                final switch(map[i][j])
-                {
-                    ///Dirt
-                    case TileType.Tile_Dirt:
-                        tiles[i][j] = Sprite.make(tileCache[1].tileTexture, Vector2f(posX, posY));
-                        break;
-                    ///Stone
-                    case TileType.Tile_Stone:
-                        tiles[i][j] = Sprite.make(tileCache[2].tileTexture, Vector2f(posX, posY));
-                        break;
-                }
+                // Instead of reapeating code in that giant switch statement.
+                // We can just throw an exception if the number is too high, and then assume the ID is correct after that.
+                import std.exception : enforce;
+                
+                auto id = map[i][j];
+                enforce(id < TileType.Tile_Count, "This map contains an ID that is too high.");
 
+                tiles[i][j]        = Sprite.make(tileCache[id].tileTexture, Vector2f(posX, posY));
                 tiles[i][j].camera = Camera.instance;
 
-                posX += chunkSize;
+                posX += tileSize;
             }
-            posY += chunkSize;
+            posY += tileSize;
             posX = minPosX;
         }
     }

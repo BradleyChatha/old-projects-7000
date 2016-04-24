@@ -65,6 +65,11 @@ class MainGame : GameState
             c.draw();
          
             PhysicalWorld.onUpdate(gameTime);
+
+            if(c.hasPlayer(PhysicalWorld.findAs!Player("Player")))
+                writeln("Quack");
+            else
+                writeln("No Quack");
         }
 
         /++
