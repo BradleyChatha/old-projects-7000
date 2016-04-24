@@ -1,9 +1,11 @@
 ﻿module tk.MainGame;
 
+import std.random;
 import std.stdio;
 import Common;
 import tk.World.Chunk;
 import tk.Entities.Player;
+import tk.World.Map.ChunkMapGenerator;
 
 class MainGame : GameState
 {
@@ -40,15 +42,12 @@ class MainGame : GameState
             PhysicalWorld.setup();
             PhysicalWorld.add(theAllocator.make!Player, "Player"); // Once you allocate something and add it to the PhysicalWorld, you don't have to bother deallocating it yourself
 
-            ChunkMap map;
+            loadTiles();
 
-            for(int i = 0; i < chunkSize; i++)
-            {
-                for(int j = 0; j < chunkSize; j++)
-                {
-                    map[i][j] = 1;
-                }
-            }
+            ///A test map
+            ChunkMap map = ChunkMapGenerator.generateMap();
+
+            writeln(Tile.maxID);
 
             c = new Chunk(Vector2i(0, 0), map);
 
@@ -63,9 +62,9 @@ class MainGame : GameState
          + ++/
         void onUpdate(ref float gameTime)
         {
-            PhysicalWorld.onUpdate(gameTime);
-
             c.draw();
+         
+            PhysicalWorld.onUpdate(gameTime);
         }
 
         /++

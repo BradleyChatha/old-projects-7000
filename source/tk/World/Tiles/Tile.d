@@ -2,6 +2,7 @@
 
 import Common;
 import tk.World.Tiles.Dirt;
+import tk.World.Tiles.Stone;
 
 public static Tile[512] tileCache;
 
@@ -25,12 +26,46 @@ public:
         return this._tileTexture;
     }
 
+    ///A tile is 32 by 32 pixels.
+    @property
+    const uint tileSize()
+    {
+        return 32;
+    }
+
+    ///Finds and returns the highest tile ID in tileCache
+    static uint maxID()
+    {
+        uint highestID = 0;
+
+        foreach(i, t; tileCache)
+        {
+            if(i != 0 && t is null)
+                break;
+            else if(i == 0 && t is null)
+                continue;
+
+            if(highestID < t.ID)
+                highestID = t.ID;
+
+        }
+
+        return highestID;
+    }
+
 protected:
-    uint _ID;
+    TileType _ID;
     Texture _tileTexture;
+}
+
+enum TileType : byte
+{
+    Tile_Dirt = 1,
+    Tile_Stone
 }
 
 void loadTiles()
 {
     tileCache[1] = new Dirt();
+    tileCache[2] = new Stone();
 }

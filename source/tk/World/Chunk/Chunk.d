@@ -12,7 +12,6 @@ class Chunk
     ///Creates the array of sprites with all the textures depending on the passed map.
     this(Vector2i topLeftChunk, ChunkMap map)
     {
-        loadTiles();
         this.loadMap(topLeftChunk, map);
     }
 
@@ -54,8 +53,12 @@ private:
                 final switch(map[i][j])
                 {
                     ///Dirt
-                    case 1:
+                    case TileType.Tile_Dirt:
                         tiles[i][j] = Sprite.make(tileCache[1].tileTexture, Vector2f(posX, posY));
+                        break;
+                    ///Stone
+                    case TileType.Tile_Stone:
+                        tiles[i][j] = Sprite.make(tileCache[2].tileTexture, Vector2f(posX, posY));
                         break;
                 }
 

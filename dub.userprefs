@@ -1,0 +1,14 @@
+﻿<Properties StartupItem="dub.sdl">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Default" PreferredExecutionTarget="debug" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="source\tk\World\Chunk\ChunkHandler.d">
+    <Files>
+      <File FileName="source\tk\World\Chunk\Chunk.d" Line="64" Column="17" />
+      <File FileName="source\tk\World\Map\ChunkMapGenerator.d" Line="42" Column="96" />
+      <File FileName="source\tk\World\Chunk\ChunkHandler.d" Line="17" Column="23" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>
