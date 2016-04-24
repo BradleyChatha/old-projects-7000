@@ -2,9 +2,11 @@
 
 import Common;
 import jengine.graphics.camera;
+import tk.Entities.Player;
 import tk.World.Tiles.Tile;
 
 enum chunkSize = 32;
+enum tileSize  = 32;
 alias ChunkMap = byte[chunkSize][chunkSize];
 
 class Chunk
@@ -37,6 +39,26 @@ class Chunk
         }
     }
 
+    /++
+     + Determines if the given player is inside the chunk.
+     + 
+     + Parameters:
+     +  player = The player to test for.
+     + 
+     + Returns:
+     +  $(D true) if $(B point) is inside the chunk.
+     +  $(D false) otherwise.
+     + ++/
+    @safe @nogc
+    bool hasPlayer(Player player) nothrow
+    {
+        // Find the top-left position of the chunk
+        const topLeft = this.tiles[0][0].position.asVector!int;
+        const size    = (tileSize * chunkSize);
+
+        return Rectangle(topLeft.x, topLeft.y, topLeft.x + size, topLeft.y + size).intersectsWith(player.sprite.box.box);
+    }
+
 private:
 
     void loadMap(Vector2i topLeftChunk, ChunkMap map)
@@ -60,9 +82,9 @@ private:
                 tiles[i][j]        = Sprite.make(tileCache[id].tileTexture, Vector2f(posX, posY));
                 tiles[i][j].camera = Camera.instance;
 
-                posX += chunkSize;
+                posX += tileSize;
             }
-            posY += chunkSize;
+            posY += tileSize;
             posX = minPosX;
         }
     }
