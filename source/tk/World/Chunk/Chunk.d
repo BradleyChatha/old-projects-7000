@@ -50,18 +50,14 @@ private:
         {
             for(int j = 0; j < chunkSize; j++)
             {
-                final switch(map[i][j])
-                {
-                    ///Dirt
-                    case TileType.Tile_Dirt:
-                        tiles[i][j] = Sprite.make(tileCache[1].tileTexture, Vector2f(posX, posY));
-                        break;
-                    ///Stone
-                    case TileType.Tile_Stone:
-                        tiles[i][j] = Sprite.make(tileCache[2].tileTexture, Vector2f(posX, posY));
-                        break;
-                }
+                // Instead of reapeating code in that giant switch statement.
+                // We can just throw an exception if the number is too high, and then assume the ID is correct after that.
+                import std.exception : enforce;
+                
+                auto id = map[i][j];
+                enforce(id < TileType.Tile_Count, "This map contains an ID that is too high.");
 
+                tiles[i][j]        = Sprite.make(tileCache[id].tileTexture, Vector2f(posX, posY));
                 tiles[i][j].camera = Camera.instance;
 
                 posX += chunkSize;
