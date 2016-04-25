@@ -53,10 +53,26 @@ class Chunk
     bool hasPlayer(Player player) nothrow
     {
         // Find the top-left position of the chunk
-        const topLeft = this.tiles[0][0].position.asVector!int;
+        const topLeft = this._topLeft.asVector!int;
         const size    = (tileSize * chunkSize);
 
         return Rectangle(topLeft.x, topLeft.y, topLeft.x + size, topLeft.y + size).intersectsWith(player.sprite.box.box);
+    }
+
+    /++
+     + Makes a position relative to the chunk.
+     + For example, if the position of the chunk was (40, 60) and the position given was (140, 200), the relative position would be (100, 140).
+     + 
+     + Parameters:
+     +  position = The position to convert.
+     + 
+     + Returns:
+     +  $(B position) relative to the position of the chunk.
+     + ++/
+    @safe @nogc
+    Vector2f relativePosition(Vector2f position) nothrow
+    {
+        return (position - this._topLeft.asVector!float);
     }
 
 private:
@@ -91,5 +107,8 @@ private:
 
     ///(0,0) is very left... I hope.
     Sprite[chunkSize][chunkSize] tiles;
+
+    /// The top left position of the chunk.
+    Vector2i _topLeft;
 }
 
