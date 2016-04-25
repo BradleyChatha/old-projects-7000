@@ -70,6 +70,8 @@ class MainGame : GameState
                 writeln("Quack");
             else
                 writeln("No Quack");
+
+            //writeln(c.relativePosition(PhysicalWorld.findAs!Player("Player").sprite.position));
         }
 
         /++
