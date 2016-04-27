@@ -6,10 +6,11 @@ import Common;
 import tk.World.Chunk;
 import tk.Entities.Player;
 import tk.World.Map.ChunkMapGenerator;
+import tk.World.Chunks.ChunkHandler;
 
 class MainGame : GameState
 {
-    Chunk c;
+   // Chunk c;
 
     public override
     {
@@ -45,11 +46,12 @@ class MainGame : GameState
             loadTiles();
 
             ///A test map
-            ChunkMap map = ChunkMapGenerator.generateMap();
+           // ChunkMap map = ChunkMapGenerator.generateMap();
 
             writeln(Tile.maxID);
 
-            c = new Chunk(Vector2i(0, 0), map);
+            //c = new Chunk(Vector2i(0, 0), map);
+            ChunkHandler.setup();
 
             super.onInit();
         }
@@ -62,14 +64,12 @@ class MainGame : GameState
          + ++/
         void onUpdate(ref float gameTime)
         {
-            c.draw();
+            auto player = PhysicalWorld.findAs!Player("Player");
+            //c.draw();
+            ChunkHandler.update(player); // But this still says it's null...
+            ChunkHandler.draw();
          
             PhysicalWorld.onUpdate(gameTime);
-
-            if(c.hasPlayer(PhysicalWorld.findAs!Player("Player")))
-                writeln("Quack");
-            else
-                writeln("No Quack");
 
             //writeln(c.relativePosition(PhysicalWorld.findAs!Player("Player").sprite.position));
         }

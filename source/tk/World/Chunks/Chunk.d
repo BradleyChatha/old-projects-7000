@@ -5,8 +5,16 @@ import jengine.graphics.camera;
 import tk.Entities.Player;
 import tk.World.Tiles.Tile;
 
+
 enum chunkSize = 32;
 enum tileSize  = 32;
+
+/// The width of a chunk in pixels.
+enum chunkWidth  = (chunkSize * tileSize);
+
+/// The height of a chunk in pixels.
+enum chunkHeight = chunkWidth;
+
 alias ChunkMap = byte[chunkSize][chunkSize];
 
 class Chunk
@@ -14,6 +22,7 @@ class Chunk
     ///Creates the array of sprites with all the textures depending on the passed map.
     this(Vector2i topLeftChunk, ChunkMap map)
     {
+        this._topLeft = topLeftChunk;
         this.loadMap(topLeftChunk, map);
     }
 
@@ -75,6 +84,12 @@ class Chunk
         return (position - this._topLeft.asVector!float);
     }
 
+    @property
+    Vector2i topLeft()
+    {
+        return this._topLeft;
+    }
+
 private:
 
     void loadMap(Vector2i topLeftChunk, ChunkMap map)
@@ -90,8 +105,6 @@ private:
             {
                 // Instead of reapeating code in that giant switch statement.
                 // We can just throw an exception if the number is too high, and then assume the ID is correct after that.
-                import std.exception : enforce;
-                
                 auto id = map[i][j];
                 enforce(id < TileType.Tile_Count, "This map contains an ID that is too high.");
 
