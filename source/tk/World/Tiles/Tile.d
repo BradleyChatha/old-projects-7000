@@ -71,4 +71,14 @@ void loadTiles()
 {
     tileCache[1] = new Dirt();
     tileCache[2] = new Stone();
+
+    // To keep things consistant, every tile in the tileCache should have the same texture size.
+    // Unless, of course, you want them to have different sizes.
+    foreach(t; tileCache)
+    {
+        if(t is null)
+            break;
+
+        assert(t.tileTexture.size == Vector2u(t.tileSize, t.tileSize));
+    }
 }
