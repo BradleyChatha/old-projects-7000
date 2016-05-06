@@ -84,6 +84,75 @@ class Chunk
         return (position - this._topLeft.asVector!float);
     }
 
+    /++
+     + Returns up to 9 tiles around a point.
+     + 
+     + E.G.
+     + {
+     +      T = Tile
+     +      P = Point
+     +      T&P = Tile the point is over
+     + 
+     +      T T   T
+     +      T T&P T
+     +      T T   T
+     + 
+     +      All tiles touching the tile the point is around will be returned.
+     + }
+     + 
+     + Parameters:
+     +  point = The point to get the tiles of.
+     + 
+     + Returns:
+     +  A static array of 9 Sprites.
+     +  Some of the sprites *may* be null, so make sure to check for that.
+     + ++/
+    @safe @nogc
+    Sprite[9] tilesAroundPoint(Vector2f point) nothrow
+    {
+        Sprite[9] toReturn;
+
+        // Find which tile the point is over.
+        auto pos  = this.relativePosition(point);
+        auto cell = (pos / Vector2f(tileSize, tileSize)).asVector!int;
+
+        @safe @nogc
+        void setSprite(size_t index, int x, int y) nothrow
+        {
+            assert(index < toReturn.length, "Umm...?");
+
+            // If the cell given is within a valid range.
+            if(x >= 0 && x < chunkSize &&
+               y >= 0 && y < chunkSize)
+            {
+                // Set the sprite
+                toReturn[index] = this.tiles[y][x];
+            }
+        }
+
+        setSprite(0, cell.x - 1, cell.y - 1); // Top left
+        setSprite(1, cell.x,     cell.y - 1); // Top middle
+        setSprite(2, cell.x + 1, cell.y - 1); // Top right
+        setSprite(3, cell.x - 1, cell.y);     // Middle left
+        setSprite(4, cell.x,     cell.y);     // Middle
+        setSprite(5, cell.x + 1, cell.y);     // Middle right
+        setSprite(6, cell.x - 1, cell.y + 1); // Bottom left
+        setSprite(7, cell.x,     cell.y + 1); // Bottom middle
+        setSprite(8, cell.x + 1, cell.y + 1); // Bottom right
+
+        return toReturn;
+    }
+
+    /// Ditto
+    @safe @nogc
+    Sprite[9] tilesAroundPoint(Player player) nothrow
+    {
+        // We want to use the player's center point for this, instead of the top-left point.
+        return this.tilesAroundPoint(
+            player.sprite.position + player.sprite.centre.asVector!float
+            );
+    }
+
     @property
     Vector2i topLeft()
     {

@@ -43,6 +43,14 @@ public static:
             this.chunks ~= new Chunk(Vector2i(this.currentPlayerChunk.topLeft.x, -(this.currentPlayerChunk.topLeft.y + chunkHeight)), ChunkMapGenerator.generateMap());
             writeln("New Chunk Created");
         }
+
+        // Just debugging stuff for tilesAroundPoint, delete it please.
+        /+
+        foreach(tile; this.currentPlayerChunk.tilesAroundPoint(player))
+        {
+            if(tile !is null)
+                tile.colour = Renderer.red;
+        }+/
     }
 
     void draw()

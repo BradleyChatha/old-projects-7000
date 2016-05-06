@@ -4,6 +4,12 @@ import Common;
 
 void main()
 {
+    // If we're running in the unittest mode, fix the CWD so it points to the "bin" folder.
+    version(unittest)
+    {
+        fixCWD();
+    }
+
     loadSDL();
 
     Allocators.setup();
@@ -16,4 +22,25 @@ void main()
     auto game = Allocators.GameState.make!MainGame();
     
     Window.startGameLoop(game);
+}
+
+version(unittest)
+{
+    void fixCWD()
+    {
+        import std.path   : exists, getcwd, chdir;
+        import std.string : endsWith;
+
+        // Make sure we're in the "bin" folder.
+        if(!getcwd().endsWith("bin"))
+        {
+            if(!exists("bin"))
+            {
+                writeln("Please run the tests in either the project's root directory, or from the 'bin' folder.");
+                return;
+            }
+            else
+                chdir("bin");
+        }
+    }
 }
