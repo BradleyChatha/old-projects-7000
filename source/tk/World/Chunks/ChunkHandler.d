@@ -11,10 +11,6 @@ public static:
     void setup()
     {
         this.chunks ~= new Chunk(Vector2i(0,0), ChunkMapGenerator.generateMap());
-        this.chunks ~= new Chunk(Vector2i(1024,0), ChunkMapGenerator.generateMap());
-        this.chunks ~= new Chunk(Vector2i(2048,0), ChunkMapGenerator.generateMap());
-        this.chunks ~= new Chunk(Vector2i(3072,0), ChunkMapGenerator.generateMap());
-        this.chunks ~= new Chunk(Vector2i(4096,0), ChunkMapGenerator.generateMap());
     }
 
     void update(Player player)
@@ -26,23 +22,57 @@ public static:
             if(!chunk.hasPlayer(player))
                 continue;
 
-            if(this.currentPlayerChunk !is null && this.currentPlayerChunk.hasPlayer(player))
-                break;
+            /*if(this.currentPlayerChunk !is null && this.currentPlayerChunk.hasPlayer(player))
+                break;*/
 
-            this.currentPlayerChunk = chunk;
+
+            if(chunk.hasPlayer(player))
+                this.currentPlayerChunk = chunk;
         }
+
+        writeln("Chunks: ", this.chunks.length);
 
         assert(this.currentPlayerChunk !is null, "The player isn't inside any chunk.");
 
         ///Temp for testing
         //Vector2f pos = this.currentPlayerChunk.relativePosition(player.sprite.position);
 
-        ///Top
-        if(this.currentPlayerChunk.relativePosition(player.sprite.position).y <= -11)
+        if(this.currentPlayerChunk.up is null)
         {
-            this.chunks ~= new Chunk(Vector2i(this.currentPlayerChunk.topLeft.x, -(this.currentPlayerChunk.topLeft.y + chunkHeight)), ChunkMapGenerator.generateMap());
-            writeln("New Chunk Created");
+            this.chunks ~= new Chunk(Vector2i(this.currentPlayerChunk.topLeft.x, (this.currentPlayerChunk.topLeft.y - chunkHeight)), ChunkMapGenerator.generateMap());
+            this.currentPlayerChunk.up = this.chunks[$ - 1];
+            this.chunks[$ - 1].down = this.currentPlayerChunk; 
+
+            if(this.currentPlayerChunk.up.left is null)
+            {
+                this.chunks ~= new Chunk(Vector2i((this.currentPlayerChunk.topLeft.x - chunkWidth), (this.currentPlayerChunk.topLeft.y - chunkHeight)), ChunkMapGenerator.generateMap());
+                this.currentPlayerChunk.up = this.chunks[$ - 1];
+            }
+            if(this.currentPlayerChunk.up.right is null)
+            {
+                this.chunks ~= new Chunk(Vector2i((this.currentPlayerChunk.topLeft.x - chunkWidth), (this.currentPlayerChunk.topLeft.y - chunkHeight)), ChunkMapGenerator.generateMap());
+                this.currentPlayerChunk.up = this.chunks[$ - 1];
+            }
         }
+        if(this.currentPlayerChunk.down is null)
+        {
+            this.chunks ~= new Chunk(Vector2i(this.currentPlayerChunk.topLeft.x, (this.currentPlayerChunk.topLeft.y + chunkHeight)), ChunkMapGenerator.generateMap());
+            this.currentPlayerChunk.down = this.chunks[$ - 1];
+            this.chunks[$ - 1].up = this.currentPlayerChunk;
+        }
+        if(this.currentPlayerChunk.left is null)
+        {
+            this.chunks ~= new Chunk(Vector2i((this.currentPlayerChunk.topLeft.x - chunkWidth), this.currentPlayerChunk.topLeft.y), ChunkMapGenerator.generateMap());
+            this.currentPlayerChunk.left = this.chunks[$ - 1];
+            this.chunks[$ - 1].right = this.currentPlayerChunk;
+        }
+        if(this.currentPlayerChunk.right is null)
+        {
+            this.chunks ~= new Chunk(Vector2i((this.currentPlayerChunk.topLeft.x + chunkWidth), this.currentPlayerChunk.topLeft.y), ChunkMapGenerator.generateMap());
+            this.currentPlayerChunk.right = this.chunks[$ - 1];
+            this.chunks[$ - 1].left = this.currentPlayerChunk;
+        }
+
     }
 
     void draw()

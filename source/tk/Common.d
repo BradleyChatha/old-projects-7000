@@ -8,10 +8,10 @@ public
     import tk.World.Tiles.Tile;
 }
 
-debug
-{
+//debug
+//{
     public
     {
         import std.stdio;
     }
-}
+//}

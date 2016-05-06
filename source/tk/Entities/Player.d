@@ -4,6 +4,8 @@ import Common;
 import jengine.graphics.camera;
 import std.stdio;
 
+import tk.World.Chunk;
+
 class Player : PhysicalComponent 
 {
 public:

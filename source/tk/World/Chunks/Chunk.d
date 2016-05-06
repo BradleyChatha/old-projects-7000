@@ -65,7 +65,7 @@ class Chunk
         const topLeft = this._topLeft.asVector!int;
         const size    = (tileSize * chunkSize);
 
-        return Rectangle(topLeft.x, topLeft.y, topLeft.x + size, topLeft.y + size).intersectsWith(player.sprite.box.box);
+        return Rectangle(topLeft.x, topLeft.y, size, size).intersectsWith(player.sprite.box.box);
     }
 
     /++
@@ -88,6 +88,57 @@ class Chunk
     Vector2i topLeft()
     {
         return this._topLeft;
+    }
+
+    @property
+    Chunk left()
+    {
+        return this._chunkLeft;
+    }
+    
+    @property
+    Chunk right()
+    {
+        return this._chunkRight;
+    }
+    
+    @property
+    Chunk up()
+    {
+        return this._chunkUp;
+    }
+    
+    @property
+    Chunk down()
+    {
+        return this._chunkDown;
+    }
+
+    // You only have getters D:
+    // Do that quickly , then I'll do my suggestion
+    // I'll do one for you
+    @property
+    void left(Chunk chunkLeft)
+    {
+        this._chunkLeft = chunkLeft;
+    }
+
+    @property
+    void right(Chunk chunkRight)
+    {
+        this._chunkRight = chunkRight;
+    }
+
+    @property
+    void up(Chunk chunkUp)
+    {
+        this._chunkUp = chunkUp;
+    }
+
+    @property
+    void down(Chunk chunkDown)
+    {
+        this._chunkDown = chunkDown;
     }
 
 private:
@@ -120,6 +171,12 @@ private:
 
     ///(0,0) is very left... I hope.
     Sprite[chunkSize][chunkSize] tiles;
+
+    ///The chunks that neighbore the current chunk
+    Chunk _chunkLeft;
+    Chunk _chunkRight;
+    Chunk _chunkUp;
+    Chunk _chunkDown;
 
     /// The top left position of the chunk.
     Vector2i _topLeft;
