@@ -159,55 +159,13 @@ class Chunk
         return this._topLeft;
     }
 
+    /++
+     + I'll try to show you how it works D:
+     + ++/
     @property
-    Chunk left()
+    Vector2i cell()
     {
-        return this._chunkLeft;
-    }
-    
-    @property
-    Chunk right()
-    {
-        return this._chunkRight;
-    }
-    
-    @property
-    Chunk up()
-    {
-        return this._chunkUp;
-    }
-    
-    @property
-    Chunk down()
-    {
-        return this._chunkDown;
-    }
-
-    // You only have getters D:
-    // Do that quickly , then I'll do my suggestion
-    // I'll do one for you
-    @property
-    void left(Chunk chunkLeft)
-    {
-        this._chunkLeft = chunkLeft;
-    }
-
-    @property
-    void right(Chunk chunkRight)
-    {
-        this._chunkRight = chunkRight;
-    }
-
-    @property
-    void up(Chunk chunkUp)
-    {
-        this._chunkUp = chunkUp;
-    }
-
-    @property
-    void down(Chunk chunkDown)
-    {
-        this._chunkDown = chunkDown;
+        return this.topLeft / Vector2i(chunkWidth, chunkHeight);
     }
 
 private:
@@ -240,12 +198,6 @@ private:
 
     ///(0,0) is very left... I hope.
     Sprite[chunkSize][chunkSize] tiles;
-
-    ///The chunks that neighbore the current chunk
-    Chunk _chunkLeft;
-    Chunk _chunkRight;
-    Chunk _chunkUp;
-    Chunk _chunkDown;
 
     /// The top left position of the chunk.
     Vector2i _topLeft;
