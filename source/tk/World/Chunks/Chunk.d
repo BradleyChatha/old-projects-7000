@@ -107,7 +107,8 @@ class Chunk
      +  A static array of 9 Sprites.
      +  Some of the sprites *may* be null, so make sure to check for that.
      + ++/
-    Sprite[9] tilesAroundPoint(Vector2f point)
+    @safe @nogc
+    Sprite[9] tilesAroundPoint(Vector2f point) nothrow
     {
         Sprite[9] toReturn;
 
@@ -115,7 +116,8 @@ class Chunk
         auto pos  = this.relativePosition(point);
         auto cell = (pos / Vector2f(tileSize, tileSize)).asVector!int;
 
-        void setSprite(size_t index, int x, int y)
+        @safe @nogc
+        void setSprite(size_t index, int x, int y) nothrow
         {
             assert(index < toReturn.length, "Umm...?");
 
@@ -142,7 +144,8 @@ class Chunk
     }
 
     /// Ditto
-    Sprite[9] tilesAroundPoint(Player player)
+    @safe @nogc
+    Sprite[9] tilesAroundPoint(Player player) nothrow
     {
         // We want to use the player's center point for this, instead of the top-left point.
         return this.tilesAroundPoint(
