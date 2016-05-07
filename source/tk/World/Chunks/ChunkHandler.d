@@ -17,20 +17,42 @@ public static:
     {
         ///Check if there is a player within the current the current chunk and assign the chunk its own object
         ///I can't help but feel there is a better way than this...
-        foreach(array; this.chunks)
+        auto cell = (player.sprite.position / Vector2f(chunkWidth, chunkHeight)).asVector!int;
+
+        Chunk* get(int x, int y)
         {
-            foreach(Chunk chunk; array)
+            auto first = (cell.x + x in this.chunks);
+            
+            if(first !is null)
             {
-                if(!chunk.hasPlayer(player))
-                    continue;
-
-                /*if(this.currentPlayerChunk !is null && this.currentPlayerChunk.hasPlayer(player))
-                    break;*/
-
-
-                if(chunk.hasPlayer(player))
-                    this.currentPlayerChunk = chunk;
+                auto second = (cell.y + y in *first);
+                
+                return second;
             }
+            else
+                return null;
+        }
+        Chunk*[5*5] array;
+        size_t index = 0;
+        foreach(x; -2..3)
+        {
+            foreach(y; -2..3)
+            {
+                array[index++] = get(x, y);
+            }
+        }
+
+        foreach(Chunk* chunk; array)
+        {
+            if(chunk is null || !chunk.hasPlayer(player))
+                continue;
+
+            /*if(this.currentPlayerChunk !is null && this.currentPlayerChunk.hasPlayer(player))
+                break;*/
+
+
+            if(chunk.hasPlayer(player))
+                this.currentPlayerChunk = *chunk;
         }
 
         writeln("Chunks: ", this.chunks.length);
