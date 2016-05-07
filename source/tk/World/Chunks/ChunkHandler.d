@@ -81,7 +81,7 @@ private:
                 return null;
         }
 
-        // -1 Would be up.
+        // Up
         auto temp = getChunk(cell + Vector2i(0, -1));
         if(temp is null)
         {
@@ -92,7 +92,7 @@ private:
             this.chunks[nextCell.x][nextCell.y] = next;
         }
 
-        // Up, down, left, right
+        // Down
         temp = getChunk(cell + Vector2i(0, 1));
         if(temp is null) // We can't use centreChunk.down anymore
         {
@@ -103,6 +103,7 @@ private:
             this.chunks[nextCell.x][nextCell.y] = next;
         }
 
+        // Left
         temp = getChunk(cell + Vector2i(-1, 0));
         if(temp is null)
         {
@@ -113,6 +114,7 @@ private:
             this.chunks[nextCell.x][nextCell.y] = next;
         }
 
+        // Right
         temp = getChunk(cell + Vector2i(1, 0));
         if(temp is null)
         {
@@ -123,43 +125,46 @@ private:
             this.chunks[nextCell.x][nextCell.y] = next;
         }
 
-        ///Corners
+        /// Top-Left
         temp = getChunk(cell + Vector2i(-1, -1));
         if(temp is null)
         {
             auto next     = new Chunk(Vector2i((centreChunk.topLeft.x - chunkWidth), (centreChunk.topLeft.y - chunkHeight)), ChunkMapGenerator.generateMap());
             auto nextCell = next.cell;
-           // assert(nextCell.x == cell.x && nextCell.y == cell.y - 1); // This makes sure it's 1 cell above
+            assert(nextCell.x == cell.x - 1 && nextCell.y == cell.y - 1); // This makes sure it's 1 cell above
             
             this.chunks[nextCell.x][nextCell.y] = next;
         }
 
+        // Top Right
         temp = getChunk(cell + Vector2i(1, -1));
         if(temp is null)
         {
             auto next     = new Chunk(Vector2i((centreChunk.topLeft.x + chunkWidth), (centreChunk.topLeft.y - chunkHeight)), ChunkMapGenerator.generateMap());
             auto nextCell = next.cell;
-           // assert(nextCell.x == cell.x && nextCell.y == cell.y - 1); // This makes sure it's 1 cell above
+            assert(nextCell.x == cell.x + 1 && nextCell.y == cell.y - 1); // This makes sure it's 1 cell above
             
             this.chunks[nextCell.x][nextCell.y] = next;
         }
 
+        // Bottom left
         temp = getChunk(cell + Vector2i(-1, 1));
         if(temp is null)
         {
             auto next = new Chunk(Vector2i((centreChunk.topLeft.x - chunkWidth), (centreChunk.topLeft.y + chunkHeight)), ChunkMapGenerator.generateMap());
             auto nextCell = next.cell;
-           // assert(nextCell.x == cell.x - 1 && nextCell.y == cell.y);
+            assert(nextCell.x == cell.x - 1 && nextCell.y == cell.y + 1);
             
             this.chunks[nextCell.x][nextCell.y] = next;
         }
 
+        // Bottom right
         temp = getChunk(cell + Vector2i(1, 1));
         if(temp is null)
         {
-            auto next = new Chunk(Vector2i((centreChunk.topLeft.x - chunkWidth), (centreChunk.topLeft.y - chunkHeight)), ChunkMapGenerator.generateMap());
+            auto next = new Chunk(Vector2i((centreChunk.topLeft.x + chunkWidth), (centreChunk.topLeft.y + chunkHeight)), ChunkMapGenerator.generateMap());
             auto nextCell = next.cell;
-            //assert(nextCell.x == cell.x - 1 && nextCell.y == cell.y);
+            assert(nextCell.x == cell.x + 1 && nextCell.y == cell.y + 1);
             
             this.chunks[nextCell.x][nextCell.y] = next;
         }
