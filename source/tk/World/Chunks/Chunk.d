@@ -168,6 +168,12 @@ class Chunk
         return this.topLeft / Vector2i(chunkWidth, chunkHeight);
     }
 
+    @property
+    Sprite[chunkSize][chunkSize] getTiles()
+    {
+        return this.tiles;
+    }
+
 private:
 
     void loadMap(Vector2i topLeftChunk, ChunkMap map)

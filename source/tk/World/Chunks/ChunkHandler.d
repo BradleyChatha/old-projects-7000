@@ -15,8 +15,133 @@ public static:
 
     void update(Player player)
     {
-        ///Check if there is a player within the current the current chunk and assign the chunk its own object
-        ///I can't help but feel there is a better way than this...
+        auto array = chunksAroundPlayer(player);
+        foreach(Chunk* chunk; array)
+        {
+            if(chunk is null || !chunk.hasPlayer(player))
+                continue;
+
+            /*if(this.currentPlayerChunk !is null && this.currentPlayerChunk.hasPlayer(player))
+                break;*/
+
+
+            if(chunk.hasPlayer(player))
+                this.currentPlayerChunk = *chunk;
+        }
+
+        writeln("Chunks: ", this.chunks.length);
+
+        assert(this.currentPlayerChunk !is null, "The player isn't inside any chunk.");
+
+        ///Temp for testing
+        //Vector2f pos = this.currentPlayerChunk.relativePosition(player.sprite.position);
+
+        createChunk(this.currentPlayerChunk);
+    }
+
+    void draw(Player player)
+    {
+        auto array = chunksAroundPlayer(player);
+        foreach(Chunk* c; array)
+        {
+            if(c is null)
+                continue;
+
+            c.draw();
+        }
+    }
+
+    /++
+     + Gets the tiles around the player, regardless if they're in different chunks.
+     + 
+     + Parameters:
+     +  player = The player.
+     + 
+     + Returns:
+     +  A 3x3 grid of all the tiles around the player.
+     + 
+     +  {
+     +     0    1        2
+     +     3    4&Player 5
+     +     6    7        8
+     +  }
+     + ++/
+    Sprite[18] tilesAroundPlayer(Player player)
+    {
+        Chunk[9] chunks;
+        Sprite[18] toReturn;
+
+        size_t index = 0;
+        auto cell = (player.sprite.position / Vector2f(chunkWidth, chunkHeight)).asVector!int;
+        foreach(i; -1..2)
+        {
+            foreach(j; -1..2)
+            {
+                chunks[index++] = this.chunks[cell.x + i][cell.y + j];
+            }
+        }
+
+        index = 0;
+        foreach(c; chunks)
+        {
+            if(c is null)
+                continue;
+
+            foreach(tile; c.tilesAroundPoint(player))
+            {
+                if(tile !is null)
+                    toReturn[index++] = tile;
+            }
+        }
+
+        return toReturn;
+    }
+
+    Chunk[4] getPlayerChunks(Player player)
+    {
+        Chunk[4] toReturn;
+        auto cell = (player.sprite.position / Vector2f(chunkWidth, chunkHeight)).asVector!int;
+
+        size_t index = 0;
+
+        ///Top-Left
+        if(this.chunks[cell.x - 1][cell.y - 1].hasPlayer(player))
+            toReturn[index++] = this.chunks[cell.x - 1][cell.y - 1];
+        ///Top-Middle
+        if(this.chunks[cell.x][cell.y - 1].hasPlayer(player))
+            toReturn[index++] = this.chunks[cell.x][cell.y - 1];
+        ///Top-Right
+        if(this.chunks[cell.x + 1][cell.y - 1].hasPlayer(player))
+            toReturn[index++] = this.chunks[cell.x + 1][cell.y - 1];
+        ///Middle-Left
+        if(this.chunks[cell.x - 1][cell.y].hasPlayer(player))
+            toReturn[index++] = this.chunks[cell.x - 1][cell.y];
+        ///Middle-Middle
+        if(this.chunks[cell.x][cell.y].hasPlayer(player))
+            toReturn[index++] = this.chunks[cell.x][cell.y];
+        ///Middle-Right
+        if(this.chunks[cell.x + 1][cell.y].hasPlayer(player))
+            toReturn[index++] = this.chunks[cell.x + 1][cell.y];
+        ///Bottom-Left
+        if(this.chunks[cell.x - 1][cell.y + 1].hasPlayer(player))
+            toReturn[index++] = this.chunks[cell.x - 1][cell.y + 1];
+        ///Bottom-Middle
+        if(this.chunks[cell.x][cell.y + 1].hasPlayer(player))
+            toReturn[index++] = this.chunks[cell.x][cell.y + 1];
+        ///Bottom-Right
+        if(this.chunks[cell.x + 1][cell.y + 1].hasPlayer(player))
+            toReturn[index++] = this.chunks[cell.x + 1][cell.y + 1];
+
+        return toReturn;
+    }
+
+private:
+    static Chunk[int][int] chunks; // So something like, Chunk[int][int]? >:D Go for it. And pray the GC doesn't have a fit for some reason
+    ///The chunk which currently has player
+    static Chunk currentPlayerChunk; 
+
+    static Chunk*[5*5] chunksAroundPlayer(Player player)
+    {
         auto cell = (player.sprite.position / Vector2f(chunkWidth, chunkHeight)).asVector!int;
 
         Chunk* get(int x, int y)
@@ -42,44 +167,8 @@ public static:
             }
         }
 
-        foreach(Chunk* chunk; array)
-        {
-            if(chunk is null || !chunk.hasPlayer(player))
-                continue;
-
-            /*if(this.currentPlayerChunk !is null && this.currentPlayerChunk.hasPlayer(player))
-                break;*/
-
-
-            if(chunk.hasPlayer(player))
-                this.currentPlayerChunk = *chunk;
-        }
-
-        writeln("Chunks: ", this.chunks.length);
-
-        assert(this.currentPlayerChunk !is null, "The player isn't inside any chunk.");
-
-        ///Temp for testing
-        //Vector2f pos = this.currentPlayerChunk.relativePosition(player.sprite.position);
-
-        createChunk(this.currentPlayerChunk);
+        return array;
     }
-
-    void draw()
-    {
-        foreach(array; this.chunks)
-        {
-            foreach(Chunk c; array)
-            {
-                c.draw();
-            }
-        }
-    }
-
-private:
-    static Chunk[int][int] chunks; // So something like, Chunk[int][int]? >:D Go for it. And pray the GC doesn't have a fit for some reason
-    ///The chunk which currently has player
-    static Chunk currentPlayerChunk; 
 
     ///Will make up, down, left, right, if not found.
     static void createChunk(Chunk centreChunk)

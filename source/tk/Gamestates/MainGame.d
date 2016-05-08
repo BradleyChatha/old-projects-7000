@@ -45,12 +45,6 @@ class MainGame : GameState
 
             loadTiles();
 
-            ///A test map
-           // ChunkMap map = ChunkMapGenerator.generateMap();
-
-            writeln(Tile.maxID);
-
-            //c = new Chunk(Vector2i(0, 0), map);
             ChunkHandler.setup();
 
             super.onInit();
@@ -67,9 +61,18 @@ class MainGame : GameState
             auto player = PhysicalWorld.findAs!Player("Player");
             //c.draw();
             ChunkHandler.update(player); // But this still says it's null...
-            ChunkHandler.draw();
+            ChunkHandler.draw(player);
          
             PhysicalWorld.onUpdate(gameTime);
+
+            foreach(tile; ChunkHandler.tilesAroundPlayer(player))
+            {
+                if(tile is null)
+                    continue;
+
+                // Xamarin is broken
+                tile.colour = Colour(0, 0, 0, 255);
+            }
 
             //writeln(c.relativePosition(PhysicalWorld.findAs!Player("Player").sprite.position));
         }
