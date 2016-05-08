@@ -14,6 +14,13 @@ public static Tile[512] tileCache;
 class Tile
 {
 public:
+    this(TileType type, Texture texture)
+    {
+        this._ID = type;
+        this._tileTexture = texture;
+        this._sprite = new Sprite(this._tileTexture);
+    }
+
     @property
     uint ID()
     {
@@ -26,11 +33,25 @@ public:
         return this._tileTexture;
     }
 
+    @property
+    Sprite sprite()
+    {
+        return this._sprite;
+    }
+
     ///A tile is 32 by 32 pixels.
     @property
     const uint tileSize()
     {
         return 32;
+    }
+
+    /++
+     + Clones the tile.
+     + ++/
+    Tile clone()
+    {
+        return new Tile(this._ID, this._tileTexture);
     }
 
     ///Finds and returns the highest tile ID in tileCache
@@ -56,6 +77,7 @@ public:
 protected:
     TileType _ID;
     Texture _tileTexture;
+    Sprite  _sprite;
 }
 
 enum TileType : byte

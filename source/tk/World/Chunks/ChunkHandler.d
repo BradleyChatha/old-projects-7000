@@ -66,10 +66,10 @@ public static:
      +     6    7        8
      +  }
      + ++/
-    Sprite[18] tilesAroundPlayer(Player player)
+    Tile[18] tilesAroundPlayer(Player player)
     {
         Chunk[9] chunks;
-        Sprite[18] toReturn;
+        Tile[18] toReturn;
 
         size_t index = 0;
         auto cell = (player.sprite.position / Vector2f(chunkWidth, chunkHeight)).asVector!int;
