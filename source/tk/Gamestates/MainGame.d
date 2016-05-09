@@ -71,7 +71,7 @@ class MainGame : GameState
                     continue;
 
                 // Xamarin is broken
-                tile.colour = Colour(0, 0, 0, 255);
+                tile.sprite.colour = Colour(0, 0, 0, 255);
             }
 
             //writeln(c.relativePosition(PhysicalWorld.findAs!Player("Player").sprite.position));

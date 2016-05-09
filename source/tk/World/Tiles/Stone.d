@@ -6,8 +6,7 @@ class Stone : Tile
 {
     this()
     {
-        this._ID = TileType.Tile_Stone;
-        this._tileTexture = Cache.loadTexture("Assets\\Tiles\\Stone.png");
+        super(TileType.Tile_Stone, Cache.loadTexture("Assets/Tiles/Stone.png"));
     }
 }
 

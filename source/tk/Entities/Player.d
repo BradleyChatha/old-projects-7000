@@ -11,7 +11,7 @@ class Player : PhysicalComponent
 public:
     this()
     {
-        this.moveableDirections[0..3] = true;
+        this.moveableDirections[0..4] = true;
     }
 
     override void onHitEntity(PhysicalComponent other)
@@ -79,15 +79,11 @@ private:
             if(chunk is null)
                 continue;
                 
-            auto c = ChunkHandler.tilesAroundPoint(this);
+            auto c = ChunkHandler.tilesAroundPlayer(this);
             foreach(tile; c)
             {
-                if(tile.collides(this.sprite))
-                    return true;
             }
         }
-
-        return false;
     }
 }
 

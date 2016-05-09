@@ -26,24 +26,13 @@ class Chunk
         this.loadMap(topLeftChunk, map);
     }
 
-    ~this()
-    {
-        for(int i = 0; i < chunkSize; i++)
-        {
-            for(int j = 0; j < chunkSize; j++)
-            {
-                Sprite.dispose(tiles[i][j]);
-            }
-        }
-    }
-
     void draw()
     {
         for(int i = 0; i < chunkSize; i++)
         {
             for(int j = 0; j < chunkSize; j++)
             {
-                Renderer.drawSprite(tiles[i][j]);
+                Renderer.drawSprite(tiles[i][j].sprite);
             }
         }
     }
@@ -108,9 +97,9 @@ class Chunk
      +  Some of the sprites *may* be null, so make sure to check for that.
      + ++/
     @safe @nogc
-    Sprite[9] tilesAroundPoint(Vector2f point) nothrow
+    Tile[9] tilesAroundPoint(Vector2f point) nothrow
     {
-        Sprite[9] toReturn;
+        Tile[9] toReturn;
 
         // Find which tile the point is over.
         auto pos  = this.relativePosition(point);
@@ -145,7 +134,7 @@ class Chunk
 
     /// Ditto
     @safe @nogc
-    Sprite[9] tilesAroundPoint(Player player) nothrow
+    Tile[9] tilesAroundPoint(Player player) nothrow
     {
         // We want to use the player's center point for this, instead of the top-left point.
         return this.tilesAroundPoint(
@@ -169,7 +158,7 @@ class Chunk
     }
 
     @property
-    Sprite[chunkSize][chunkSize] getTiles()
+    Tile[chunkSize][chunkSize] getTiles()
     {
         return this.tiles;
     }
@@ -192,8 +181,9 @@ private:
                 auto id = map[i][j];
                 enforce(id < TileType.Tile_Count, "This map contains an ID that is too high.");
 
-                tiles[i][j]        = Sprite.make(tileCache[id].tileTexture, Vector2f(posX, posY));
-                tiles[i][j].camera = Camera.instance;
+                tiles[i][j]                 = tileCache[id].clone();
+                tiles[i][j].sprite.position = Vector2f(posX, posY);
+                tiles[i][j].sprite.camera   = Camera.instance;
 
                 posX += tileSize;
             }
@@ -203,7 +193,7 @@ private:
     }
 
     ///(0,0) is very left... I hope.
-    Sprite[chunkSize][chunkSize] tiles;
+    Tile[chunkSize][chunkSize] tiles;
 
     /// The top left position of the chunk.
     Vector2i _topLeft;
