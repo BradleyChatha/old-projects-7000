@@ -1,0 +1,12 @@
+class Number
+{
+public:
+    unsigned int seven(void) { return 7; }
+};
+
+int main(int argc, char** argv)
+{
+    Number num;
+    std::cout << num.seven() << endl;
+    return 0;
+}
