@@ -193,6 +193,7 @@ private:
     }
 
     ///(0,0) is very left... I hope.
+    /// [y][x]
     Tile[chunkSize][chunkSize] tiles;
 
     /// The top left position of the chunk.
