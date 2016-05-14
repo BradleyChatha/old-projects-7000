@@ -29,7 +29,7 @@ public static:
                 this.currentPlayerChunk = *chunk;
         }
 
-        writeln("Chunks: ", this.chunks.length);
+        //writeln("Chunks: ", this.chunks.length);
 
         assert(this.currentPlayerChunk !is null, "The player isn't inside any chunk.");
 
@@ -66,31 +66,76 @@ public static:
      +     6    7        8
      +  }
      + ++/
-    Tile[18] tilesAroundPlayer(Player player)
+    Tile[9] tilesAroundPlayer(Player player)
     {
         Chunk[9] chunks;
-        Tile[18] toReturn;
+        Tile[9] toReturn;
 
+        // This code is super super super super super messy. But meh
         size_t index = 0;
-        auto cell = (player.sprite.position / Vector2f(chunkWidth, chunkHeight)).asVector!int;
+        auto cell = playerCell(player);
         foreach(i; -1..2)
         {
             foreach(j; -1..2)
             {
-                chunks[index++] = this.chunks[cell.x + i][cell.y + j];
+                Chunk* get(int x, int y)
+                {
+                    auto first = (x in this.chunks);
+                    
+                    if(first !is null)
+                    {
+                        auto second = (y in *first);
+                        
+                        return second;
+                    }
+                    else
+                        return null;
+                }
+
+                auto ptr = get(cell.x + i, cell.y + j);
+                chunks[index++] = (ptr is null) ? null : *ptr;
             }
         }
 
-        index = 0;
         foreach(c; chunks)
         {
             if(c is null)
                 continue;
 
-            foreach(tile; c.tilesAroundPoint(player))
+            foreach(tile; c.tilesAroundPoint(player.sprite.position + player.sprite.centre.asVector!float))
             {
                 if(tile !is null)
-                    toReturn[index++] = tile;
+                {
+                    auto pos  = currentPlayerChunk.relativePosition(tile.sprite.position).asVector!int;
+                    pos      /= Vector2i(tileSize, tileSize);
+
+                    grid[pos.y][pos.x] = tile;
+                }
+            }
+        }
+
+        index = 0;
+        cell  = (currentPlayerChunk.relativePosition(player.sprite.position + player.sprite.centre.asVector!float) / Vector2f(tileSize, tileSize)).asVector!int;
+        foreach(i; -1..2)
+        {
+            foreach(j; -1..2)
+            {
+                Tile* gett(int x, int y)
+                {
+                    auto first = (x in grid);
+                    
+                    if(first !is null)
+                    {
+                        auto second = (y in *first);
+                        
+                        return second;
+                    }
+                    else
+                        return null;
+                }
+
+                auto ptr = gett(cell.y + i, cell.x + j);
+                toReturn[index++] = (ptr is null) ? null : *ptr;
             }
         }
 
@@ -100,7 +145,7 @@ public static:
     Chunk[4] getPlayerChunks(Player player)
     {
         Chunk[4] toReturn;
-        auto cell = (player.sprite.position / Vector2f(chunkWidth, chunkHeight)).asVector!int;
+        auto cell = playerCell(player);
 
         size_t index = 0;
 
@@ -135,14 +180,22 @@ public static:
         return toReturn;
     }
 
-private:
-    static Chunk[int][int] chunks; // So something like, Chunk[int][int]? >:D Go for it. And pray the GC doesn't have a fit for some reason
+private static:
+    Chunk[int][int] chunks; // So something like, Chunk[int][int]? >:D Go for it. And pray the GC doesn't have a fit for some reason
     ///The chunk which currently has player
-    static Chunk currentPlayerChunk; 
+    Chunk currentPlayerChunk; 
 
-    static Chunk*[5*5] chunksAroundPlayer(Player player)
+    /// Used in tilesAroundPlayer
+    Tile[int][int] grid;
+
+    static Vector2i playerCell(Player player)
     {
-        auto cell = (player.sprite.position / Vector2f(chunkWidth, chunkHeight)).asVector!int;
+        return ((player.sprite.position + player.sprite.centre.asVector!float) / Vector2f(chunkWidth, chunkHeight)).asVector!int;
+    }
+
+    Chunk*[5*5] chunksAroundPlayer(Player player)
+    {
+        auto cell = playerCell(player);
 
         Chunk* get(int x, int y)
         {
@@ -171,7 +224,7 @@ private:
     }
 
     ///Will make up, down, left, right, if not found.
-    static void createChunk(Chunk centreChunk)
+    void createChunk(Chunk centreChunk)
     {
         //Chunk tempChunk = null; //bby
         auto cell = centreChunk.cell;
