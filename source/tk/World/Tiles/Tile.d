@@ -3,6 +3,7 @@
 import Common;
 import tk.World.Tiles.Dirt;
 import tk.World.Tiles.Stone;
+import tk.World.Tiles.Tunnel;
 
 public static Tile[512] tileCache;
 
@@ -84,6 +85,7 @@ enum TileType : byte
 {
     Tile_Dirt = 1,
     Tile_Stone,
+    Tile_Tunnel,
 
     /// This will have the value of the total amount of tile types <3
     Tile_Count
@@ -93,6 +95,7 @@ void loadTiles()
 {
     tileCache[1] = new Dirt();
     tileCache[2] = new Stone();
+    tileCache[3] = new Tunnel();
 
     // To keep things consistant, every tile in the tileCache should have the same texture size.
     // Unless, of course, you want them to have different sizes.

@@ -171,6 +171,8 @@ private:
                 auto id = map[i][j];
                 enforce(id < TileType.Tile_Count, "This map contains an ID that is too high.");
 
+                //writeln(id, " ", tileCache[id] is null);
+
                 tiles[i][j]                 = tileCache[id].clone();
                 tiles[i][j].sprite.position = Vector2f(posX, posY);
                 tiles[i][j].sprite.camera   = Camera.instance;

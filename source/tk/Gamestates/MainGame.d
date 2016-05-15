@@ -49,7 +49,8 @@ class MainGame : GameState
 
             super.onInit();
         }
-        
+
+        Colour _deleteMe = Renderer.black;
         /++
          + Called everytime the component is updated.
          + 
@@ -64,16 +65,7 @@ class MainGame : GameState
             ChunkHandler.draw(player);
          
             PhysicalWorld.onUpdate(gameTime);
-
-            foreach(tile; ChunkHandler.tilesAroundPlayer(player))
-            {
-                if(tile is null)
-                    continue;
-
-                // Xamarin is broken
-                tile.sprite.colour = Colour(0, 0, 0, 255);
-            }
-
+           
             //writeln(c.relativePosition(PhysicalWorld.findAs!Player("Player").sprite.position));
         }
 

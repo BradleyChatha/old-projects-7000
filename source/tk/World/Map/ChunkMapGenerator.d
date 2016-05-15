@@ -22,8 +22,10 @@ public:
             {
                 float chance = uniform(0.0f, 10.0f);
 
-                if(chance > 3.333)
+                if(chance > 3.333 && chance < 7.333)
                     map[i][j] = TileType.Tile_Dirt;
+                else if(chance > 7.334)
+                    map[i][j] = TileType.Tile_Tunnel;
                 else
                     map[i][j] = TileType.Tile_Stone;
             }
