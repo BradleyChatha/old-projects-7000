@@ -72,7 +72,7 @@ class Chunk
     {
         return (position - this._topLeft.asVector!float);
     }
-
+    /+
     /++
      + Returns up to 9 tiles around a point.
      + 
@@ -130,17 +130,7 @@ class Chunk
         setSprite(8, cell.x + 1, cell.y + 1); // Bottom right
 
         return toReturn;
-    }
-
-    /// Ditto
-    @safe @nogc
-    Tile[9] tilesAroundPoint(Player player) nothrow
-    {
-        // We want to use the player's center point for this, instead of the top-left point.
-        return this.tilesAroundPoint(
-            player.sprite.position + player.sprite.centre.asVector!float
-            );
-    }
+    }+/
 
     @property
     Vector2i topLeft()

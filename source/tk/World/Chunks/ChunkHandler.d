@@ -10,39 +10,31 @@ class ChunkHandler
 public static:
     void setup()
     {
-        this.chunks[0][0] = new Chunk(Vector2i(0,0), ChunkMapGenerator.generateMap());
+        ChunkHandler.createChunk(Vector2i(0, 0));
     }
 
     void update(Player player)
     {
-        auto array = chunksAroundPlayer(player);
-        foreach(Chunk* chunk; array)
+        ChunkHandler.createChunk(ChunkHandler.toChunkCell(player));
+
+        // Find the chunk the player is inside.
+        auto array = getPlayerChunks(player);
+        foreach(Chunk chunk; array)
         {
             if(chunk is null || !chunk.hasPlayer(player))
                 continue;
 
-            /*if(this.currentPlayerChunk !is null && this.currentPlayerChunk.hasPlayer(player))
-                break;*/
-
-
             if(chunk.hasPlayer(player))
-                this.currentPlayerChunk = *chunk;
+                this.currentPlayerChunk = chunk;
         }
 
-        //writeln("Chunks: ", this.chunks.length);
-
         assert(this.currentPlayerChunk !is null, "The player isn't inside any chunk.");
-
-        ///Temp for testing
-        //Vector2f pos = this.currentPlayerChunk.relativePosition(player.sprite.position);
-
-        createChunk(this.currentPlayerChunk);
     }
 
     void draw(Player player)
     {
-        auto array = chunksAroundPlayer(player);
-        foreach(Chunk* c; array)
+        auto array = getPlayerChunks(player);
+        foreach(Chunk c; array)
         {
             if(c is null)
                 continue;
@@ -68,277 +60,199 @@ public static:
      + ++/
     Tile[9] tilesAroundPlayer(Player player)
     {
-        Chunk[9] chunks;
         Tile[9] toReturn;
+        auto cell = ChunkHandler.toTileCell(player);
 
-        // This code is super super super super super messy. But meh
         size_t index = 0;
-        auto cell = playerCell(player);
-        foreach(i; -1..2)
+        foreach(y; -1..2)
         {
-            foreach(j; -1..2)
-            {
-                Chunk* get(int x, int y)
-                {
-                    auto first = (x in this.chunks);
-                    
-                    if(first !is null)
-                    {
-                        auto second = (y in *first);
-                        
-                        return second;
-                    }
-                    else
-                        return null;
-                }
-
-                auto ptr = get(cell.x + i, cell.y + j);
-                chunks[index++] = (ptr is null) ? null : *ptr;
-            }
+            foreach(x; -1..2)
+                toReturn[index++] = ChunkHandler.tileAtGrid(cell + Vector2i(x, y));
         }
 
-        foreach(c; chunks)
+        //toReturn[0] = ChunkHandler.tileAtGrid(cell + Vector2i(0, -1));
+        return toReturn;
+    }
+
+    /++
+     + Gets the chunks around the player.
+     + 
+     + Parameters:
+     +  player = The player.
+     + 
+     + Returns:
+     +  A 3x3 of all the chunks around the player, with the middle chunk being the player's chunk.
+     + ++/
+    Chunk[9] getPlayerChunks(Player player)
+    {
+        Chunk[9] toReturn;
+        auto cell = ChunkHandler.toChunkCell(player);
+
+        size_t index = 0;
+        foreach(y; -1..2)
         {
-            if(c is null)
-                continue;
-
-            foreach(tile; c.tilesAroundPoint(player.sprite.position + player.sprite.centre.asVector!float))
-            {
-                if(tile !is null)
-                {
-                    auto pos  = currentPlayerChunk.relativePosition(tile.sprite.position).asVector!int;
-                    pos      /= Vector2i(tileSize, tileSize);
-
-                    grid[pos.y][pos.x] = tile;
-                }
-            }
-        }
-
-        index = 0;
-        cell  = (currentPlayerChunk.relativePosition(player.sprite.position + player.sprite.centre.asVector!float) / Vector2f(tileSize, tileSize)).asVector!int;
-        foreach(i; -1..2)
-        {
-            foreach(j; -1..2)
-            {
-                Tile* gett(int x, int y)
-                {
-                    auto first = (x in grid);
-                    
-                    if(first !is null)
-                    {
-                        auto second = (y in *first);
-                        
-                        return second;
-                    }
-                    else
-                        return null;
-                }
-
-                auto ptr = gett(cell.y + i, cell.x + j);
-                toReturn[index++] = (ptr is null) ? null : *ptr;
-            }
+            foreach(x; -1..2)
+                toReturn[index++] = ChunkHandler.chunkAtGrid(cell + Vector2i(x, y));
         }
 
         return toReturn;
     }
 
-    Chunk[4] getPlayerChunks(Player player)
+    /++
+     + Gets a chunk at a specific coordinate. Returns null if the chunk doesn't exist
+     + 
+     + Parameters:
+     +  coord = The coordinates of the chunk to get. This is to be used for the Chunk-grid.
+     + 
+     + Returns:
+     +  The chunk, if it exists.
+     +  $(D null) if it doesn't.
+     + ++/
+    Chunk chunkAtGrid(Vector2i coord)
     {
-        Chunk[4] toReturn;
-        auto cell = playerCell(player);
+        auto first  = ChunkHandler.chunks.get(coord.y, null);
+        auto second = (first is null) ? null : first.get(coord.x, null);
+        
+        return second;
+    }
 
-        size_t index = 0;
+    /++
+     + Calculates the chunk-grid coordinates of the given world coordinates, and returns the chunk the coord is inside.
+     + 
+     + Parameters:
+     +  coord = The coordinate of the chunk. This is a world-position.
+     + 
+     + Returns:
+     +  The chunk that $(B coord) is inside.
+     +  Or null, if that chunk doesn't exist.
+     + ++/
+    Chunk chunkAt(Vector2f coord)
+    {
+        auto newCoord = (coord / Vector2f(chunkWidth, chunkHeight));
 
-        ///Top-Left
-        if(this.chunks[cell.x - 1][cell.y - 1].hasPlayer(player))
-            toReturn[index++] = this.chunks[cell.x - 1][cell.y - 1];
-        ///Top-Middle
-        if(this.chunks[cell.x][cell.y - 1].hasPlayer(player))
-            toReturn[index++] = this.chunks[cell.x][cell.y - 1];
-        ///Top-Right
-        if(this.chunks[cell.x + 1][cell.y - 1].hasPlayer(player))
-            toReturn[index++] = this.chunks[cell.x + 1][cell.y - 1];
-        ///Middle-Left
-        if(this.chunks[cell.x - 1][cell.y].hasPlayer(player))
-            toReturn[index++] = this.chunks[cell.x - 1][cell.y];
-        ///Middle-Middle
-        if(this.chunks[cell.x][cell.y].hasPlayer(player))
-            toReturn[index++] = this.chunks[cell.x][cell.y];
-        ///Middle-Right
-        if(this.chunks[cell.x + 1][cell.y].hasPlayer(player))
-            toReturn[index++] = this.chunks[cell.x + 1][cell.y];
-        ///Bottom-Left
-        if(this.chunks[cell.x - 1][cell.y + 1].hasPlayer(player))
-            toReturn[index++] = this.chunks[cell.x - 1][cell.y + 1];
-        ///Bottom-Middle
-        if(this.chunks[cell.x][cell.y + 1].hasPlayer(player))
-            toReturn[index++] = this.chunks[cell.x][cell.y + 1];
-        ///Bottom-Right
-        if(this.chunks[cell.x + 1][cell.y + 1].hasPlayer(player))
-            toReturn[index++] = this.chunks[cell.x + 1][cell.y + 1];
+        if(coord.x < 0 && (coord.x % chunkWidth) != 0)
+            newCoord.x -= 1;
+        if(coord.y < 0 && (coord.y % chunkHeight) != 0)
+            newCoord.y -= 1;
 
-        return toReturn;
+        return ChunkHandler.chunkAtGrid(newCoord.asVector!int);
+    }
+
+    /++
+     + Converts a given world-position coordinate into a tile-grid coordinate, and returns the tile the coord is inside.
+     + 
+     + Parameters:
+     +  coord = The coordinate of the tile. This is a world-position.
+     + 
+     + Returns:
+     +  The tile that $(B coord) is inside.
+     +  Or null, if for some reason the tile can't be found.
+     + ++/
+    Tile tileAt(Vector2f coord)
+    {
+        // Find the chunk the tile should be inside.
+        auto chunk = ChunkHandler.chunkAt(coord);
+
+        if(chunk is null)
+            return null;
+
+        // Then try to get the tile from inside the chunk.
+        auto chunkPos = chunk.topLeft.asVector!float;
+
+        auto cell = ((coord - chunkPos) / Vector2f(tileSize, tileSize)).asVector!int;
+        /++if(cell.x == 32 || cell.y == 32)
+        {
+            if(cell.x == 32) coord.x += 1;
+            if(cell.y == 32) coord.y += 1;
+
+            return ChunkHandler.tileAt(coord);
+        }++/
+
+        //writefln("coord: %s | chunkPos: %s | cell: %s | chunkPosReal: %s", coord, chunkPos, cell, chunk.topLeft);
+
+        return chunk.getTiles[cell.y][cell.x];
+    }
+
+    /// Ditto
+    Tile tileAtGrid(Vector2i coord)
+    {
+        coord *= Vector2i(tileSize, tileSize);
+        return ChunkHandler.tileAt(coord.asVector!float);
+    }
+
+    /++
+     + Calculates the chunk-cell the player is inside.
+     + 
+     + Parameters:
+     +  player = The player.
+     + 
+     + Returns:
+     +  A Vector2i containing the cell that the player is in. This cell is for the Chunk grid.
+     + ++/
+    Vector2i toChunkCell(Player player)
+    {
+        return ChunkHandler.toChunkCell(player.sprite.position + player.sprite.centre.asVector!float);
+    }
+
+    /// Ditto
+    Vector2i toChunkCell(Vector2f coord)
+    {
+        if(coord.y < 0)
+            coord.y += -chunkHeight;
+        if(coord.x < 0)
+            coord.x += -chunkWidth;
+
+        return (coord / Vector2f(chunkWidth, chunkHeight)).asVector!int;
+    }
+
+    /++
+     + Calculates the tile-cell the player is inside.
+     + 
+     + Parameters:
+     +  player = The player.
+     + 
+     + Returns:
+     +  A Vector2i containing the cell the player is in. This cell is for the Tile grid.
+     + ++/
+    Vector2i toTileCell(Player player)
+    {
+        return ChunkHandler.toTileCell(player.sprite.position + player.sprite.centre.asVector!float);
+    }
+
+    /// Ditto
+    Vector2i toTileCell(Vector2f coord)
+    {
+        if(coord.y < 0)
+            coord.y += -tileSize;
+        if(coord.x < 0)
+            coord.x += -tileSize;
+
+        return (coord / Vector2f(tileSize, tileSize)).asVector!int;
     }
 
 private static:
     Chunk[int][int] chunks; // So something like, Chunk[int][int]? >:D Go for it. And pray the GC doesn't have a fit for some reason
     ///The chunk which currently has player
-    Chunk currentPlayerChunk; 
+    Chunk currentPlayerChunk;
 
-    /// Used in tilesAroundPlayer
-    Tile[int][int] grid;
-
-    static Vector2i playerCell(Player player)
+    /++
+     + Will create a 3x3 grd of chunks around the given chunk, if chunks don't already exist.
+     + 
+     + Parameters:
+     +  chunk = The chunk that is the centre of the grid. If the chunk doesn't exist, then the chunk itself is also created.
+     + ++/
+    void createChunk(Vector2i chunk)
     {
-        return ((player.sprite.position + player.sprite.centre.asVector!float) / Vector2f(chunkWidth, chunkHeight)).asVector!int;
-    }
-
-    Chunk*[5*5] chunksAroundPlayer(Player player)
-    {
-        auto cell = playerCell(player);
-
-        Chunk* get(int x, int y)
+        foreach(y; -1..2)
         {
-            auto first = (cell.x + x in this.chunks);
-            
-            if(first !is null)
+            foreach(x; -1..2)
             {
-                auto second = (cell.y + y in *first);
-                
-                return second;
+                auto cell     = (chunk + Vector2i(x, y));
+                auto position = (cell * Vector2i(chunkWidth, chunkHeight));
+
+                if(ChunkHandler.chunkAtGrid(cell) is null)
+                    ChunkHandler.chunks[cell.y][cell.x] = new Chunk(position, ChunkMapGenerator.generateMap());
             }
-            else
-                return null;
-        }
-        Chunk*[5*5] array;
-        size_t index = 0;
-        foreach(x; -2..3)
-        {
-            foreach(y; -2..3)
-            {
-                array[index++] = get(x, y);
-            }
-        }
-
-        return array;
-    }
-
-    ///Will make up, down, left, right, if not found.
-    void createChunk(Chunk centreChunk)
-    {
-        //Chunk tempChunk = null; //bby
-        auto cell = centreChunk.cell;
-
-        ///Bradley and his nested functions
-        ///Finds a chunk or doesn't. COMMENTING POWER
-        Chunk* getChunk(Vector2i cell)
-        {
-            auto first = (cell.x in this.chunks);
-
-            if(first !is null)
-            {
-                auto second = (cell.y in *first);
-
-                return second;
-            }
-            else
-                return null;
-        }
-
-        // Up
-        auto temp = getChunk(cell + Vector2i(0, -1));
-        if(temp is null)
-        {
-            auto next     = new Chunk(Vector2i(centreChunk.topLeft.x, (centreChunk.topLeft.y - chunkHeight)), ChunkMapGenerator.generateMap());
-            auto nextCell = next.cell;
-            assert(nextCell.x == cell.x && nextCell.y == cell.y - 1); // This makes sure it's 1 cell above
-
-            this.chunks[nextCell.x][nextCell.y] = next;
-        }
-
-        // Down
-        temp = getChunk(cell + Vector2i(0, 1));
-        if(temp is null) // We can't use centreChunk.down anymore
-        {
-            auto next = new Chunk(Vector2i(centreChunk.topLeft.x, (centreChunk.topLeft.y + chunkHeight)), ChunkMapGenerator.generateMap());
-            auto nextCell = next.cell;
-            assert(nextCell.x == cell.x && nextCell.y == cell.y + 1); // This assert makes sure that the new chunk is 1 cell down than the centreChunk.
-            
-            this.chunks[nextCell.x][nextCell.y] = next;
-        }
-
-        // Left
-        temp = getChunk(cell + Vector2i(-1, 0));
-        if(temp is null)
-        {
-            auto next = new Chunk(Vector2i((centreChunk.topLeft.x - chunkWidth), centreChunk.topLeft.y), ChunkMapGenerator.generateMap());
-            auto nextCell = next.cell;
-            assert(nextCell.x == cell.x - 1 && nextCell.y == cell.y);
-
-            this.chunks[nextCell.x][nextCell.y] = next;
-        }
-
-        // Right
-        temp = getChunk(cell + Vector2i(1, 0));
-        if(temp is null)
-        {
-            auto next = new Chunk(Vector2i((centreChunk.topLeft.x + chunkWidth), centreChunk.topLeft.y), ChunkMapGenerator.generateMap());
-            auto nextCell = next.cell;
-            assert(nextCell.x == cell.x + 1 && nextCell.y == cell.y);
-            
-            this.chunks[nextCell.x][nextCell.y] = next;
-        }
-
-        /// Top-Left
-        temp = getChunk(cell + Vector2i(-1, -1));
-        if(temp is null)
-        {
-            auto next     = new Chunk(Vector2i((centreChunk.topLeft.x - chunkWidth), (centreChunk.topLeft.y - chunkHeight)), ChunkMapGenerator.generateMap());
-            auto nextCell = next.cell;
-            assert(nextCell.x == cell.x - 1 && nextCell.y == cell.y - 1); // This makes sure it's 1 cell above
-            
-            this.chunks[nextCell.x][nextCell.y] = next;
-        }
-
-        // Top Right
-        temp = getChunk(cell + Vector2i(1, -1));
-        if(temp is null)
-        {
-            auto next     = new Chunk(Vector2i((centreChunk.topLeft.x + chunkWidth), (centreChunk.topLeft.y - chunkHeight)), ChunkMapGenerator.generateMap());
-            auto nextCell = next.cell;
-            assert(nextCell.x == cell.x + 1 && nextCell.y == cell.y - 1); // This makes sure it's 1 cell above
-            
-            this.chunks[nextCell.x][nextCell.y] = next;
-        }
-
-        // Bottom left
-        temp = getChunk(cell + Vector2i(-1, 1));
-        if(temp is null)
-        {
-            auto next = new Chunk(Vector2i((centreChunk.topLeft.x - chunkWidth), (centreChunk.topLeft.y + chunkHeight)), ChunkMapGenerator.generateMap());
-            auto nextCell = next.cell;
-            assert(nextCell.x == cell.x - 1 && nextCell.y == cell.y + 1);
-            
-            this.chunks[nextCell.x][nextCell.y] = next;
-        }
-
-        // Bottom right
-        temp = getChunk(cell + Vector2i(1, 1));
-        if(temp is null)
-        {
-            auto next = new Chunk(Vector2i((centreChunk.topLeft.x + chunkWidth), (centreChunk.topLeft.y + chunkHeight)), ChunkMapGenerator.generateMap());
-            auto nextCell = next.cell;
-            assert(nextCell.x == cell.x + 1 && nextCell.y == cell.y + 1);
-            
-            this.chunks[nextCell.x][nextCell.y] = next;
         }
     }
 }
-/+
- + e_e If you want me to code it, sure.
- + 
- + But we have an array as usual
- + Chunk[] chunks;
- + 
- + It *can*, but I'm not sure if it'll be slow. We can try <3
- + ++/
