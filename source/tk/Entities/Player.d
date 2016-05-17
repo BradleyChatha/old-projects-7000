@@ -33,17 +33,15 @@ public:
         this._actualSpeed = this._baseSpeed * gameTime;
 
         if(InputManager.isKeyDown(SDL_SCANCODE_W) && this.moveableDirections[up])
-            this.sprite.position += Vector2f(0, -this._actualSpeed);
+            this.tryMove(Vector2f(0, -this._actualSpeed), up);
         if(InputManager.isKeyDown(SDL_SCANCODE_S) && this.moveableDirections[down])
-            this.sprite.position += Vector2f(0, this._actualSpeed);
+            this.tryMove(Vector2f(0, this._actualSpeed), down);
         if(InputManager.isKeyDown(SDL_SCANCODE_A) && this.moveableDirections[left])
-            this.sprite.position += Vector2f(-this._actualSpeed, 0);
+            this.tryMove(Vector2f(-this._actualSpeed, 0), left);
         if(InputManager.isKeyDown(SDL_SCANCODE_D) && this.moveableDirections[right])
-            this.sprite.position += Vector2f(this._actualSpeed, 0);
+            this.tryMove(Vector2f(this._actualSpeed, 0), right);
 
         Camera.instance.centreOn(sprite);
-
-        this.handleCollision();
     }
 
     override bool onEvent(SDL_Event event, bool handled)
@@ -70,140 +68,44 @@ private:
     enum right = 2;
     enum down = 3;
 
+    void tryMove(Vector2f offset, int direction)
+    {
+        this.sprite.position += offset;
+        auto tiles = ChunkHandler.tilesAroundPlayer(this);
+
+        foreach(i, tile; tiles)
+        {
+            if(tile.ID == TileType.Tile_Tunnel)
+                continue;
+
+            if(direction == up)
+            {
+                if(i < 3 && this.isColliding(tile.sprite))
+                    this.sprite.position.y = tile.sprite.position.y + tile.sprite.size.y;
+            }
+            else if(direction == down)
+            {
+                if(i > 5 && this.isColliding(tile.sprite))
+                    this.sprite.position.y = tile.sprite.position.y - this.sprite.size.y;
+            }
+            else if(direction == left)
+            {
+                if((i == 0 || i == 3 || i == 6) && this.isColliding(tile.sprite))
+                    this.sprite.position.x = tile.sprite.position.x + tile.sprite.size.x;
+            }
+            else if(direction == right)
+            {
+                if((i == 2 || i == 5 || i == 8) && this.isColliding(tile.sprite))
+                    this.sprite.position.x = tile.sprite.position.x - this.sprite.size.x;
+            }
+        }
+    }
+
     ///Checks if player is touching a certain sprite
     bool isColliding(Sprite otherSprite)
     {
         assert(this.sprite !is null, "The sprite is null. Cannot be used.");
         return this.sprite.collides(otherSprite);
-    }
-
-    ///Handles whether the tile that is being touched is a tile that can't be walked through
-    void handleCollision()
-    {                
-        auto c = ChunkHandler.tilesAroundPlayer(this);
-        int index = 0;
-        foreach(tile; c)
-        {
-            assert(tile !is null, "The tile has some how became null again, black magic!");
-
-            if(tile.sprite.collides(this.sprite))
-            {
-                /+
-                ///Debug
-                final switch(tile.ID)
-                {
-                    case TileType.Tile_Dirt:
-                        writeln("Tile type: Dirt");
-                        break;
-                    case TileType.Tile_Stone:
-                        writeln("Tile type: Stone");
-                        break;
-                    case TileType.Tile_Tunnel:
-                        writeln("Tile type: Tunnel");
-                }
-                ///
-                +/
-
-                if(tile.ID == TileType.Tile_Tunnel)
-                {
-                    ///Up Left
-                    if(index == 0)
-                    {
-                        this.moveableDirections[up] = true;
-                        this.moveableDirections[left] = true;
-                    }
-                    ///Up Mid
-                    if(index == 1)
-                    {
-                        this.moveableDirections[up] = true;
-                    }
-                    ///Up Right
-                    if(index == 2)
-                    {
-                        this.moveableDirections[up] = true;
-                        this.moveableDirections[right] = true;
-                    }
-                    ///Mid left
-                    if(index == 3)
-                    {
-                        this.moveableDirections[left] = true;
-                    }
-                    ///Mid right
-                    if(index == 5)
-                    {
-                        this.moveableDirections[right] = true;
-                    }
-                    ///Down Left
-                    if(index == 6)
-                    {
-                        this.moveableDirections[down] = true;
-                        this.moveableDirections[left] = true;
-                    }
-                    ///Down Down
-                    if(index == 7)
-                    {
-                        this.moveableDirections[down] = true;
-                    }
-                    ///Down Right
-                    if(index == 8)
-                    {
-                        this.moveableDirections[down] = true;
-                        this.moveableDirections[right] = true;
-                    }
-                }
-                else
-                {
-                    ///Up Left
-                    if(index == 0)
-                    {
-                        this.moveableDirections[up] = false;
-                        this.moveableDirections[left] = false;
-                        this.sprite.position = Vector2f(tile.sprite.position.x + cast(float)(tile.sprite.size.x), tile.sprite.position.y + cast(float)(tile.sprite.size.y));
-                    }
-                    ///Up Mid
-                    if(index == 1)
-                    {
-                        this.moveableDirections[up] = false;
-                        this.sprite.position.y = (tile.sprite.position.y + cast(float)(tile.sprite.size.y));
-                    }
-                    ///Up Right
-                    if(index == 2)
-                    {
-                        this.moveableDirections[up] = false;
-                        this.moveableDirections[right] = false;
-                        this.sprite.position = Vector2f(tile.sprite.position.x - cast(float)(tile.sprite.size.x), tile.sprite.position.y + cast(float)(tile.sprite.size.y));
-                    }
-                    ///Mid left
-                    if(index == 3)
-                    {
-                        this.moveableDirections[left] = false;
-                    }
-                    ///Mid right
-                    if(index == 5)
-                    {
-                        this.moveableDirections[right] = false;
-                    }
-                    ///Down Left
-                    if(index == 6)
-                    {
-                        this.moveableDirections[down] = false;
-                        this.moveableDirections[left] = false;
-                    }
-                    ///Down Down
-                    if(index == 7)
-                    {
-                        this.moveableDirections[down] = false;
-                    }
-                    ///Down Right
-                    if(index == 8)
-                    {
-                        this.moveableDirections[down] = false;
-                        this.moveableDirections[right] = false;
-                    }
-                }
-            }
-            index++;
-        }
     }
 }
 
