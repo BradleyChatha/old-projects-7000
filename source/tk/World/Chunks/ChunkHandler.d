@@ -99,6 +99,19 @@ public static:
     }
 
     /++
+     + Sets a chunk.
+     + 
+     + Parameters:
+     +  x = The x position of the chunk.
+     +  y = The y position of the chunk.
+     +  chunk = The chunk to set.
+     + ++/
+    void setChunk(int x, int y, Chunk chunk)
+    {
+        ChunkHandler.chunks[y][x] = chunk;
+    }
+
+    /++
      + Gets a chunk at a specific coordinate. Returns null if the chunk doesn't exist
      + 
      + Parameters:

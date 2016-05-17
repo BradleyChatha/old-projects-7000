@@ -42,6 +42,11 @@ public:
             this.tryMove(Vector2f(this._actualSpeed, 0), right);
 
         Camera.instance.centreOn(sprite);
+<<<<<<< Updated upstream
+=======
+
+        //this.handleCollision();
+>>>>>>> Stashed changes
     }
 
     override bool onEvent(SDL_Event event, bool handled)
