@@ -15,9 +15,13 @@ void main()
 
     Allocators.setup();
     theAllocator = Allocators.Default;
-    scope(exit) Allocators.printStats();
-    scope(exit) writeln("Press enter to continue...");
-    scope(exit) readln();
+    scope(exit) 
+    {
+        writeln("Press enter to continue...");
+        readln();
+
+        Allocators.printStats();
+    }
 
     Window.create("TK",  Rectangle(SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 860, 720), FPS(60));
     scope(exit) Window.destroy(); // It pretty much guarentees to run.
