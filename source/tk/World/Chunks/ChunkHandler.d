@@ -4,6 +4,7 @@ import Common;
 import tk.World.Chunk;
 import tk.Entities.Player;
 import tk.World.Map.ChunkMapGenerator;
+import tk.World.Map.Map;
 
 class ChunkHandler
 {
@@ -11,6 +12,7 @@ public static:
     void setup()
     {
         ChunkHandler.createChunk(Vector2i(0, 0));
+        Map.setChunks(chunks);
     }
 
     void update(Player player)

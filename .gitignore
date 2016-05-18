@@ -5,4 +5,5 @@ __dummy.html
 *.obj
 *.dll
 *.exe
+*.dat
 dub.userprefs

@@ -5,6 +5,6 @@ authors "sherb_000"
 
 targetPath "bin"
 targetType "executable"
-targetName "Tunnelers Kingdom"
+targetName "Tunnelers_Kingdom"
 
 dependency "jengine" version="~develop"

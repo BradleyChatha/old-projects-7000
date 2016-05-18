@@ -7,6 +7,7 @@ import tk.World.Chunk;
 import tk.Entities.Player;
 import tk.World.Map.ChunkMapGenerator;
 import tk.World.Chunks.ChunkHandler;
+import tk.World.Map.Map;
 
 class MainGame : GameState
 {
@@ -46,6 +47,9 @@ class MainGame : GameState
             loadTiles();
 
             ChunkHandler.setup();
+
+            Map m = new Map();
+            m.saveMap();
 
             super.onInit();
         }
