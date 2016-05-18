@@ -173,15 +173,7 @@ public static:
 
         // Then try to get the tile from inside the chunk.
         auto chunkPos = chunk.topLeft.asVector!float;
-
         auto cell = ((coord - chunkPos) / Vector2f(tileSize, tileSize)).asVector!int;
-        /++if(cell.x == 32 || cell.y == 32)
-        {
-            if(cell.x == 32) coord.x += 1;
-            if(cell.y == 32) coord.y += 1;
-
-            return ChunkHandler.tileAt(coord);
-        }++/
 
         //writefln("coord: %s | chunkPos: %s | cell: %s | chunkPosReal: %s", coord, chunkPos, cell, chunk.topLeft);
 
@@ -269,5 +261,47 @@ private static:
                     ChunkHandler.chunks[cell.y][cell.x] = new Chunk(position, ChunkMapGenerator.generateMap());
             }
         }
+    }
+}
+unittest
+{
+    import tk.Test;
+    setupTestEnv("ChunkHandler #1, correct tiles and chunks");
+
+    Player player = makePlayer();
+    ChunkHandler.setup();
+
+    // ### First test is to make sure we're getting the correct tiles/chunks ###
+    // But first, we must draw to the screen for reasons.
+    float f = 0.012;
+    player.sprite.position = Vector2f(0, 0); // Makes sure that the player is always starting from 0,0
+    ChunkHandler.draw(player);
+    player.onUpdate(f);
+    Renderer.drawSprite(player.sprite);
+    Renderer.present();
+
+    player.sprite.position -= Vector2f(tileSize/2, tileSize/2); // This should hopefully place the player inbetween 4 different chunks.
+
+    // Making sure we're in 4 chunks, meaning the code for getting the tiles is forced to use all of it's logic.
+    assert(ChunkHandler.toChunkCell(player.sprite.position)                                     == Vector2i(-1, -1)); // Top left
+    assert(ChunkHandler.toChunkCell(player.sprite.position + Vector2f(player.sprite.size.x, 0)) == Vector2i(0, -1));  // Top right
+    assert(ChunkHandler.toChunkCell(player.sprite.position + Vector2f(0, player.sprite.size.y)) == Vector2i(-1, 0));  // Bottom left
+    assert(ChunkHandler.toChunkCell(player.sprite.position + player.sprite.size.asVector!float) == Vector2i(0, 0));   // Bottom right
+
+    // Now make sure we're getting the correct tiles
+    auto playerCellPos = ChunkHandler.toTileCell(player) * Vector2i(tileSize, tileSize); // This is the position of the tile the player is over.
+    foreach(i, tile; ChunkHandler.tilesAroundPlayer(player))
+    {
+        assert(tile !is null);
+
+        // If the tile is to the left of the player, make sure it's X position is correct.
+        if(i == 0 || i == 3 || i == 6)
+            assert(cast(int)tile.sprite.position.x == playerCellPos.x - tileSize, "We're probably not getting the right tiles");
+        if(i < 3) // Tiles above
+            assert(cast(int)tile.sprite.position.y == playerCellPos.y - tileSize, "We're probably not getting the right tiles");
+        if(i == 2 || i == 5 || i == 8) // Tiles to the right
+            assert(cast(int)tile.sprite.position.x == playerCellPos.x + tileSize, "We're probably not getting the right tiles");
+        if(i > 5) // Tiles under
+            assert(cast(int)tile.sprite.position.y == playerCellPos.y + tileSize, "We're probably not getting the right tiles");
     }
 }
