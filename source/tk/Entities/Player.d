@@ -108,4 +108,3 @@ private:
         return this.sprite.collides(otherSprite);
     }
 }
-

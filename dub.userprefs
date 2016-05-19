@@ -1,13 +1,15 @@
 ﻿<Properties StartupItem="dub.sdl">
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Default" PreferredExecutionTarget="debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="source\tk\World\Chunks\ChunkHandler.d">
+  <MonoDevelop.Ide.Workbench ActiveDocument="source\tk\Test\package.d">
     <Files>
-      <File FileName="source\tk\World\Map\Map.d" Line="41" Column="6" />
+      <File FileName="source\tk\World\Map\Map.d" Line="1" Column="1" />
       <File FileName="source\tk\Entities\Player.d" Line="1" Column="1" />
-      <File FileName="dub.sdl" Line="8" Column="23" />
-      <File FileName="source\app.d" Line="24" Column="1" />
-      <File FileName="source\tk\World\Chunks\ChunkHandler.d" Line="14" Column="50" />
-      <File FileName="source\tk\Gamestates\MainGame.d" Line="10" Column="25" />
+      <File FileName="dub.sdl" Line="1" Column="1" />
+      <File FileName="source\app.d" Line="10" Column="6" />
+      <File FileName="source\tk\World\Chunks\ChunkHandler.d" Line="70" Column="10" />
+      <File FileName="source\tk\Gamestates\MainGame.d" Line="1" Column="1" />
+      <File FileName="source\tk\Common.d" Line="1" Column="1" />
+      <File FileName="source\tk\Test\package.d" Line="5" Column="65" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
