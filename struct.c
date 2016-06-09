@@ -11,3 +11,9 @@ Point* point_Set(int newX, int newY)
     newPoint->y = newY;
     return newPoint;
 }
+
+void point_empty(Point* dst)
+{
+    dst->x = NULL;
+    dst->y = NULL;
+}
