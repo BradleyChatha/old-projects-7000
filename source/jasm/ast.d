@@ -11,28 +11,41 @@ private
 }
 
 /++
- + The type of a Node.
+ + A `Node`'s type.
  + ++/
-// TODO: Comments
 enum NodeType
 {
-    /// The Node describes an opcode.
+    /// This `Node` describes an operation
+    /// 
+    /// e.g. "debug.locals"
     Opcode,
 
+    /// This `Node` contains a string value.
     String,
 
+    /// This `Node` contains a number value.
     Number,
 
+    /// This `Node` contains a varaible's type
+    /// 
+    /// e.g. "int32"
     VariableType,
 
+    /// This `Node` contains a list of `VariableType`s
     TypeList,
 
+    /// This `Node` contains an attribute.
+    /// 
+    /// e.g. "[EntryPoint]"
     Attribute,
 
+    /// This `Node` contains a function.
     Function,
 
+    /// This `Node` contains a class.
     Class,
 
+    /// This `Node` contains a namespace.
     Namespace
 }
 
