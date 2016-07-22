@@ -96,10 +96,7 @@ class OpcodeNode : Node
 
     public
     {
-        /++
-         + Assertions;
-         +  $(D parameters) must not be null.
-         + 
+        /++ 
          + Throws:
          +  `ASTException` if either $(D operation) or any of the $(D parameters) are incorrect types.
          + 
@@ -112,7 +109,6 @@ class OpcodeNode : Node
         {
             import std.algorithm : reduce;
 
-            assert(parameters !is null);
             enforce(operation.type > TokenType.CODE_START && operation.type < TokenType.CODE_END,
                 new ASTException(format("Unknown operation: %s", operation.text), operation.info));
 
@@ -253,7 +249,7 @@ class FunctionNode : Node
          +  `ASTException` if $(D name) is not an identifier.
          + 
          + Assertions:
-         +  None of the parameters should be null. ($(D name) being the exception, since it's a struct)
+         +  Some of the parameters should not be null.
          + 
          + Parameters:
          +  name        = The function's name.
@@ -270,9 +266,7 @@ class FunctionNode : Node
 
             assert(params       !is null);
             assert(retType      !is null);
-            assert(attributes   !is null);
             assert(locals       !is null);
-            assert(ops          !is null);
 
             this._name          = name.text;
             this._retType       = retType;
