@@ -97,6 +97,9 @@ class OpcodeNode : Node
     public
     {
         /++
+         + Assertions;
+         +  $(D parameters) must not be null.
+         + 
          + Throws:
          +  `ASTException` if either $(D operation) or any of the $(D parameters) are incorrect types.
          + 
@@ -109,6 +112,7 @@ class OpcodeNode : Node
         {
             import std.algorithm : reduce;
 
+            assert(parameters !is null);
             enforce(operation.type > TokenType.CODE_START && operation.type < TokenType.CODE_END,
                 new ASTException(format("Unknown operation: %s", operation.text), operation.info));
 
@@ -157,7 +161,13 @@ class ValueNode(TokenType TType, NodeType Type) : Node
 
     public
     {
-        // TODO: Comment
+        /++
+         + Throws:
+         +  `ASTException` if $(D tok)'s type is not the same as $(D TType).
+         + 
+         + Parameters:
+         +  tok = The value of the node.
+         + ++/
         @safe
         this(Token tok)
         {
@@ -183,7 +193,7 @@ alias TypeNode      = ValueNode!(TokenType.UNIQ_IDENTIFIER,    NodeType.Variable
 alias AttributeNode = ValueNode!(TokenType.UNIQ_IDENTIFIER,    NodeType.Attribute);
 
 /++
- + The node that contains a list of types
+ + The node that contains a list of `TypeNode`s
  + ++/
 class TypeListNode : Node
 {
@@ -194,8 +204,15 @@ class TypeListNode : Node
 
     public
     {
-        @safe
-        this(TypeNode[] types)
+        /++
+         + Assertions:
+         +  $(D types) should not be null.
+         + 
+         + Parameters:
+         +  types = The list of types.
+         + ++/
+        @safe @nogc
+        this(TypeNode[] types) nothrow
         {
             assert(types !is null);
 
@@ -214,6 +231,9 @@ class TypeListNode : Node
     }
 }
 
+/++
+ + Contains a function, including the operations it should take.
+ + ++/
 class FunctionNode : Node
 {
     private
@@ -229,6 +249,12 @@ class FunctionNode : Node
     public
     {
         /++
+         + Throws:
+         +  `ASTException` if $(D name) is not an identifier.
+         + 
+         + Assertions:
+         +  None of the parameters should be null. ($(D name) being the exception, since it's a struct)
+         + 
          + Parameters:
          +  name        = The function's name.
          +  params      = The function's parameters.
@@ -240,11 +266,13 @@ class FunctionNode : Node
         @safe
         this(Token name, TypeListNode params, TypeNode retType, AttributeNode[] attributes, TypeListNode locals, OpcodeNode[] ops)
         {
-            enforce(name.type == TokenType.UNIQ_IDENTIFIER,
-                new ASTException(format("Expected an Identifier for a function's name, got %s", name.type), name.info));
+            name.enforceToken(TokenType.UNIQ_IDENTIFIER, "an Identifier for a function's name");
 
-            assert(retType !is null);
-            assert(ops     !is null);
+            assert(params       !is null);
+            assert(retType      !is null);
+            assert(attributes   !is null);
+            assert(locals       !is null);
+            assert(ops          !is null);
 
             this._name          = name.text;
             this._retType       = retType;
@@ -260,31 +288,49 @@ class FunctionNode : Node
         @property @safe @nogc
         nothrow pure
         {
+            /++
+             + Returns the name of the function.
+             + ++/
             string name()
             {
                 return this._name;
             }
 
+            /++
+             + Returns the type of the parameters of the function.
+             + ++/
             TypeListNode params()
             {
                 return this._params;
             }
 
+            /++
+             + Returns the type of the function's return value.
+             + ++/
             TypeNode retType()
             {
                 return this._retType;
             }
 
+            /++
+             + Returns the attributes attached to the function.
+             + ++/
             AttributeNode[] attributes()
             {
                 return this._attributes;
             }
 
+            /++
+             + Returns the type of function's local variables.
+             + ++/
             TypeListNode locals()
             {
                 return this._locals;
             }
 
+            /++
+             + Returns the opcodes of the function.
+             + ++/
             OpcodeNode[] ops()
             {
                 return this._ops;
@@ -293,7 +339,9 @@ class FunctionNode : Node
     }
 }
 
-/// TODO: COmment
+/++
+ + Contains a class.
+ + ++/
 class ClassNode : Node
 {
     private
@@ -305,6 +353,14 @@ class ClassNode : Node
 
     public
     {
+        /++
+         + Throws:
+         +  `ASTException` if $(D name) is not an identifier.
+         + 
+         + Parameters:
+         +  name        = The name of the class.
+         +  attributes  = The attributes of the class.    
+         + ++/
         @safe
         this(Token name, AttributeNode[] attributes)
         {
@@ -322,7 +378,7 @@ class ClassNode : Node
          +  func = The function to register.
          + ++/
         @safe
-        void registerFunction(FunctionNode func)
+        void registerFunction(FunctionNode func) nothrow
         {
             this._functions ~= func;
         }
@@ -330,16 +386,25 @@ class ClassNode : Node
         @property @safe @nogc
         nothrow pure
         {
+            /++
+             + Returns the name of the class.
+             + ++/
             string name()
             {
                 return this._name;
             }
 
+            /++
+             + Returns all of the functions inside the class.
+             + ++/
             FunctionNode[] functions()
             {
                 return this._functions;
             }
 
+            /++
+             + Returns all of the attributes attached to the class.
+             + ++/
             AttributeNode[] attributes()
             {
                 return this._attributes;
@@ -348,6 +413,9 @@ class ClassNode : Node
     }
 }
 
+/++
+ + Contains a namespace.
+ + ++/
 class NamespaceNode : Node
 {
     private
@@ -358,6 +426,14 @@ class NamespaceNode : Node
 
     public
     {
+        /++
+         + Throws:
+         +  `ASTException` if the name is invalid.
+         + 
+         + Parameters:
+         +  nameTokens = The tokens that make up the namespace's name.
+         +               e.g "Some/Super/Long/Namespace/Name"
+         + ++/
         @safe
         this(Token[] nameTokens)
         {
@@ -383,25 +459,45 @@ class NamespaceNode : Node
             super(NodeType.Namespace);
         }
 
+        /++
+         + Registers a new class to the Namespace
+         + 
+         + Parameters:
+         +  node = The node to register.
+         + ++/
         @safe
-        void registerClass(ClassNode node)
+        void registerClass(ClassNode node) nothrow
         {
             this._classes ~= node;
         }
 
         @property @safe
-        nothrow
+        nothrow pure
         {
-            string[] nameSegments() pure
+            /++
+             + Returns the segments of the Namespace's name.
+             + 
+             + See_Also:
+             +  `NamespaceNode.fullName`
+             + ++/
+            @nogc
+            string[] nameSegments()
             {
                 return this._nameSegments;
             }
 
-            ClassNode[] classes() pure
+            /++
+             + Returns the classes in the namespace.
+             + ++/
+            @nogc
+            ClassNode[] classes()
             {
                 return this._classes;
             }
 
+            /++
+             + Returns the full name of the namespace.
+             + ++/
             string fullName()
             {
                 return this._nameSegments.join("/");
@@ -429,6 +525,18 @@ bool validOpParameter(Token param) nothrow pure
             || param.type == TokenType.UNIQ_STRING;
 }
 
+/++
+ + Reads the next namespace(Which is generally the entire piece of code)
+ + 
+ + Throws:
+ +  `ASTException` if something is invalid.
+ + 
+ + Parameters:
+ +  lex = The input range of tokens.
+ + 
+ + Returns:
+ +  A `NamespaceNode` containing all of the information about the namespace.
+ + ++/
 @safe
 NamespaceNode nextNamespace(R)(ref R lex)
 {
@@ -461,15 +569,25 @@ NamespaceNode nextNamespace(R)(ref R lex)
 
     // Read in all the stuff needed
     while(!lex.empty)
-    {
         if(lex.front.type == TokenType.KEY_CLASS)
             node.registerClass(lex.nextClass);
-    }
 
     return node;
 }
 // For ease of testing, this class is tested in nextFunction's unittest
 
+/++
+ + Reads in the next class.
+ + 
+ + Throws:
+ +  `ASTException` if something is invalid.
+ + 
+ + Parameters:
+ +  lex = The input range of tokens.
+ + 
+ + Returns:
+ +  A `ClassNode` containing all of the information about the class.
+ + ++/
 @safe
 ClassNode nextClass(R)(ref R lex)
 {
@@ -520,6 +638,15 @@ ClassNode nextClass(R)(ref R lex)
 
 /++
  + Reads in the next function.
+ + 
+ + Throws:
+ +  `ASTException` if something is invalid.
+ + 
+ + Parameters:
+ +  lex = The input range of tokens.
+ + 
+ + Returns:
+ +  A `FunctionNode` containing all of the information about the function.
  + ++/
 @safe
 FunctionNode nextFunction(R)(ref R lex)
