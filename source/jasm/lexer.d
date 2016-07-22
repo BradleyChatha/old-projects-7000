@@ -182,6 +182,7 @@ class Lexer
          + Parameters:
          +  pop = True if popFront should be called. False otherwise.
          + ++/
+        @safe
         this(string code, string fileName, bool pop)
         {
             this._code  = code;
@@ -195,6 +196,7 @@ class Lexer
         }
     }
 
+    @safe
     public
     {
         /++
@@ -242,6 +244,7 @@ class Lexer
     }
 
     /// Private functions
+    @safe
     private
     {
         /++
@@ -742,6 +745,7 @@ class LexerException : Exception
          +  msg = The error message.
          +  info = The debug info for where things went wrong.
          + ++/
+        @safe
         this(string msg, TokenDebugInfo info, string file = __FILE__, size_t line = __LINE__, Throwable next = null)
         {
             super(format("[%s] on line %s column %s: '%s'", info.file, info.line, info.column, msg), file, line, next);

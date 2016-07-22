@@ -104,6 +104,7 @@ class OpcodeNode : Node
          +  operation  = The token holding the operation.
          +  parameters = The tokens being used as parameters.
          + ++/
+        @safe
         this(Token operation, Token[] parameters)
         {
             import std.algorithm : reduce;
@@ -157,6 +158,7 @@ class ValueNode(TokenType TType, NodeType Type) : Node
     public
     {
         // TODO: Comment
+        @safe
         this(Token tok)
         {
             enforce(tok.type == TType, new ASTException(format("Expected Token of type %s, got %s", TType, tok.type), tok.info));
@@ -192,6 +194,7 @@ class TypeListNode : Node
 
     public
     {
+        @safe
         this(TypeNode[] types)
         {
             assert(types !is null);
@@ -234,6 +237,7 @@ class FunctionNode : Node
          +  locals      = The function's local variables.
          +  ops         = The operations the function takes.
          + ++/
+        @safe
         this(Token name, TypeListNode params, TypeNode retType, AttributeNode[] attributes, TypeListNode locals, OpcodeNode[] ops)
         {
             enforce(name.type == TokenType.UNIQ_IDENTIFIER,
@@ -301,6 +305,7 @@ class ClassNode : Node
 
     public
     {
+        @safe
         this(Token name, AttributeNode[] attributes)
         {
             name.enforceToken(TokenType.UNIQ_IDENTIFIER, "an Indentifier for a class' name");
@@ -316,6 +321,7 @@ class ClassNode : Node
          + Parameters:
          +  func = The function to register.
          + ++/
+        @safe
         void registerFunction(FunctionNode func)
         {
             this._functions ~= func;
@@ -352,6 +358,7 @@ class NamespaceNode : Node
 
     public
     {
+        @safe
         this(Token[] nameTokens)
         {
             // Make sure the tokens are correct
@@ -376,6 +383,7 @@ class NamespaceNode : Node
             super(NodeType.Namespace);
         }
 
+        @safe
         void registerClass(ClassNode node)
         {
             this._classes ~= node;
@@ -412,7 +420,8 @@ class NamespaceNode : Node
  +  `true` if it's valid.
  +  `false` otherwise.
  + ++/
-bool validOpParameter(Token param)
+@safe @nogc
+bool validOpParameter(Token param) nothrow pure
 {
     return 
                param.type == TokenType.UNIQ_IDENTIFIER
@@ -420,6 +429,7 @@ bool validOpParameter(Token param)
             || param.type == TokenType.UNIQ_STRING;
 }
 
+@safe
 NamespaceNode nextNamespace(R)(ref R lex)
 {
     auto info = lex.front.info;
@@ -460,6 +470,7 @@ NamespaceNode nextNamespace(R)(ref R lex)
 }
 // For ease of testing, this class is tested in nextFunction's unittest
 
+@safe
 ClassNode nextClass(R)(ref R lex)
 {
     lex.front.enforceToken(TokenType.KEY_CLASS, ".class");
@@ -510,6 +521,7 @@ ClassNode nextClass(R)(ref R lex)
 /++
  + Reads in the next function.
  + ++/
+@safe
 FunctionNode nextFunction(R)(ref R lex)
 {
     lex.front.enforceToken(TokenType.KEY_FUNCTION, ".function");
@@ -635,6 +647,7 @@ unittest
  + Returns:
  +  An AttributeNode with the name of the attribute.
  + ++/
+@safe
 AttributeNode nextAttribute(R)(ref R lex)
 {
     lex.front.enforceToken(TokenType.OP_SQUARE_LEFT, "[");
@@ -670,6 +683,7 @@ unittest
  + Returns:
  +  A FuncLocalsNode with all of the function's local variables
  + ++/
+@safe
 TypeListNode nextFuncLocals(R)(ref R lex)
 if(isInputRange!R && is(ElementType!R == Token))
 {
@@ -732,6 +746,7 @@ unittest
  + Returns:
  +  A node representing the value found.
  + ++/
+@safe
 Node nextValueNode(R)(ref R lex)
 if(isInputRange!R && is(ElementType!R == Token))
 {
@@ -787,6 +802,7 @@ unittest
  + Returns:
  +  A new OpcodeNode containing the next opcode
  + ++/
+@safe
 OpcodeNode nextOperation(R)(ref R lex)
 if(isInputRange!R && is(ElementType!R == Token))
 {
@@ -829,6 +845,7 @@ unittest
     assertThrown!ASTException(lex.nextOperation);
 }
 
+@safe
 void enforceToken(Token t, TokenType type, string wanted)
 {
     enforce(t.type == type,
@@ -847,6 +864,7 @@ class ASTException : Exception
          +  msg = The error message.
          +  info = The debug info for where things went wrong.
          + ++/
+        @safe
         this(string msg, TokenDebugInfo info, string file = __FILE__, size_t line = __LINE__, Throwable next = null)
         {
             super(format("[%s] on line %s column %s: '%s'", info.file, info.line, info.column, msg), file, line, next);
