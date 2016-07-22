@@ -1,0 +1,7 @@
+name "jasm"
+description "A minimal D application."
+copyright "Copyright © 2016, Sealab"
+authors "Sealab"
+
+targetType "executable"
+targetPath "bin"
