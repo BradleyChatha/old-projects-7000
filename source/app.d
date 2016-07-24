@@ -1,7 +1,7 @@
 ﻿module app;
 
 import std.stdio, std.file, std.format;
-import jasm.lexer;
+import jasm.lexer, jasm.compiler, jasm.ast;
 
 void main()
 {
@@ -12,15 +12,8 @@ void main()
         chdir("bin");
     }
 
-    auto lex = new Lexer(readText!string("Test.jasm"), "Test.jasm");
-
-    string f = "";
-    foreach(token; lex)
-    {
-        f ~= format("%s\n", token);
-    }
-
-    std.file.write("Tokens.txt", f);
+    auto lex = new Lexer(readText("Test.jasm"), "Test.jasm");
+    std.file.write("Test.bin", compileJasm([nextNamespace(lex)]));
 
     version(unittest)
     {

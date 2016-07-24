@@ -210,8 +210,6 @@ class TypeListNode : Node
         @safe @nogc
         this(TypeNode[] types) nothrow
         {
-            assert(types !is null);
-
             this._types = types;
             super(NodeType.TypeList);
         }
@@ -223,6 +221,20 @@ class TypeListNode : Node
         const(TypeNode[]) types() nothrow const pure
         {
             return this._types;
+        }
+
+        /++
+         + Returns all of the types in the list, as a string.
+         + ++/
+        @property @safe
+        string asList() nothrow
+        {
+            auto name = "";
+
+            foreach(param; this.types)
+                name ~= ("&" ~ param.token.text);
+
+            return name;
         }
     }
 }
@@ -240,6 +252,7 @@ class FunctionNode : Node
         OpcodeNode[]    _ops;
         TypeListNode    _locals;
         TypeListNode    _params;
+        ClassNode       _class;
     }
 
     public
@@ -329,6 +342,38 @@ class FunctionNode : Node
             {
                 return this._ops;
             }
+
+            /++
+             + Returns the class that this function belongs to.
+             + ++/
+            ClassNode parent()
+            {
+                return this._class;
+            }
+        }
+
+        /++
+         + Returns the mangled signature of the function.
+         + ++/
+        @property @safe
+        string signature() nothrow
+        {
+            auto name = this.name;
+
+            name ~= this.params.asList;            
+            name ~= ("$" ~ this.retType.token.text);
+
+            return name;
+        }
+
+        /++
+         + Returns the full name of the function, which includes the class.
+         + ++/
+        @property @safe
+        string fullName() nothrow
+        {
+            assert(this._class !is null);
+            return (this._class.fullName ~ "#" ~ this.signature);
         }
     }
 }
@@ -343,6 +388,7 @@ class ClassNode : Node
         string              _name;
         FunctionNode[]      _functions;
         AttributeNode[]     _attributes;
+        NamespaceNode       _namespace;
     }
 
     public
@@ -374,6 +420,7 @@ class ClassNode : Node
         @safe
         void registerFunction(FunctionNode func) nothrow
         {
+            func._class      = this;
             this._functions ~= func;
         }
 
@@ -403,6 +450,16 @@ class ClassNode : Node
             {
                 return this._attributes;
             }
+        }
+
+        /++
+         + Returns the full name of the class, which includes the namespace.
+         + ++/
+        @property @safe
+        string fullName() nothrow
+        {
+            assert(this._namespace !is null);
+            return (this._namespace.fullName ~ ":" ~ this.name);
         }
     }
 }
@@ -462,7 +519,8 @@ class NamespaceNode : Node
         @safe
         void registerClass(ClassNode node) nothrow
         {
-            this._classes ~= node;
+            node._namespace = this;
+            this._classes  ~= node;
         }
 
         @property @safe
@@ -754,6 +812,10 @@ unittest
     assert(func.attributes[0].token.text        == "Static");
     assert(func.locals.types[0].token.text      == "int32");
     assert(func.ops[0].operation.text           == "debug.locals");
+
+    // Now to test the names
+    assert(func.signature == "Test&int32&string$void");
+    assert(func.fullName  == "Super/Test:Test#Test&int32&string$void"); // If this passes, it generally means the Class and NamespaceNodes also would pass.
 }
 
 /++

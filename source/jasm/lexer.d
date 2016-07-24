@@ -39,7 +39,7 @@ enum TokenType
     UNIQ_IDENTIFIER,                // An Identifier(Looks like a keyword, but doesn't have any meaning)
     UNIQ_UNKNOWN,                   // An unknown(therefor invalid) type.
 
-    // Op codes
+    // Op codes, it is _very_ important that once an opcode is added, it's position in the enum must not change.
     CODE_START, // Any enum value between CODE_START and CODE_END are Opcodes
 
     CODE_PUSH_STRING,               // push.str STR1
