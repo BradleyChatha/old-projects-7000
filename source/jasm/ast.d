@@ -1035,6 +1035,25 @@ void enforceToken(Token t, TokenType type, string wanted)
         new ASTException(format("Expected %s [%s], got '%s' [%s]", wanted, type, t.text, t.type), t.info));
 }
 
+/++
+ + Determines if the number in the node is a floating point.
+ + 
+ + Parameters:
+ +  node = The number node to check.
+ + 
+ + Returns:
+ +  `true` if the number is a floating point. `false` otherwise.
+ + ++/
+@safe @nogc
+bool isFloatingPoint(NumberNode node) nothrow pure
+{
+    foreach(ch; node.token.text)
+        if(ch == '.')
+            return true;
+
+    return false;
+}
+
 /// The exception that is thrown by the AST.
 class ASTException : Exception
 {
