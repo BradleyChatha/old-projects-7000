@@ -44,18 +44,16 @@ enum TokenType
 
     CODE_PUSH_STRING,               // push.str STR1
                                     //  Pushes a string onto the function's stack.
-                                    //      Parameter STR1 = The string to push onto the stack
+                                    //      Parameter STR1 = The string to push onto the stack. Max size of 255
 
     CODE_PUSH_INT_32,               // push.i32 NUM1
                                     //  Pushes a 32-bit int onto the function's stack.
                                     //      Parameter NUM1 = The number to push onto the stack
 
-    CODE_STORE_LOCAL,               // store.local
-                                    //  This code takes 2 values off of the top of the stack.
-                                    //  The top-most value on the stack is the index of a local variable.
-                                    //  The value under the stack is the value to store into the variable.
-                                    //      STACK #1 = Index of the local variable to modify
-                                    //      STACK #2 = The value to store in the local variable at [STACK #1]
+    CODE_STORE_LOCAL,               // store.local NUM1
+                                    //  This code takes 1 value off of the top of the stack and stores it into a local variable.
+                                    //      Parmater NUM1 = The index of the local variable to store the value in.
+                                    //      STACK #1      = The value to store in the local variable in the [NUM]th local
 
     CODE_DEBUG_LOCALS,              // debug.locals
                                     //  Prints out the value of all locals in the function to stdout.
@@ -507,14 +505,15 @@ class Lexer
             this._skipSpaces();
 
             // This should never be called unless the next character is a digit
+            auto n = this._nextChar();
             version(unittest)
             {
                 // The unittest for this function wants to make sure this is thrown properly <3
-                enforce(isDigit(this._nextChar()), new LexerException("This function shouldn't have been called.", this._debug));
+                enforce(isDigit(n) || n == '-', new LexerException("This function shouldn't have been called.", this._debug));
             }
             else
             {
-                assert(isDigit(this._nextChar()), "This function shouldn't have been called.");
+                assert(isDigit(n) || n == '-', "This function shouldn't have been called.");
             }
             this._stepBack();
 
@@ -531,7 +530,7 @@ class Lexer
                 }
 
                 auto chr = this._nextChar();
-                if(!isDigit(chr) && chr != '.')
+                if(!isDigit(chr) && chr != '.' && chr != '-')
                 {
                     this._stepBack();
                     break;
@@ -545,11 +544,12 @@ class Lexer
         }
         unittest
         {
-            auto lex = new Lexer("40 200.4964", "NoFile", false);
+            auto lex = new Lexer("40 200.4964 -40", "NoFile", false);
 
             assert(lex._nextNumberToken.text == "40");
             assert(lex._debug.column == 3);
             assert(lex._nextNumberToken.text == "200.4964");
+            assert(lex._nextNumberToken.text == "-40");
 
             lex.popFront();
             assert(lex.empty);
@@ -685,7 +685,7 @@ class Lexer
                 this._stepBack();
                 return this._nextStringToken();
             }
-            else if(isDigit(chr)) // Check to see if it's a number
+            else if(isDigit(chr) || chr == '-') // Check to see if it's a number
             {
                 this._stepBack();
                 return this._nextNumberToken();
