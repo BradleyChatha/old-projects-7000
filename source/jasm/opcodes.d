@@ -40,9 +40,52 @@ enum FuncFlags : ubyte
 
 /++
  + Contains all of the opcodes used in a JEXE.
+ + 
+ + Unlikes the CODE_XXX values inside of `jasm.lexer`, the documentation for the `Opcode` values is talking about
+ + how the VM should function, instead of how it works inside of JASM.
  + ++/
 enum Opcode : ubyte
 {
+    /++
+     + Command:
+     +  push.str
+     + 
+     + Description:
+     +  Pushes a string value onto the top of the stack.
+     + 
+     + Parameters:
+     +  [0] String8 = The string to push onto the stack.
+     + ++/
+    PUSH_STRING                 = 1,
+
+    /++
+     + Command:
+     +  push.i32
+     + 
+     + Description:
+     +  Pushes a 32-bit signed integer onto the top of the stack.
+     + 
+     + Parameters:
+     +  [0] Int32 = The interger to push onto the stack.
+     + ++/
+    PUSH_INT32                  = 2,
+
+    /++
+     + Command:
+     +  store.local
+     + 
+     + Description:
+     +  Pops the stack and stores the popped off value into a local variable.
+     + 
+     + Exceptions:
+     +  An TODO: Make exception name, should be thrown if the type of the popped off value is not convertable to
+     +  the type of the local variable.
+     + 
+     + Parameters:
+     +  [0] UInt8 = The index of the local variable to store the value into.
+     + ++/
+    STORE_LOCAL                 = 3,
+
     /++
      + Command:
      +  debug.locals
@@ -50,7 +93,7 @@ enum Opcode : ubyte
      + Description:
      +  Causes the VM to output the values of the function's local variables.
      + ++/
-    DEBUG_LOCALS = 4
+    DEBUG_LOCALS                = 4
 }
 
 /++
