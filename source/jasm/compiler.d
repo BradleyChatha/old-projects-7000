@@ -233,8 +233,9 @@ struct Compiler
             
         output.put(flags);
 
-        // Reserve space for the pointer
+        // Reserve space for the pointer and size
         auto pos = output.data.length;
+        output.put(0.toBytes[]);
         output.put(0.toBytes[]);
 
         return pos;
@@ -321,7 +322,7 @@ struct Compiler
 
                     auto pos = funcPosMap[func.fullName];
                     output.data[pos..pos + uint.sizeof]                         = start.toBytes[];                              // Write where the function's data starts.
-                    output.data[pos + uint.sizeof..pos + (uint.sizeof * 2)]     = (currentPos - output.data.length).toBytes[];  // Write how many bytes the function's data takes up.
+                    output.data[pos + uint.sizeof..pos + (uint.sizeof * 2)]     = (output.data.length - currentPos).toBytes[];  // Write how many bytes the function's data takes up.
                 }
             }
         }

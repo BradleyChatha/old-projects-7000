@@ -75,9 +75,12 @@ if(isInputRange!R && is(Unqual!(ElementType!R) == ubyte))
 {
     private
     {
-        ushort _fileVersion;
-        ubyte  _flags;
-        R      _range;
+        ushort  _fileVersion;
+        ubyte   _flags;
+        R       _range;
+        ubyte[] _instructions;
+
+        JExeNamespace[] _namespaces;
 
         /++
          + Reads a certain amount of bytes from the input range.
@@ -180,11 +183,47 @@ if(isInputRange!R && is(Unqual!(ElementType!R) == ubyte))
         {
             this._range = range;
             this.validateHeader();
+            this.readFile();
+        }
+
+        /++
+         + Returns the information about all the namespaces in the JExe
+         + ++/
+        @property @safe @nogc
+        JExeNamespace[] namespaces() nothrow pure
+        {
+            return this._namespaces;
         }
     }
 
     private
     {
+        void readFile()
+        {
+            auto namespaces = this.readNamespaces();
+
+            // Read in the opcodes
+            auto amount         = this.read!uint;
+            this._instructions  = this.readBytes(amount);
+
+            // Now go over every function, and find their data.
+            foreach(ref namespace; namespaces)
+            {
+                foreach(ref cls; namespace.classes)
+                {
+                    foreach(ref func; cls.functions)
+                    {
+                        enforce(func.pointer + func.size <= this._instructions.length, 
+                            new JExeException(format("For function '%s', it's pointer and size are invalid.", func)));
+
+                        func.data = this._instructions[func.pointer..func.pointer + func.size];
+                    }
+                }
+            }
+
+            this._namespaces = namespaces;
+        }
+
         /++
          + Confirms that the header is valid.
          + ++/
@@ -218,8 +257,8 @@ if(isInputRange!R && is(Unqual!(ElementType!R) == ubyte))
             jexe        ~= vers;
             jexe        ~= 0x00;
             
-            assertNotThrown!JExeException(JExeReader(jexe));
-            assertThrown!JExeException(JExeReader([0x00]));
+            assertNotThrown!JExeException(JExeReader(jexe, false).validateHeader());
+            assertThrown!JExeException(JExeReader([0x00], false).validateHeader());
         }
 
         /++
@@ -337,7 +376,7 @@ unittest
     import std.stdio, std.array;
     const(ubyte)[] jexe = cast(const(ubyte)[])import("Test.bin");
 
-    writeln(JExeReader!(const(ubyte)[])(jexe).readNamespaces());
+    writeln(JExeReader!(const(ubyte)[])(jexe).namespaces);
 }
 
 version(unittest)
