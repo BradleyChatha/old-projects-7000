@@ -24,15 +24,18 @@ Description:
 	Contains some text, where the length is specified by a prefixed ushort.
 	
 <Function Definition(FuncDef)>
-Format:  [String16, name][String16, localTypes][ubyte, flags][uint, pointer]
-Example: 0x001C,MyFunction&int32&string$void,0x000D,&string&int32,0x00,0x000001EF
+Format:  [String16, name_and_paramtypes][String16, localTypes][ubyte, flags][uint, pointer][uint, size]
+Example: 0x001C,MyFunction&int32&string$void,0x000D,&string&int32,0x00,0x000001EF,0xDEADBEEF
 Description:
 	Contains a defintion about a function.
 	The definition contains the signature of the function, as well as where the function is found in the file.
 	
-	The `localTypes` string contains the types of the function's local variables, delimited by an & sign.
+	The `localTypes` string contains the types of the function's local variables, delimited by an & sign,
+	with the return type of the function being prefixed with a $.
 	
 	It should be noted that the pointer is relative to the first opcode, not relative to the beginning of the file.
+	
+	The size of the function's data is also stored.
 	
 	The function used in the example would be expressed as
 	{		
@@ -52,7 +55,7 @@ Flags:
 	
 <Class Definition(ClassDef)>
 Format:  [String8, name][ubyte, flags][FuncDef[] functionDefinitions]
-Example: 0x14,MyClass,0x00,0x01,[Imagine the example for FuncDef is here]
+Example: 0x14,MyClass,0x00,0x00000001,[Imagine the example for FuncDef is here]
 Description:
 	Contains a definition about a class.
 	
@@ -78,7 +81,7 @@ Flags:
 
 <Namespace Definition(NamespaceDef)>
 Format:  [String8, name][ClassDef[] classDefinitions]
-Example: 0x0F,Test/Namespace,0x01,[Imagine the example for ClassDef here]
+Example: 0x0F,Test/Namespace,0x00000001,[Imagine the example for ClassDef here]
 Description:
 	Contains a definition about a namespace.
 	

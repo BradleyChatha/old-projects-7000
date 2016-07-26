@@ -315,11 +315,13 @@ struct Compiler
             {
                 foreach(func; cls.functions)
                 {
-                    auto start = (output.data.length - firstOp);
+                    auto currentPos = output.data.length;
+                    auto start      = (currentPos - firstOp);
                     this.writeFunctionOperations(func);
 
                     auto pos = funcPosMap[func.fullName];
-                    output.data[pos..pos + uint.sizeof] = start.toBytes[];
+                    output.data[pos..pos + uint.sizeof]                         = start.toBytes[];                              // Write where the function's data starts.
+                    output.data[pos + uint.sizeof..pos + (uint.sizeof * 2)]     = (currentPos - output.data.length).toBytes[];  // Write how many bytes the function's data takes up.
                 }
             }
         }
