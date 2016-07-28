@@ -1,0 +1,4 @@
+﻿  Lexer.cpp
+e:\programming\c++\ec\ec\lexer.cpp(126): warning C4018: '<': signed/unsigned mismatch
+  EC.vcxproj -> E:\Programming\C++\EC\Debug\EC.exe
+  EC.vcxproj -> E:\Programming\C++\EC\Debug\EC.pdb (Full PDB)
