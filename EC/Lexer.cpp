@@ -15,7 +15,7 @@ void Lexer::Test(void)
 {
 	try
 	{
-		cout << TokenTypeNames[(int)ToTokenType<string>("else")] << endl;
+		NextIdentifierToken().print(cout);
 	}
 	catch(exception& e)
 	{
@@ -131,21 +131,39 @@ Token Lexer::NextStringToken(void)
 	return StringToken;
 }
 
-void Lexer::NextIdentifierToken(void)
+Token Lexer::NextIdentifierToken(void)
 {
 	SkipWhiteSpace();
 	string Text = "";
 	int start = Index;
 
-	/*//Work out the length of the identifier.
+	///Work out the length of the identifier.
 	while(true)
 	{
 		///EoF
 		if (Index >= RawCode.length())
 			break;
 
+		char c = NextCharacter(false);
+		cout << c << endl;
+		if(isspace(c) || ToTokenType(string(1, c)) != TokenType::TOKENTYPE_UNKOWN)
+		{
+			StepBack();
+			break;
+		}
+	}
 
-	}*/
+	string TokenText = "";
+
+	for (int i = start; i < Index; i++)
+		TokenText += RawCode[i];
+
+	cout << TokenText << endl;
+
+	TokenType Type = ToTokenType(TokenText);
+	Type = ((Type == TokenType::TOKENTYPE_UNKOWN) ? TokenType::TOKENTYPE_IDENTIFIER : Type);
+
+	return Token(TokenText, Type, Debug);
 }
 
 void Lexer::SkipWhiteSpace(void)
@@ -201,4 +219,46 @@ void Lexer::StepBack(void)
 
 	Index--;
 	Debug.Column--;
+}
+
+TokenType Lexer::ToTokenType(string text)
+{
+	///String
+	if(text.length() > 1)
+	{
+		GenerateIfCase(text, "namespace", TokenType::TOKENTYPE_KEYWORD_NAMESPACE);
+		GenerateIfCase(text, "class", TokenType::TOKENTYPE_KEYWORD_CLASS);
+		GenerateIfCase(text, "var", TokenType::TOKENTYPE_KEYWORD_VAR);
+		GenerateIfCase(text, "if", TokenType::TOKENTYPE_KEYWORD_IF);
+		GenerateIfCase(text, "elif", TokenType::TOKENTYPE_KEYWORD_ELIF);
+		GenerateIfCase(text, "else", TokenType::TOKENTYPE_KEYWORD_ELSE);
+		GenerateIfCase(text, "int", TokenType::TOKENTYPE_KEYWORD_INT);
+		GenerateIfCase(text, "uint", TokenType::TOKENTYPE_KEYWORD_UINT);
+		GenerateIfCase(text, "byte", TokenType::TOKENTYPE_KEYWORD_BYTE);
+		GenerateIfCase(text, "ubyte", TokenType::TOKENTYPE_KEYWORD_UBYTE);
+		GenerateIfCase(text, "float", TokenType::TOKENTYPE_KEYWORD_FLOAT);
+		GenerateIfCase(text, "string", TokenType::TOKENTYPE_KEYWORD_STRING);
+		GenerateIfCase(text, "return", TokenType::TOKENTYPE_KEYWORD_RETURN);
+		GenerateIfCase(text, "for", TokenType::TOKENTYPE_KEYWORD_FOR);
+		GenerateIfCase(text, "while", TokenType::TOKENTYPE_KEYWORD_WHILE);
+	}
+	else ///Character
+	{
+		char value = text[0];
+
+		GenerateIfCase(value, '.', TokenType::TOKENTYPE_OPERATOR_DOTOPERATOR);
+		GenerateIfCase(value, ';', TokenType::TOKENTYPE_OPERATOR_SEMICOLON);
+		GenerateIfCase(value, '/', TokenType::TOKENTYPE_OPERATOR_DIVISION);
+		GenerateIfCase(value, '*', TokenType::TOKENTYPE_OPERATOR_MULTIPLACATION);
+		GenerateIfCase(value, '+', TokenType::TOKENTYPE_OPERATOR_ADDITION);
+		GenerateIfCase(value, '-', TokenType::TOKENTYPE_OPERATOR_SUBTRACTION);
+		GenerateIfCase(value, '{', TokenType::TOKENTYPE_OPERATOR_OPENCURLYBRACE);
+		GenerateIfCase(value, '}', TokenType::TOKENTYPE_OPERATOR_CLOSECURLYBRACE);
+		GenerateIfCase(value, '(', TokenType::TOKENTYPE_OPERATOR_OPENBRACKET);
+		GenerateIfCase(value, ')', TokenType::TOKENTYPE_OPERATOR_CLOSEBRACKET);
+		GenerateIfCase(value, '[', TokenType::TOKENTYPE_OPERATOR_OPENSQUAREBRACKET);
+		GenerateIfCase(value, ']', TokenType::TOKENTYPE_OPERATOR_CLOSESQUAREBRACKET);
+	}
+
+	return TokenType::TOKENTYPE_UNKOWN;
 }

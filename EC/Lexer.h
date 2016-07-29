@@ -51,7 +51,7 @@ private:
 	Token NextStringToken(void);
 
 	///Returns the next identifier token
-	void NextIdentifierToken(void);
+	Token NextIdentifierToken(void);
 
 	///Skips over all the whitespaces
 	void SkipWhiteSpace(void);
@@ -60,29 +60,6 @@ private:
 	void StepBack(void);
 
 	///Works out the token type
-	template<class T>
-	TokenType ToTokenType(T text)
-	{
-		if(CheckType(T, string))
-		{
-			GenerateIfCase(text, "namespace", TokenType::TOKENTYPE_KEYWORD_NAMESPACE);
-			GenerateIfCase(text, "class", TokenType::TOKENTYPE_KEYWORD_CLASS);
-			GenerateIfCase(text, "var", TokenType::TOKENTYPE_KEYWORD_VAR);
-			GenerateIfCase(text, "if", TokenType::TOKENTYPE_KEYWORD_IF);
-			GenerateIfCase(text, "elif", TokenType::TOKENTYPE_KEYWORD_ELIF);
-			GenerateIfCase(text, "else", TokenType::TOKENTYPE_KEYWORD_ELSE);
-
-		}
-		else if(CheckType(T, char))
-		{
-
-		}
-		else
-		{
-			throw invalid_argument("T is of an unkown type and is not textual.");
-		}
-
-		return TokenType::TOKENTYPE_UNKOWN;
-	}
+	TokenType ToTokenType(string text);
 };
 

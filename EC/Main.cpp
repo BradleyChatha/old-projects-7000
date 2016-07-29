@@ -8,7 +8,7 @@ using namespace std;
 
 int main(int argc, char** argv)
 {
-	Lexer Lex = Lexer("\"Hello World\"", "meme");
+	Lexer Lex = Lexer("class;", "meme");
 	Lex.Test();
 
 	system("PAUSE");
