@@ -1028,6 +1028,18 @@ unittest
     assertThrown!ASTException(lex.nextOperation);
 }
 
+/++
+ + Performs an enforce on a `Token`
+ + 
+ + Exceptions:
+ +  `ASTException` if $(D t)'s type isn't the same as $(D type).
+ + 
+ + Params:
+ +  t       = The token to peform the enforce on.
+ +  type    = The type that $(D t) must be, for it to pass the enforce.
+ +  wanted  = Should the enforce fail, then this message is displayed following the text "Expected ".
+ +            Aka, it's just information about what the token should've been.
+ + ++/
 @safe
 void enforceToken(Token t, TokenType type, string wanted)
 {
