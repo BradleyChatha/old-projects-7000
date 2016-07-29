@@ -13,7 +13,7 @@ void main()
     }
 
     auto lex = new Lexer(readText("Test.jasm"), "Test.jasm");
-    std.file.write("Test.bin", compileJasm([nextNamespace(lex)]));
+    //std.file.write("Test.bin", compileJasm([parseCode(lex)]));
 
     version(unittest)
     {

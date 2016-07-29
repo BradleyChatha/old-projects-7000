@@ -46,7 +46,13 @@ enum NodeType
     Class,
 
     /// This `Node` contains a namespace.
-    Namespace
+    Namespace,
+
+    /// This `Node` contains information about an entire file(or an entire piece of code, since they're treated as the same thing)
+    File,
+
+    /// This `Node` contains a namespace's name, which determines what files get imported.
+    Import,
 }
 
 /++
@@ -559,6 +565,47 @@ class NamespaceNode : Node
 }
 
 /++
+ + This node is created from parsing an entire piece of code (Which probably comes from a file).
+ + ++/
+class FileNode : Node
+{
+    private
+    {
+        NamespaceNode _namespace;
+    }
+
+    public
+    {
+        /++
+         + Creates a new FileNode, which represents everything about a piece of code..
+         + 
+         + Assertions:
+         +  $(D namespace) must not be `null`.
+         + 
+         + Parameters:
+         +  namespace = The namespace that the code adds to.
+         + ++/
+        @safe @nogc
+        this(NamespaceNode namespace) nothrow
+        {
+            assert(namespace !is null);
+
+            this._namespace = namespace;
+            super(NodeType.File);
+        }
+
+        /++
+         + Returns the node contaning most of the information about the code.
+         + ++/
+        @property @safe @nogc
+        NamespaceNode namespace() nothrow pure
+        {
+            return this._namespace;
+        }
+    }
+}
+
+/++
  + Determines if a token can be used a parameter to an operation.
  + 
  + Parameters:
@@ -578,7 +625,7 @@ bool validOpParameter(Token param) nothrow pure
 }
 
 /++
- + Reads the next namespace(Which is generally the entire piece of code)
+ + Parses the entire piece of code.
  + 
  + Throws:
  +  `ASTException` if something is invalid.
@@ -587,10 +634,10 @@ bool validOpParameter(Token param) nothrow pure
  +  lex = The input range of tokens.
  + 
  + Returns:
- +  A `NamespaceNode` containing all of the information about the namespace.
+ +  A `FileNode` containing all of the information about the code.
  + ++/
 @safe
-NamespaceNode nextNamespace(R)(ref R lex)
+FileNode parseCode(R)(ref R lex)
 {
     auto info = lex.front.info;
     lex.front.enforceToken(TokenType.KEY_NAMESPACE, ".namespace");
@@ -624,7 +671,7 @@ NamespaceNode nextNamespace(R)(ref R lex)
         if(lex.front.type == TokenType.KEY_CLASS)
             node.registerClass(lex.nextClass);
 
-    return node;
+    return new FileNode(node);
 }
 // For ease of testing, this class is tested in nextFunction's unittest
 
