@@ -376,7 +376,7 @@ unittest
     import std.stdio, std.array;
     const(ubyte)[] jexe = cast(const(ubyte)[])import("Test.bin");
 
-    writeln(JExeReader!(const(ubyte)[])(jexe).namespaces);
+    //writeln(JExeReader!(const(ubyte)[])(jexe).namespaces);
 }
 
 version(unittest)

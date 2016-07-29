@@ -547,13 +547,12 @@ class NamespaceNode : Node
          +  `ASTException` if the name is invalid.
          + 
          + Parameters:
-         +  nameTokens = The tokens that make up the namespace's name.
-         +               e.g "Some/Super/Long/Namespace/Name"
+         +  name = The name of the namespace.
          + ++/
         @safe
-        this(Token[] nameTokens)
+        this(NamespaceName name)
         {
-            this._name = NamespaceName(nameTokens);
+            this._name = name;
             super(NodeType.Namespace);
         }
 
@@ -590,6 +589,51 @@ class NamespaceNode : Node
             {
                 return this._name;
             }
+        }
+    }
+}
+
+/++
+ + This node contains a namespace's name, which will be used to import the namespace.
+ + ++/
+class ImportNode : Node
+{
+    private
+    {
+        NamespaceName _name;
+    }
+
+    public
+    {
+        /++
+         + Parameters:
+         +  name = The namespace's name.
+         + ++/
+        @safe @nogc
+        this(NamespaceName name) nothrow
+        {
+            this._name = name;
+            super(NodeType.Import);
+        }
+
+        /++
+         + Parameters:
+         +  name = The tokens making up the namespace's name.
+         + ++/
+        @safe
+        this(Token[] nameTokens)
+        {
+            this._name = NamespaceName(nameTokens);
+            super(NodeType.Import);
+        }
+
+        /++
+         + Returns the name of the namespace to import.
+         + ++/
+        @property @safe @nogc
+        NamespaceName name() nothrow pure
+        {
+            return this._name;
         }
     }
 }
@@ -673,28 +717,9 @@ FileNode parseCode(R)(ref R lex)
     lex.front.enforceToken(TokenType.KEY_NAMESPACE, ".namespace");
     lex.popFront;
 
-    // Read in names until a semi-colon is hit.
-    Token[] toks;
-    while(true)
-    {
-        enforce(!lex.empty, new ASTException("Unexpected EoF", info));
-
-        if(lex.front.type == TokenType.OP_OPERATION_END)
-        {
-            lex.popFront;
-            break;
-        }
-        else
-        {
-            enforce(lex.front.type == TokenType.UNIQ_IDENTIFIER || lex.front.type == TokenType.OP_NAMESPACE_SEPERATOR,
-                new ASTException(format("Expected an Identifier, or a '/' for a namespace, not a %s", lex.front.type), lex.front.info));
-
-            toks ~= lex.front;
-            lex.popFront;
-        }
-    }
-
-    auto node = new NamespaceNode(toks);
+    // Get the name of the namespace
+    auto name = lex.nextNamespaceName;
+    auto node = new NamespaceNode(name);
 
     // Read in all the stuff needed
     while(!lex.empty)
@@ -704,6 +729,66 @@ FileNode parseCode(R)(ref R lex)
     return new FileNode(node);
 }
 // For ease of testing, this class is tested in nextFunction's unittest
+
+/++
+ + Reads in the next name of a namespace.
+ + 
+ + Throws:
+ +  `ASTException` if something is invalid.
+ + 
+ + Parameters:
+ +  lex = The input range of tokens.
+ + 
+ + Returns:
+ +  A `NamespaceNAme` containing all of the information about the name.
+ + ++/
+@safe
+NamespaceName nextNamespaceName(R)(ref R lex)
+{
+    // Read in names until a semi-colon is hit.
+    auto    info = lex.front.info;
+    Token[] toks;
+    while(true)
+    {
+        enforce(!lex.empty, new ASTException("Unexpected EoF", info));
+        
+        if(lex.front.type == TokenType.OP_OPERATION_END)
+        {
+            lex.popFront;
+            break;
+        }
+        else
+        {
+            enforce(lex.front.type == TokenType.UNIQ_IDENTIFIER || lex.front.type == TokenType.OP_NAMESPACE_SEPERATOR,
+                new ASTException(format("Expected an Identifier, or a '/' for a namespace, not a %s", lex.front.type), lex.front.info));
+            
+            toks ~= lex.front;
+            lex.popFront;
+        }
+    }
+    enforce(toks.length > 0, new ASTException("Umm... No tokens were read in for a namespace's name. Unexpected EoF?", info));
+
+    return NamespaceName(toks);
+}
+///
+unittest
+{
+    import std.exception : assertThrown;
+
+    auto lex = new Lexer(r"
+        Hello/From/The/Other/Slash;
+        This:Is:Invalid
+    ");
+
+    auto name = lex.nextNamespaceName;
+    assert(name.segments == ["Hello", "From", "The", "Other", "Slash"]);
+    assert(name.fullName == "Hello/From/The/Other/Slash");
+
+    assertThrown!ASTException(lex.nextNamespaceName);
+
+    lex = new Lexer("Hello");
+    assertThrown!ASTException(lex.nextNamespaceName);
+}
 
 /++
  + Reads in the next class.
