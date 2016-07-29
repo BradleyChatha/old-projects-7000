@@ -295,7 +295,7 @@ struct Compiler
      + ++/
     void writeNamespaceDefinition(NamespaceNode node)
     {
-        this.writeString8(node.fullName);
+        this.writeString8(node.name.fullName);
         this.writeClassTable(node);
     }
 

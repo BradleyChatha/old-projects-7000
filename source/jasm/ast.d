@@ -465,7 +465,66 @@ class ClassNode : Node
         string fullName() nothrow
         {
             assert(this._namespace !is null);
-            return (this._namespace.fullName ~ ":" ~ this.name);
+            return (this._namespace.name.fullName ~ ":" ~ this.name);
+        }
+    }
+}
+
+/++
+ + This helper struct is used to seperate, and recreate the names of a namespace.
+ + ++/
+struct NamespaceName
+{
+    private
+    {
+        string[] _segments;
+    }
+
+    public
+    {
+        /++
+         + Parameters:
+         +  nameTokens = The tokens that make up the name of the namespace.
+         + ++/
+        @safe
+        this(Token[] nameTokens)
+        {
+            // Make sure the tokens are correct
+            bool wantSeperator = false;
+            foreach(tok; nameTokens)
+            {
+                if(!wantSeperator)
+                {
+                    tok.enforceToken(TokenType.UNIQ_IDENTIFIER, "an Identifier for a namespace");
+                    this._segments ~= tok.text;
+                    
+                    wantSeperator = true;
+                }
+                else
+                {
+                    tok.enforceToken(TokenType.OP_NAMESPACE_SEPERATOR, "a '/' to seperate namespace segments");
+                    wantSeperator = false;
+                }
+            }
+            enforce(wantSeperator, new ASTException("Namespaces shouldn't end with a '/'", nameTokens[0].info));
+        }
+
+        /++
+         + Returns the full name of the namespace.
+         + ++/
+        @property @safe
+        string fullName() nothrow pure
+        {
+            return this._segments.join("/");
+        }
+
+        /++
+         + Returns an array of all of the segments in the namespace's name.
+         + ++/
+        @property @safe @nogc
+        string[] segments() nothrow pure
+        {
+            return this._segments;
         }
     }
 }
@@ -477,7 +536,7 @@ class NamespaceNode : Node
 {
     private
     {
-        string[]        _nameSegments;
+        NamespaceName   _name;
         ClassNode[]     _classes;
     }
 
@@ -494,25 +553,7 @@ class NamespaceNode : Node
         @safe
         this(Token[] nameTokens)
         {
-            // Make sure the tokens are correct
-            bool wantSeperator = false;
-            foreach(tok; nameTokens)
-            {
-                if(!wantSeperator)
-                {
-                    tok.enforceToken(TokenType.UNIQ_IDENTIFIER, "an Identifier for a namespace");
-                    this._nameSegments ~= tok.text;
-
-                    wantSeperator = true;
-                }
-                else
-                {
-                    tok.enforceToken(TokenType.OP_NAMESPACE_SEPERATOR, "a '/' to seperate namespace segments");
-                    wantSeperator = false;
-                }
-            }
-            enforce(wantSeperator, new ASTException("Namespaces shouldn't end with a '/'", nameTokens[0].info));
-
+            this._name = NamespaceName(nameTokens);
             super(NodeType.Namespace);
         }
 
@@ -533,18 +574,6 @@ class NamespaceNode : Node
         nothrow pure
         {
             /++
-             + Returns the segments of the Namespace's name.
-             + 
-             + See_Also:
-             +  `NamespaceNode.fullName`
-             + ++/
-            @nogc
-            string[] nameSegments()
-            {
-                return this._nameSegments;
-            }
-
-            /++
              + Returns the classes in the namespace.
              + ++/
             @nogc
@@ -554,11 +583,12 @@ class NamespaceNode : Node
             }
 
             /++
-             + Returns the full name of the namespace.
+             + Returns a helper struct to access the namespace's name.
              + ++/
-            string fullName()
+            @nogc
+            NamespaceName name()
             {
-                return this._nameSegments.join("/");
+                return this._name;
             }
         }
     }
@@ -842,9 +872,11 @@ unittest
         }
         ");
 
-    auto space = lex.nextNamespace;
-    assert(space.nameSegments == ["Super", "Test"]);
-    assert(space.fullName     == "Super/Test");
+    auto file = lex.parseCode();
+
+    auto space = file.namespace;
+    assert(space.name.segments == ["Super", "Test"]);
+    assert(space.name.fullName == "Super/Test");
 
     auto cls = space.classes[0];
     assert(cls.name                     == "Test");
