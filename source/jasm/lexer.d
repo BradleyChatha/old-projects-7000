@@ -18,6 +18,7 @@ enum TokenType
     KEY_CLASS,                      // .class
     KEY_FUNCTION,                   // .function
     KEY_FUNCTION_LOCALS,            // .locals     
+    KEY_IMPORT_NAMESPACE,           // .import
 
     // Operators
     OP_NAMESPACE_SEPERATOR,         // name1/name2
@@ -90,6 +91,7 @@ private
                         ".class",               KEY_CLASS,
                         ".function",            KEY_FUNCTION,
                         ".locals",              KEY_FUNCTION_LOCALS,
+                        ".import",              KEY_IMPORT_NAMESPACE,
 
                         "push.str",             CODE_PUSH_STRING,
                         "push.i32",             CODE_PUSH_INT_32,

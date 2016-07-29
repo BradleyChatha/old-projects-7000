@@ -646,6 +646,7 @@ class FileNode : Node
     private
     {
         NamespaceNode _namespace;
+        ImportNode[]  _imports;
     }
 
     public
@@ -669,12 +670,34 @@ class FileNode : Node
         }
 
         /++
+         + Adds a namespace that is to be imported.
+         + 
+         + Parameters:
+         +  name = The name of the namespace to import.
+         + ++/
+        @safe
+        void addImport(NamespaceName name)
+        {
+            this._imports ~= new ImportNode(name);
+            // TODO: MAke sure no namespace is repeated twice.
+        }
+
+        /++
          + Returns the node contaning most of the information about the code.
          + ++/
         @property @safe @nogc
         NamespaceNode namespace() nothrow pure
         {
             return this._namespace;
+        }
+
+        /++
+         + Returns all of the namespaces this file imports.
+         + ++/
+        @property @safe @nogc
+        ImportNode[] imports() nothrow pure
+        {
+            return this._imports;
         }
     }
 }
@@ -714,19 +737,34 @@ bool validOpParameter(Token param) nothrow pure
 FileNode parseCode(R)(ref R lex)
 {
     auto info = lex.front.info;
-    lex.front.enforceToken(TokenType.KEY_NAMESPACE, ".namespace");
+    lex.front.enforceToken(TokenType.KEY_NAMESPACE, ".namespace must be at the start of every piece of JASM code");
     lex.popFront;
 
     // Get the name of the namespace
     auto name = lex.nextNamespaceName;
-    auto node = new NamespaceNode(name);
+    auto node = new FileNode(new NamespaceNode(name));
 
     // Read in all the stuff needed
     while(!lex.empty)
-        if(lex.front.type == TokenType.KEY_CLASS)
-            node.registerClass(lex.nextClass);
+    {
+        switch(lex.front.type) with(TokenType)
+        {
+            case KEY_CLASS:
+                node.namespace.registerClass(lex.nextClass);
+                break;
 
-    return new FileNode(node);
+            case KEY_IMPORT_NAMESPACE:
+                lex.popFront();
+                name = lex.nextNamespaceName();
+
+                node.addImport(name);
+                break;
+
+            default: throw new ASTException(format("Unexpected token %s", lex.front), lex.front.info);
+        }
+    }
+
+    return node;
 }
 // For ease of testing, this class is tested in nextFunction's unittest
 
@@ -941,7 +979,10 @@ unittest
 {
     auto lex = new Lexer(
         r"
-        .namespace Super/Test;        
+        .namespace Super/Test;
+
+        .import Some/Namespace;
+        .import Some/Other/Namespace;  
 
         .class Test [AttribThing]
         {
@@ -952,12 +993,14 @@ unittest
                     &int32
                 }
 
-                debug.locals;
+                push.i32 20;
             }
         }
         ");
 
     auto file = lex.parseCode();
+    assert(file.imports[0].name.fullName == "Some/Namespace");
+    assert(file.imports[1].name.segments == ["Some", "Other", "Namespace"]);
 
     auto space = file.namespace;
     assert(space.name.segments == ["Super", "Test"]);
@@ -975,7 +1018,8 @@ unittest
     assert(func.retType.token.text              == "void");
     assert(func.attributes[0].token.text        == "Static");
     assert(func.locals.types[0].token.text      == "int32");
-    assert(func.ops[0].operation.text           == "debug.locals");
+    assert(func.ops[0].operation.text           == "push.i32");
+    assert(func.ops[0].parameters[0].type       == NodeType.Number);
 
     // Now to test the names
     assert(func.signature == "Test&int32&string$void");
