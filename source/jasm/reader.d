@@ -228,11 +228,9 @@ if(isInputRange!R && is(Unqual!(ElementType!R) == ubyte))
          + Confirms that the header is valid.
          + ++/
         void validateHeader()
-        {
-            import jasm.compiler : Compiler;
-            
+        {            
             // First, the magic number
-            foreach(ch; Compiler.fileHeader)
+            foreach(ch; "JEXE")//Compiler.fileHeader)
             {
                 enforce(this._range.front == ch, new JExeException("Invalid magic number."));
                 this._range.popFront;
@@ -241,7 +239,7 @@ if(isInputRange!R && is(Unqual!(ElementType!R) == ubyte))
             this._fileVersion = this.read!ushort;
             this._flags       = this.read!ubyte;
 
-            enforce(Compiler.formatVersion >= this._fileVersion, new JExeException("Unsupported version of JExe"));
+            enforce(1/+Compiler.formatVersion+/ >= this._fileVersion, new JExeException("Unsupported version of JExe"));
         }
         unittest
         {
