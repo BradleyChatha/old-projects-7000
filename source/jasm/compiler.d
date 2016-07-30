@@ -108,8 +108,10 @@ class Compiler
          + ++/
         ubyte[] compile()
         {
+            import std.algorithm : each;
+
             this.writeHeader();
-            this.writeClassDef(this._files[0].namespace.classes[0]);
+            this._files.each!((f) => this.writeNamespaceDef(f.namespace));
 
             return this._output;
         }
@@ -172,6 +174,16 @@ class Compiler
 
             this.write(cast(uint)cls.functions.length);
             cls.functions.each!((f) => this.writeFunctionDef(f));
+        }
+
+        // <NamespaceDef>
+        void writeNamespaceDef(NamespaceNode ns)
+        {
+            import std.algorithm : each;
+            this.writeString8(ns.name.fullName);
+
+            this.write(cast(uint)ns.classes.length);
+            ns.classes.each!((c) => this.writeClassDef(c));
         }
     }
 }
