@@ -36,6 +36,7 @@ class Compiler
         ubyte[]             _output;
         size_t              _index;
         FuncInfo[string]    _funcDefs; // The key is the function's signature.
+        string[]            _strings;
 
         // Used to keep track of the positions of a function's pointer and size bytes.
         struct FuncInfo
@@ -114,26 +115,9 @@ class Compiler
          + ++/
         ubyte[] compile()
         {
-            import std.algorithm : each, map;
-
             this.writeHeader();
-            this.write(cast(uint)this._files.length);
-            this._files.each!((f) => this.writeNamespaceDef(f.namespace));
-
-            // Write out all of the opcodes            
-            auto old = this._index;
-            this.write(cast(uint)0); // Reserve space for the Opcode section size.
-
-            foreach(file; this._files)
-                foreach(cls; file.namespace.classes)
-                    foreach(func; cls.functions)
-                        this.writeFunctionBody(func);
-
-            // And then how many bytes they take up
-            auto otherOld = this._index;
-            this._index = old;
-            this.write(cast(uint)((otherOld - uint.sizeof) - old));
-            this._index = otherOld;
+            this.writeOpcodes();
+            this.writeStringTable();
 
             return this._output;
         }
@@ -148,6 +132,14 @@ class Compiler
             this.write(Compiler.fileHeader[]);
             this.write(Compiler.fileVersion);
             this.write(cast(ubyte)0);
+        }
+
+        // Writes the string table.
+        void writeStringTable()
+        {
+            this.write(cast(uint)this._strings.length);
+            foreach(str; this._strings)
+                this.writeString16(str);
         }
 
         // <FunctionDef>
@@ -210,6 +202,31 @@ class Compiler
         }
 
         // <Opcodes[]>
+        void writeOpcodes()
+        {
+            import std.algorithm : each, map;
+
+            // TODO: Merge the same namespaces into a single FileNode
+            this.write(cast(uint)this._files.length);
+            this._files.each!((f) => this.writeNamespaceDef(f.namespace));
+            
+            // Write out all of the opcodes            
+            auto old = this._index;
+            this.write(cast(uint)0); // Reserve space for the Opcode section size.
+            
+            foreach(file; this._files)
+                foreach(cls; file.namespace.classes)
+                    foreach(func; cls.functions)
+                        this.writeFunctionBody(func);
+            
+            // And then how many bytes they take up
+            auto otherOld = this._index;
+            this._index = old;
+            this.write(cast(uint)((otherOld - uint.sizeof) - old));
+            this._index = otherOld;
+        }
+
+        // <Opcodes[]>
         void writeFunctionBody(FunctionNode func)
         {
             foreach(op; func.ops)
@@ -241,7 +258,7 @@ class Compiler
                     {
                         case NodeType.String:
                             auto x = cast(StringNode)given;
-                            this.writeString16(x.token.text);
+                            this.write(this.makeStringTableEntry(x));
                             break;
 
                         case NodeType.Number:
@@ -256,6 +273,18 @@ class Compiler
                     }
                 }
             }
+        }
+
+        /// Returns:
+        ///     The index of the string
+        uint makeStringTableEntry(StringNode node)
+        {
+            foreach(i, str; this._strings)
+                if(str == node.token.text)
+                    return i;
+
+            this._strings ~= node.token.text;
+            return cast(uint)(this._strings.length - 1);
         }
 
         void writeNumberParameter(bool signed)(string numText, OpcodeInfo.Param numType)

@@ -1,4 +1,4 @@
-File format: [Header][NamespaceDef[] namespaces][Opcodes[] program]
+File format: [Header][NamespaceDef[] namespaces][Opcodes[] program][String16[] string table]
 
 The system's native endianess is used.
 
