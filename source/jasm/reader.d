@@ -9,7 +9,7 @@ private
 
     debug import std.stdio  : writefln;
 
-    import jasm.opcodes;
+    import jasm.opcodes, jasm.compiler;
 }
 
 /++
@@ -93,7 +93,7 @@ if(isInputRange!R && is(Unqual!(ElementType!R) == ubyte))
             foreach(i; 0..amount)
             {
                 enforce(!this._range.empty, 
-                    new JExeException(format("Unable to read data of size %s: Unexpected end of data", amount)));
+                    new JExeException(format("Unable to read data of size %s(0x%X): Unexpected end of data", amount, amount)));
                 
                 buffer[i] = this._range.front;
                 this._range.popFront;
@@ -230,7 +230,7 @@ if(isInputRange!R && is(Unqual!(ElementType!R) == ubyte))
         void validateHeader()
         {            
             // First, the magic number
-            foreach(ch; "JEXE")//Compiler.fileHeader)
+            foreach(ch; Compiler.fileHeader)
             {
                 enforce(this._range.front == ch, new JExeException("Invalid magic number."));
                 this._range.popFront;
@@ -239,7 +239,7 @@ if(isInputRange!R && is(Unqual!(ElementType!R) == ubyte))
             this._fileVersion = this.read!ushort;
             this._flags       = this.read!ubyte;
 
-            enforce(1/+Compiler.formatVersion+/ >= this._fileVersion, new JExeException("Unsupported version of JExe"));
+            enforce(Compiler.fileVersion >= this._fileVersion, new JExeException("Unsupported version of JExe"));
         }
         unittest
         {
@@ -265,7 +265,7 @@ if(isInputRange!R && is(Unqual!(ElementType!R) == ubyte))
         JExeNamespace[] readNamespaces()
         {
             auto amount = this.read!uint;
-            //debug writefln("[Debug] Reading in %s namespaces.", amount);
+            //debug writefln("[Debug] Reading in %s(0x%X) namespaces.", amount, amount);
 
             JExeNamespace[] array;
             foreach(i; 0..amount)
@@ -367,14 +367,6 @@ if(isInputRange!R && is(Unqual!(ElementType!R) == ubyte))
             return func;
         }
     }
-}
-///
-unittest
-{
-    import std.stdio, std.array;
-    const(ubyte)[] jexe = cast(const(ubyte)[])import("Test.bin");
-
-    //writeln(JExeReader!(const(ubyte)[])(jexe).namespaces);
 }
 
 version(unittest)

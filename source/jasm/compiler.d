@@ -7,6 +7,7 @@ private
     import std.exception : enforce;
     import std.stdio     : File;
     import std.traits    : isArray, isSomeString;
+    import std.format    : format;
 
     import jasm.ast, jasm.opcodes, jasm.lexer;
 }
@@ -77,6 +78,11 @@ class Compiler
 
     public
     {
+        this()
+        {
+            this.setupOpcodes();
+        }
+
         /++
          + Includes a file to be compiled.
          + 
@@ -108,10 +114,26 @@ class Compiler
          + ++/
         ubyte[] compile()
         {
-            import std.algorithm : each;
+            import std.algorithm : each, map;
 
             this.writeHeader();
+            this.write(cast(uint)this._files.length);
             this._files.each!((f) => this.writeNamespaceDef(f.namespace));
+
+            // Write out all of the opcodes            
+            auto old = this._index;
+            this.write(cast(uint)0); // Reserve space for the Opcode section size.
+
+            foreach(file; this._files)
+                foreach(cls; file.namespace.classes)
+                    foreach(func; cls.functions)
+                        this.writeFunctionBody(func);
+
+            // And then how many bytes they take up
+            auto otherOld = this._index;
+            this._index = old;
+            this.write(cast(uint)((otherOld - uint.sizeof) - old));
+            this._index = otherOld;
 
             return this._output;
         }
@@ -132,7 +154,7 @@ class Compiler
         void writeFunctionDef(FunctionNode func)
         {
             this.writeString16(func.signature);
-            this.writeString16(func.params.asList);
+            this.writeString16(func.locals.asList);
 
             ubyte flag = 0;
             foreach(attr; func.attributes)
@@ -172,6 +194,7 @@ class Compiler
                 }
             }
 
+            this.write(flag);
             this.write(cast(uint)cls.functions.length);
             cls.functions.each!((f) => this.writeFunctionDef(f));
         }
@@ -185,32 +208,130 @@ class Compiler
             this.write(cast(uint)ns.classes.length);
             ns.classes.each!((c) => this.writeClassDef(c));
         }
-    }
-}
-///
-unittest
-{
-    auto comp = new Compiler();
-    auto lex  = new Lexer(r"
-    .namespace Test/Namespace; 
-    
-    .class Example 
-    { 
-        .function Pls(&string &int32) &void [Static] [EntryPoint] 
+
+        // <Opcodes[]>
+        void writeFunctionBody(FunctionNode func)
         {
-            .locals 
+            foreach(op; func.ops)
             {
-                &int32
-                &int32
+                auto type = op.operation.type;
+                assert(type > TokenType.CODE_START && type < TokenType.CODE_END, format("Invalid opcode: %s", type));
+
+                auto code = cast(Opcode)(type - TokenType.CODE_START);
+                auto info = this._opcodes[code];
+
+                this.write(cast(ubyte)code);
+
+                enforce(op.parameters.length == info.params.length, 
+                    new CompileException(
+                        format("Expected %s parameters for %s, but only got %s", 
+                                info.params.length, type, op.parameters.length)
+                        ));
+                foreach(i, param; info.params)
+                {
+                    auto given = op.parameters[i];
+
+                    enforce(
+                            (given.type == NodeType.String && param == OpcodeInfo.Param.String)
+                         || (given.type == NodeType.Number && ((param & 0x00FF) >= OpcodeInfo.Param.Int8 && (param & 0x00FF) <= OpcodeInfo.Param.Int32)),
+                            new CompileException(format("For opcode %s, expected a %s as the %sst/nd/th opcode, but got %s", type, param, i, given.type))
+                        );
+
+                    switch(given.type)
+                    {
+                        case NodeType.String:
+                            auto x = cast(StringNode)given;
+                            this.writeString16(x.token.text);
+                            break;
+
+                        case NodeType.Number:
+                            auto x = cast(NumberNode)given;
+                            if(param & OpcodeInfo.Param.Unsigned)
+                                this.writeNumberParameter!false(x.token.text, param);
+                            else
+                                this.writeNumberParameter!true(x.token.text, param);
+                            break;
+
+                        default: assert(0);
+                    }
+                }
             }
-        } 
-    }");
+        }
 
-    import std.file;
-    comp.include(lex.parseCode);
+        void writeNumberParameter(bool signed)(string numText, OpcodeInfo.Param numType)
+        {
+            T validateNumber(T, OpcodeInfo.Param Num)()
+            {
+                import std.conv : to;
 
-    auto output = comp.compile();
-    write("Debug.jexe", output);
+                static if(!signed)
+                    enforce(numText[0] != '-', new CompileException("Expected a non-negative number."));
+
+                static if(signed)
+                    long value = numText.to!long;
+                else
+                    ulong value = numText.to!ulong;
+
+                static if(Num == OpcodeInfo.Param.Int8)
+                    enum max = byte.max;
+                else static if(Num == OpcodeInfo.Param.Int16)
+                    enum max = short.max;
+                else static if(Num == OpcodeInfo.Param.Int32)
+                    enum max = int.max;
+
+                static if(signed)
+                    enforce(value <= max && value >= -(max + 1), 
+                        new CompileException(format("Value is too large/too small. Min = %s, Max = %s, Got = %s", -(max + 1), max, value)));
+                else
+                    enforce(value <= (max * 2) + 1, new CompileException(format("Value is too large. Min = 0, Max = %s, Got = %s", (max * 2) + 1, value)));
+
+                return cast(T)value;
+            }
+
+            switch(numType & 0x00FF) with(OpcodeInfo.Param)
+            {
+                case Int8:  this.write(validateNumber!(ubyte,  Int8));  break;
+                case Int16: this.write(validateNumber!(ushort, Int16)); break;
+                case Int32: this.write(validateNumber!(uint,   Int32)); break;
+
+                default:
+                    assert(0);
+            }
+        }
+
+        struct OpcodeInfo
+        {
+            enum Param : ushort
+            {
+                None        = 0,
+                String      = 0x0001,
+                Int8        = 0x0002,
+                Int16       = 0x0003,
+                Int32       = 0x0004,
+                Unsigned    = 0xFF00,
+
+                UInt8       = Int8  | Unsigned,
+                UInt16      = Int16 | Unsigned,
+                UInt32      = Int32 | Unsigned
+            }
+
+            Param[] params;
+        }
+        OpcodeInfo[Opcode] _opcodes;
+        void setupOpcodes()
+        {
+            with(OpcodeInfo.Param)
+            {
+                this._opcodes =
+                [
+                    Opcode.PUSH_STRING:             OpcodeInfo([String]),
+                    Opcode.PUSH_INT32:              OpcodeInfo([Int32]),
+                    Opcode.STORE_LOCAL:             OpcodeInfo([UInt8]),
+                    Opcode.DEBUG_LOCALS:            OpcodeInfo([])
+                ];
+            }
+        }
+    }
 }
 
 /// The exception that is thrown by the Compiler.
