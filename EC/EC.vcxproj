@@ -142,10 +142,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ASTNodes.cpp" />
     <ClCompile Include="Lexer.cpp" />
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ASTNodes.h" />
     <ClInclude Include="Lexer.h" />
     <ClInclude Include="Token.h" />
     <ClInclude Include="TokenType.h" />

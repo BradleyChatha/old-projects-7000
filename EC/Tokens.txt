@@ -1,0 +1,8 @@
+[Token Debug] TokenType["TOKENTYPE_KEYWORD_VAR"] TokenData["var"] TokenDebugInfo:File["meme"] TokenDebugInfo:Line["1"] TokenDebugInfo:Column["4"] 
+[Token Debug] TokenType["TOKENTYPE_IDENTIFIER"] TokenData["MyInt"] TokenDebugInfo:File["meme"] TokenDebugInfo:Line["1"] TokenDebugInfo:Column["10"] 
+[Token Debug] TokenType["TOKENTYPE_KEYWORD_AS"] TokenData["as"] TokenDebugInfo:File["meme"] TokenDebugInfo:Line["1"] TokenDebugInfo:Column["13"] 
+[Token Debug] TokenType["TOKENTYPE_KEYWORD_INT"] TokenData["int"] TokenDebugInfo:File["meme"] TokenDebugInfo:Line["1"] TokenDebugInfo:Column["17"] 
+[Token Debug] TokenType["TOKENTYPE_OPERATOR_EQUALS"] TokenData["="] TokenDebugInfo:File["meme"] TokenDebugInfo:Line["1"] TokenDebugInfo:Column["18"] 
+[Token Debug] TokenType["TOKENTYPE_NUMBER"] TokenData["10"] TokenDebugInfo:File["meme"] TokenDebugInfo:Line["1"] TokenDebugInfo:Column["22"] 
+[Token Debug] TokenType["TOKENTYPE_OPERATOR_SEMICOLON"] TokenData[";"] TokenDebugInfo:File["meme"] TokenDebugInfo:Line["1"] TokenDebugInfo:Column["22"] 
+[Token Debug] TokenType["TOKENTYPE_FILE_EOF"] TokenData[""] TokenDebugInfo:File["meme"] TokenDebugInfo:Line["1"] TokenDebugInfo:Column["23"] 

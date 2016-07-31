@@ -2,6 +2,8 @@
 
 #include <iostream>
 #include <string>
+#include <initializer_list>
+#include <algorithm>
 #include "TokenType.h"
 
 using namespace std;
@@ -58,5 +60,19 @@ struct Token
 			<< "TokenDebugInfo:File[\"" << DebugInfo.File  << "\"] "
 			<< "TokenDebugInfo:Line[\"" << DebugInfo.Line << "\"] "
 			<< "TokenDebugInfo:Column[\"" << DebugInfo.Column << "\"] " << endl;
+	}
+
+	///Checks if the token type is the the same as the given token type.
+	///Returns if match. False otherwise.
+	bool IsType(TokenType Expected)
+	{
+		return (Type == Expected);
+	}
+
+	///Compares the given list of tokens and compares them with the this->Type.
+	///Returns true if matches any one of them. False otherwise.
+	bool IsAnyOf(initializer_list<TokenType> Types)
+	{
+		return any_of(Types.begin(), Types.end(), [this](const TokenType type) { return this->Type == type; });
 	}
 };
