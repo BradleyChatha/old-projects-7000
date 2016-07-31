@@ -165,7 +165,7 @@ struct Token
 
 /// Lexes source code into Tokens.
 /// Acts as an InputRange
-class Lexer
+struct Lexer
 {
     /// Private variables (I like to keep private functions and variables seperated, if the private functions are massive)
     private
@@ -392,7 +392,7 @@ class Lexer
         }
         unittest
         {
-            auto lex = new Lexer("a \t\r\n// Super comments!\nb\t\t\t", "NoFile", false);
+            auto lex = Lexer("a \t\r\n// Super comments!\nb\t\t\t", "NoFile", false);
 
             assert(lex._nextChar() == 'a');
             lex._skipSpaces();
@@ -481,7 +481,7 @@ class Lexer
             tryToThrow("No Starting Speech Mark\"");
             tryToThrow("\"No Ending Speech Mark");
 
-            auto lex = new Lexer("\"First String\" \"Second String\"");
+            auto lex = Lexer("\"First String\" \"Second String\"");
             assert(lex.front.type == TokenType.UNIQ_STRING);
             assert(lex.front.text == "First String");
             lex.popFront();
@@ -546,7 +546,7 @@ class Lexer
         }
         unittest
         {
-            auto lex = new Lexer("40 200.4964 -40", "NoFile", false);
+            auto lex = Lexer("40 200.4964 -40", "NoFile", false);
 
             assert(lex._nextNumberToken.text == "40");
             assert(lex._debug.column == 3);
@@ -557,7 +557,7 @@ class Lexer
             assert(lex.empty);
 
             // Make sure it throws an exception
-            lex = new Lexer(".59", "NoFile", false);
+            lex = Lexer(".59", "NoFile", false);
             assertThrown!LexerException(lex._nextNumberToken);
         }
 
@@ -601,7 +601,7 @@ class Lexer
         }
         unittest
         {
-            auto lex = new Lexer(".function Main()");
+            auto lex = Lexer(".function Main()");
 
             assert(lex.front.type == TokenType.KEY_FUNCTION);
             lex.popFront();
@@ -640,7 +640,7 @@ class Lexer
         }
         unittest
         {
-            auto lexer = new Lexer(":# /", "NoFile", false);
+            auto lexer = Lexer(":# /", "NoFile", false);
             void assertNext(TokenType wanted, string text)
             {
                 auto next = lexer._nextOperatorToken;
@@ -702,7 +702,7 @@ class Lexer
         }
         unittest
         {
-            auto lex = new Lexer("& (\n \"This is a string\" 3.1425 .function Daniel");
+            auto lex = Lexer("& (\n \"This is a string\" 3.1425 .function Daniel");
 
             // Test for operators
             assert(lex.front.type == TokenType.OP_TYPE_SPECIFIER);

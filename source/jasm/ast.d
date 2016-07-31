@@ -813,7 +813,7 @@ unittest
 {
     import std.exception : assertThrown;
 
-    auto lex = new Lexer(r"
+    auto lex = Lexer(r"
         Hello/From/The/Other/Slash;
         This:Is:Invalid
     ");
@@ -824,7 +824,7 @@ unittest
 
     assertThrown!ASTException(lex.nextNamespaceName);
 
-    lex = new Lexer("Hello");
+    lex = Lexer("Hello");
     assertThrown!ASTException(lex.nextNamespaceName);
 }
 
@@ -977,7 +977,7 @@ FunctionNode nextFunction(R)(ref R lex)
 ///
 unittest
 {
-    auto lex = new Lexer(
+    auto lex = Lexer(
         r"
         .namespace Super/Test;
 
@@ -1057,7 +1057,7 @@ AttributeNode nextAttribute(R)(ref R lex)
 ///
 unittest
 {
-    auto lex = new Lexer("[Static]");
+    auto lex = Lexer("[Static]");
 
     assert(lex.nextAttribute.token.text == "Static");
 }
@@ -1111,7 +1111,7 @@ if(isInputRange!R && is(ElementType!R == Token))
 ///
 unittest
 {
-    auto lex = new Lexer(
+    auto lex = Lexer(
         r"
         .locals
         {
@@ -1168,7 +1168,7 @@ unittest
 {
     import std.exception : assertThrown;
 
-    auto lex = new Lexer("\"Dan is sexy\" 23 &void &23 ;");
+    auto lex = Lexer("\"Dan is sexy\" 23 &void &23 ;");
 
     assert(lex.nextValueNode.type == NodeType.String);
     assert(lex.nextValueNode.type == NodeType.Number);
@@ -1221,7 +1221,7 @@ unittest
 {
     import std.exception : assertThrown;
 
-    auto lex = new Lexer("push.str \"Daniel is a boob\"; debug.locals; invalidGiveMeMoobs; MissingADiva");
+    auto lex = Lexer("push.str \"Daniel is a boob\"; debug.locals; invalidGiveMeMoobs; MissingADiva");
 
     void test(TokenType op, NodeType param)
     {
