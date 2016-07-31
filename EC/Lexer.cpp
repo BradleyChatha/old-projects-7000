@@ -5,6 +5,7 @@
 
 Lexer::Lexer(string Code, string File) : RawCode(Code), Index(0), Debug(File, 1, 1)
 {
+	PopFront();
 }
 
 Lexer::~Lexer()
@@ -15,7 +16,7 @@ void Lexer::Test(void)
 {
 	try
 	{
-		NextIdentifierToken().print(cout);
+		NextToken().print(cout);
 	}
 	catch(exception& e)
 	{
@@ -23,9 +24,55 @@ void Lexer::Test(void)
 	}
 }
 
+void Lexer::PopFront(void)
+{
+	Front = NextToken();
+}
+
+Token Lexer::FrontToken(void)
+{
+	return Front;
+}
+
+bool Lexer::Empty(void)
+{
+	return (Front.Type == TokenType::TOKENTYPE_FILE_EOF);
+}
+
 Token Lexer::NextToken(void)
 {
-	return Token("MeMe", TokenType::TOKENTYPE_FILE_EOF, Debug);
+	SkipWhiteSpace();
+
+	if (Index >= RawCode.length())
+		return Token("", TokenType::TOKENTYPE_FILE_EOF, Debug);
+
+	char c = NextCharacter(false);
+
+	TokenType type = ToTokenType(string(1, c));
+
+	if (type != TokenType::TOKENTYPE_UNKOWN
+		&& !IsNumber(string(1, c))) // So, = works now, but you managed to break 
+	{
+		StepBack();
+		return NextOperatorToken();
+	}
+
+	else if (IsNumber(string(1, c))) // This one
+	{
+		StepBack();
+		return NextNumberToken();
+	}
+	else if (c == '"')
+	{
+		StepBack();
+		return NextStringToken();
+	}
+
+	else
+	{
+		StepBack();
+		return NextIdentifierToken();
+	}
 }
 
 char Lexer::NextCharacter(bool escape)
@@ -36,6 +83,7 @@ char Lexer::NextCharacter(bool escape)
 
 	///The current character
 	char c = RawCode[Index++];
+	Debug.Column++;
 
 	///Handle the escape characters
 	if(escape && c == '\\')
@@ -74,13 +122,19 @@ Token Lexer::NextNumberToken(void)
 	while (Index < RawCode.length())
 	{
 		auto c = NextCharacter(false);
-		if (isspace(c))
+		TokenType Type = ToTokenType(string(1, c));
+		
+		if (isspace(c) || Type != TokenType::TOKENTYPE_UNKOWN)
+		{
+			StepBack();
 			break;
+		}
+		
 		Number += c;
 	}
 
-	if (!regex_match(Number, regex("((\\+|-)?[[:digit:]]+)(\\.(([[:digit:]]+)?))?")))
-		throw runtime_error("Incorrect funcation call. Given value is not a number.");
+	if (!IsNumber(Number))
+		throw runtime_error("Incorrect function call. Given value is not a number.");
 
 	return Token(Number, TokenType::TOKENTYPE_NUMBER, Debug);
 }
@@ -145,7 +199,7 @@ Token Lexer::NextIdentifierToken(void)
 			break;
 
 		char c = NextCharacter(false);
-		cout << c << endl;
+
 		if(isspace(c) || ToTokenType(string(1, c)) != TokenType::TOKENTYPE_UNKOWN)
 		{
 			StepBack();
@@ -158,12 +212,26 @@ Token Lexer::NextIdentifierToken(void)
 	for (int i = start; i < Index; i++)
 		TokenText += RawCode[i];
 
-	cout << TokenText << endl;
-
 	TokenType Type = ToTokenType(TokenText);
 	Type = ((Type == TokenType::TOKENTYPE_UNKOWN) ? TokenType::TOKENTYPE_IDENTIFIER : Type);
-
+	
 	return Token(TokenText, Type, Debug);
+}
+
+Token Lexer::NextOperatorToken(void)
+{
+	SkipWhiteSpace();
+	Token OperatorToken = Token("", TokenType::TOKENTYPE_UNKOWN, Debug);
+	char Operator = NextCharacter(false);
+	TokenType Type = ToTokenType(string(1, Operator));
+	
+	if (Type == TokenType::TOKENTYPE_UNKOWN)
+		throw runtime_error("Incorrect function call. Not an operator.");
+
+	OperatorToken.TokenData = string(1, Operator);
+	OperatorToken.Type = Type;
+
+	return OperatorToken;
 }
 
 void Lexer::SkipWhiteSpace(void)
@@ -184,7 +252,7 @@ void Lexer::SkipWhiteSpace(void)
 	///Skip over comments and then try to skip over whitespaces again.
 	///Length - 2 in order to ensure that there is at least two characters to be read and doesn't through an
 	///Out of Bounds exception like strings like to because they're rude.
-	if(Index <= RawCode.length() - 2)
+	if(RawCode.length() >= 2 && Index <= RawCode.length() - 2)
 	{
 		if(NextCharacter(false) == '/')
 		{
@@ -241,11 +309,15 @@ TokenType Lexer::ToTokenType(string text)
 		GenerateIfCase(text, "return", TokenType::TOKENTYPE_KEYWORD_RETURN);
 		GenerateIfCase(text, "for", TokenType::TOKENTYPE_KEYWORD_FOR);
 		GenerateIfCase(text, "while", TokenType::TOKENTYPE_KEYWORD_WHILE);
+		GenerateIfCase(text, "as", TokenType::TOKENTYPE_KEYWORD_AS);
+		GenerateIfCase(text, "public", TokenType::TOKENTYPE_KEYWORD_PUBLIC);
+		GenerateIfCase(text, "private", TokenType::TOKENTYPE_KEYWORD_PRIVATE);
+		GenerateIfCase(text, "import", TokenType::TOKENTYPE_KEYWORD_IMPORT);
 	}
 	else ///Character
 	{
 		char value = text[0];
-
+		
 		GenerateIfCase(value, '.', TokenType::TOKENTYPE_OPERATOR_DOTOPERATOR);
 		GenerateIfCase(value, ';', TokenType::TOKENTYPE_OPERATOR_SEMICOLON);
 		GenerateIfCase(value, '/', TokenType::TOKENTYPE_OPERATOR_DIVISION);
@@ -258,7 +330,13 @@ TokenType Lexer::ToTokenType(string text)
 		GenerateIfCase(value, ')', TokenType::TOKENTYPE_OPERATOR_CLOSEBRACKET);
 		GenerateIfCase(value, '[', TokenType::TOKENTYPE_OPERATOR_OPENSQUAREBRACKET);
 		GenerateIfCase(value, ']', TokenType::TOKENTYPE_OPERATOR_CLOSESQUAREBRACKET);
+		GenerateIfCase(value, '=', TokenType::TOKENTYPE_OPERATOR_EQUALS);
 	}
 
 	return TokenType::TOKENTYPE_UNKOWN;
+}
+
+bool Lexer::IsNumber(string num)
+{
+	return regex_match(num, regex("((\\+|-)?[[:digit:]]+)(\\.(([[:digit:]]+)?))?"));
 }

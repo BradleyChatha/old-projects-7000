@@ -8,9 +8,28 @@ using namespace std;
 
 int main(int argc, char** argv)
 {
-	Lexer Lex = Lexer("class;", "meme");
-	Lex.Test();
+	ofstream file("Tokens.txt");
 
+	Lexer Lex = Lexer("var MyInt as int = 10;", "meme");
+	try
+	{
+		while (!Lex.Empty())
+		{
+			Lex.FrontToken().print(cout);
+			Lex.FrontToken().print(file);
+			Lex.PopFront();
+		}
+
+		Lex.FrontToken().print(cout);
+		Lex.FrontToken().print(file);
+	}
+	catch (exception& e) 
+	{
+		cout << e.what() << endl;
+	}
+
+		
+	file.close();
 	system("PAUSE");
 	return 0;
 }

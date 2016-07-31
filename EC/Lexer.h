@@ -28,6 +28,15 @@ public:
 	///Temporary Function to test the lexer is working.
 	void Test(void);
 
+	///Lexes the next token
+	void PopFront(void);
+
+	///Last token lexed
+	Token FrontToken(void);
+
+	///Check if there are any more tokens to be lexed
+	bool Empty(void);
+
 private:
 	///The raw code.
 	string RawCode;
@@ -53,6 +62,9 @@ private:
 	///Returns the next identifier token
 	Token NextIdentifierToken(void);
 
+	///Returns the next operator token.
+	Token NextOperatorToken(void);
+
 	///Skips over all the whitespaces
 	void SkipWhiteSpace(void);
 
@@ -61,5 +73,8 @@ private:
 
 	///Works out the token type
 	TokenType ToTokenType(string text);
+
+	///Checks if given value is a number
+	bool IsNumber(string num);
 };
 
