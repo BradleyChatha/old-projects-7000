@@ -9,7 +9,7 @@ private
 
     debug import std.stdio  : writefln;
 
-    import jasm.opcodes;
+    import jasm.opcodes, jasm.compiler;
 }
 
 /++
@@ -93,7 +93,7 @@ if(isInputRange!R && is(Unqual!(ElementType!R) == ubyte))
             foreach(i; 0..amount)
             {
                 enforce(!this._range.empty, 
-                    new JExeException(format("Unable to read data of size %s: Unexpected end of data", amount)));
+                    new JExeException(format("Unable to read data of size %s(0x%X): Unexpected end of data", amount, amount)));
                 
                 buffer[i] = this._range.front;
                 this._range.popFront;
@@ -215,7 +215,7 @@ if(isInputRange!R && is(Unqual!(ElementType!R) == ubyte))
                     {
                         enforce(func.pointer + func.size <= this._instructions.length, 
                             new JExeException(format("For function '%s', it's pointer and size are invalid.", func)));
-
+                            
                         func.data = this._instructions[func.pointer..func.pointer + func.size];
                     }
                 }
@@ -228,9 +228,7 @@ if(isInputRange!R && is(Unqual!(ElementType!R) == ubyte))
          + Confirms that the header is valid.
          + ++/
         void validateHeader()
-        {
-            import jasm.compiler : Compiler;
-            
+        {            
             // First, the magic number
             foreach(ch; Compiler.fileHeader)
             {
@@ -241,7 +239,7 @@ if(isInputRange!R && is(Unqual!(ElementType!R) == ubyte))
             this._fileVersion = this.read!ushort;
             this._flags       = this.read!ubyte;
 
-            enforce(Compiler.formatVersion >= this._fileVersion, new JExeException("Unsupported version of JExe"));
+            enforce(Compiler.fileVersion >= this._fileVersion, new JExeException("Unsupported version of JExe"));
         }
         unittest
         {
@@ -267,7 +265,7 @@ if(isInputRange!R && is(Unqual!(ElementType!R) == ubyte))
         JExeNamespace[] readNamespaces()
         {
             auto amount = this.read!uint;
-            //debug writefln("[Debug] Reading in %s namespaces.", amount);
+            //debug writefln("[Debug] Reading in %s(0x%X) namespaces.", amount, amount);
 
             JExeNamespace[] array;
             foreach(i; 0..amount)
@@ -369,14 +367,6 @@ if(isInputRange!R && is(Unqual!(ElementType!R) == ubyte))
             return func;
         }
     }
-}
-///
-unittest
-{
-    import std.stdio, std.array;
-    const(ubyte)[] jexe = cast(const(ubyte)[])import("Test.bin");
-
-    //writeln(JExeReader!(const(ubyte)[])(jexe).namespaces);
 }
 
 version(unittest)

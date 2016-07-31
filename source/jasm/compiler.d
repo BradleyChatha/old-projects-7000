@@ -5,428 +5,398 @@ private
     import std.array     : appender, Appender;
     import std.bitmanip;
     import std.exception : enforce;
+    import std.stdio     : File;
+    import std.traits    : isArray, isSomeString;
+    import std.format    : format;
 
     import jasm.ast, jasm.opcodes, jasm.lexer;
 }
 
-ubyte[] compileJasm(NamespaceNode[] namespaces)
-{
-    return Compiler().compile(namespaces);
-}
-
 /++
- + This struct is responsible for compiling a JEXE
+ + This class will be able to compile JASM code into the JEXE format.
  + ++/
-struct Compiler
+class Compiler
 {
-    /++
-     + Number parameters for an opcode will need to be a certain size, so this enum is used to represent their sizes.
-     + ++/
-    private enum NumType
+    public static immutable
     {
-        None,
-        Int8,
-        Int16,
-        Int32,
-        UInt8,
-        UInt16,
-        UInt32
-    }
-    
-    /++
-     + Contains some extra information about an opcode, used for compiling.
-     + ++/
-    private struct OpcodeInfo
-    {
-        /// What the types of it's params are
-        NodeType[]   params;
-        
-        /// What the types of it's number parameters are
-        NumType[]    numTypes;
-    }
+        /++
+         + The "magic number" of a JEXE.
+         + ++/
+        char[4] fileHeader  = "JEXE";
 
-    public static
-    {
-        alias               Append          = Appender!(ubyte[]);
-        immutable(ushort)   formatVersion   = 0x0001;
-        immutable(char[4])  fileHeader      = ['J', 'E', 'X', 'E'];
+        /++
+         + The version of the JEXE format that the compiler outputs.
+         + ++/
+        ushort  fileVersion = 0x0001;
     }
 
     private
     {
-        static OpcodeInfo[TokenType] opcodeParams = null;
+        FileNode[]          _files;
+        ubyte[]             _output;
+        size_t              _index;
+        FuncInfo[string]    _funcDefs; // The key is the function's signature.
+        string[]            _strings;
 
-        Append          output;
-        size_t[string]  funcPosMap;
-        bool            entryPoint;
-
-        void setupParams()
+        // Used to keep track of the positions of a function's pointer and size bytes.
+        struct FuncInfo
         {
-            if(Compiler.opcodeParams !is null)
-                return;
-
-            Compiler.opcodeParams = 
-            [
-                TokenType.CODE_PUSH_STRING:             OpcodeInfo([NodeType.String]),
-
-                TokenType.CODE_PUSH_INT_32:             OpcodeInfo([NodeType.Number],
-                                                                   [NumType.Int32]),
-
-                TokenType.CODE_STORE_LOCAL:             OpcodeInfo([NodeType.Number],
-                                                                   [NumType.UInt8]),
-
-                TokenType.CODE_DEBUG_LOCALS:            OpcodeInfo([])
-            ];
+            size_t  pointerPtr;
+            size_t  sizePtr;
         }
 
-        auto numParamToBytes(NumType T)(NumberNode param)
+        void write(const(void)[] data)
         {
-            import std.conv   : to;
-            import std.format : format;
+            if(this._output.capacity == this._output.length)
+                this._output.reserve(ubyte.max); // No real rason for ubyte.max, just felt like it
 
-            auto num = param.token.text.to!long;
+            auto old     = this._index;
+            this._index += data.length;
 
-            // First, make sure it follows the rules of being unsigned.
-            enum unsigned = (T >= NumType.UInt8);
-            static if(unsigned)
-                enforce(num >= 0, new CompilerException(format("Expected an unsigned number, got '%s'", num), param.token.info));
+            // Add to the length of _output, so we don't get a RangeError
+            if(this._index > this._output.length)
+                this._output.length += (this._index - this._output.length);
 
-            // Next, make sure it's in the correct range.
-            ulong max;
-            long  min;
+            this._output[old..this._index] = cast(ubyte[])data[0..$];
+        }
 
-            static if(T == NumType.Int8)
-            {
-                max = byte.max;
-                min = byte.min;
-            }
-            else static if(T == NumType.Int16)
-            {
-                max = short.max;
-                min = short.min;
-            }
-            else static if(T == NumType.Int32)
-            {
-                max = int.max;
-                min = int.min;
-            }
-            else static if(T == NumType.UInt8)
-            {
-                max = ubyte.max;
-                min = ubyte.min;
-            }
-            else static if(T == NumType.UInt16)
-            {
-                max = ushort.max;
-                min = ushort.min;
-            }
-            else static if(T == NumType.UInt32)
-            {
-                max = uint.max;
-                min = uint.min;
-            }
+        void write(S, Prefix)(S data)
+        if(isSomeString!S)
+        {
+            this.write(cast(Prefix)data.length);
+            this.write(data);
+        }
 
-            enforce(num >= min && num <= max, new CompilerException(format("Number is out of range: min = %s, max = %s, got = %s", min, max, num), param.token.info));
+        void write(T)(T data)
+        if(!isArray!T && !is(T == class))
+        {
+            this.write((&data)[0..1]);
+        }
 
-            // And then finally, turn it into bytes.
-            static if(T == NumType.Int8 || T == NumType.UInt8)
-                return (cast(ubyte)num).toBytes;
-            else static if(T == NumType.Int16 || T == NumType.UInt16)
-                return (cast(ushort)num).toBytes;
-            else static if(T == NumType.Int32 || T == NumType.UInt32)
-                return (cast(uint)num).toBytes;
-            else
-                static assert(false);
+        alias writeString8  = write!(string, ubyte);
+        alias writeString16 = write!(string, ushort);
+    }
+
+    public
+    {
+        this()
+        {
+            this.setupOpcodes();
+        }
+
+        /++
+         + Includes a file to be compiled.
+         + 
+         + Exceptions:
+         +  $(D file) must not be `null`.
+         +  $(D file) must not have already been included.
+         + 
+         + Parameters:
+         +  file = The node of the file to include.
+         + ++/
+        void include(FileNode file)
+        {
+            import std.algorithm : all;
+
+            enforce(file !is null,                      new CompileException("Attempted to include a null FileNode"));
+            enforce(this._files.all!((f) => f != file), new CompileException("This FileNode has already been included."));
+
+            this._files ~= file;
+        }
+
+        /++
+         + Compiles all of the included files into a JEXE.
+         + 
+         + Throws:
+         +  `CompileException` if something goes wrong.
+         + 
+         + Returns:
+         +  The bytes making up the JEXE.
+         + ++/
+        ubyte[] compile()
+        {
+            this.writeHeader();
+            this.writeOpcodes();
+            this.writeStringTable();
+
+            return this._output;
         }
     }
 
-    /++
-     + 
-     + ++/
-    ubyte[] compile(NamespaceNode[] namespaces)
+    // All the functions for actually writing certain data.
+    private
     {
-        assert(this.funcPosMap.length == 0, "This is a one-use struct");
-        this.setupParams();
-
-        this.writeHeader();
-        this.writeNamespaceTable(namespaces);
-        this.writeFunctions(namespaces);
-        
-        return output.data;
-    }
-
-    /++
-     + [Header]
-     + Writes out the JEXE's header.
-     + ++/
-    void writeHeader()
-    {
-        output.put(cast(ubyte[])fileHeader);
-        output.put(formatVersion.toBytes[]);
-        output.put(cast(ubyte)0x00);
-    }
-
-    /++
-     + [String8/String16/etc.]
-     + Writes a string with a length-prefix to the file.
-     + ++/
-    void writeString(T)(string data)
-    {
-        import std.format;
-        enforce(data.length <= T.max, new Exception(format("The value of the String%s is too large: %s", T.sizeof * 8, data)));
-
-        output.put((cast(T)data.length).toBytes[]);
-        output.put(cast(immutable(ubyte)[])data);
-    }
-    alias writeString8  = writeString!ubyte;
-    alias writeString16 = writeString!ushort;
-
-    /++
-     + [FuncDef[]]
-     + Writes out the table of function definitions for a class.
-     + ++/
-    void writeFunctionTable(ClassNode node)
-    {
-        output.put((cast(uint)node.functions.length).toBytes[]);
-        foreach(func; node.functions)
-            this.funcPosMap[func.fullName]  = this.writeFunctionDefinition(func);
-    }
-
-    /++
-     + [FuncDef]
-     + Writes a function definition out.
-     + 
-     + Returns:
-     +  The position to where the function pointer can be written to.
-     + ++/
-    size_t writeFunctionDefinition(FunctionNode func)
-    {
-        import std.algorithm : canFind;
-
-        this.writeString16(func.signature);
-        this.writeString16(func.locals.asList);
-
-        // Figure out the flags
-        ubyte flags = 0;
-        foreach(attr; func.attributes)
+        // Writes <Header> as defined in the format specifitation.
+        void writeHeader()
         {
-            switch(attr.token.text)
-            {
-                case "Static":
-                    flags |= FuncFlags.IsStatic;
-                    break;
-
-                case "EntryPoint":
-                    enforce(!this.entryPoint, new ASTException("There may only be one function marked as the entry point.", attr.token.info));
-                    flags          |= FuncFlags.IsEntry;
-                    this.entryPoint = true;
-                    break;
-                    
-                default:
-                    throw new ASTException("Unknown function attribute: " ~ attr.token.text, attr.token.info);
-            }
+            this.write(Compiler.fileHeader[]);
+            this.write(Compiler.fileVersion);
+            this.write(cast(ubyte)0);
         }
 
-        // Force the function to be marked static
-        if(func.parent.attributes.canFind!((a) => a.token.text == "Static"))
-            flags |= FuncFlags.IsStatic;
-            
-        output.put(flags);
-
-        // Reserve space for the pointer and size
-        auto pos = output.data.length;
-        output.put(0.toBytes[]);
-        output.put(0.toBytes[]);
-
-        return pos;
-    }
-
-    /++
-     + [ClassDef[]]
-     + Writes out a table of class definitions.
-     + ++/
-    void writeClassTable(NamespaceNode node)
-    {
-        output.put((cast(uint)node.classes.length).toBytes[]);
-        foreach(cls; node.classes)
-            this.writeClassDefinition(cls);
-    }
-
-    /++
-     + [ClassDef]
-     + Writes out the definition for the class, as well as all of it's functions' definitions.
-     + ++/
-    void writeClassDefinition(ClassNode node)
-    {
-        this.writeString8(node.name);
-
-        ubyte flags = 0;
-        foreach(attr; node.attributes)
+        // Writes the string table.
+        void writeStringTable()
         {
-            switch(attr.token.text)
-            {
-                case "Static":
-                    flags |= ClassFlags.IsStatic;
-                    break;
-
-                default:
-                    throw new ASTException("Unknown class attribute: " ~ attr.token.text, attr.token.info);
-            }
+            this.write(cast(uint)this._strings.length);
+            foreach(str; this._strings)
+                this.writeString16(str);
         }
-        output.put(flags);
 
-        this.writeFunctionTable(node);
-    }
-
-    /++
-     + [NamespaceDef[]]
-     + Writes out a tbale of namespace definitions
-     + ++/
-    void writeNamespaceTable(NamespaceNode[] nodes)
-    {
-        output.put((cast(uint)nodes.length).toBytes[]);
-        foreach(ns; nodes)
-            this.writeNamespaceDefinition(ns);
-    }
-
-    /++
-     + [NamespaceDef]
-     + Writes out the definition for the namespace, as well as all of it's classes
-     + ++/
-    void writeNamespaceDefinition(NamespaceNode node)
-    {
-        this.writeString8(node.name.fullName);
-        this.writeClassTable(node);
-    }
-
-    /++
-     + [Opcodes[]]
-     + 
-     + Writes out all of the function's opcodes, and sets their pointers in their definitions.
-     + ++/
-    void writeFunctions(NamespaceNode[] namespaces)
-    {
-        uint length  = output.data.length;
-        auto firstOp = output.data.length + length.sizeof;
-
-        output.put(length.toBytes[]);
-        foreach(ns; namespaces)
+        // <FunctionDef>
+        void writeFunctionDef(FunctionNode func)
         {
-            foreach(cls; ns.classes)
+            this.writeString16(func.signature);
+            this.writeString16(func.locals.asList);
+
+            ubyte flag = 0;
+            foreach(attr; func.attributes)
             {
-                foreach(func; cls.functions)
+                switch(attr.token.text)
                 {
-                    auto currentPos = output.data.length;
-                    auto start      = (currentPos - firstOp);
-                    this.writeFunctionOperations(func);
-
-                    auto pos = funcPosMap[func.fullName];
-                    output.data[pos..pos + uint.sizeof]                         = start.toBytes[];                              // Write where the function's data starts.
-                    output.data[pos + uint.sizeof..pos + (uint.sizeof * 2)]     = (output.data.length - currentPos).toBytes[];  // Write how many bytes the function's data takes up.
-                }
-            }
-        }
-
-        uint size = (output.data.length - firstOp);
-        output.data[length..length+length.sizeof] = size.toBytes[];
-    }
-
-    /++
-     + [Opcodes]
-     + 
-     + 
-     + ++/
-    void writeFunctionOperations(FunctionNode func)
-    {
-        import std.format : format;
-
-        foreach(op; func.ops)
-        {
-            auto wanted = opcodeParams[op.operation.type];
-            output.put(cast(ubyte)op.operation.type.toOpcode);
-
-            enforce(
-                op.parameters.length == wanted.params.length, 
-                new CompilerException(format("For opcode '%s', expected %s operands, but got %s operands.", 
-                        op.operation.type, wanted.params.length, op.parameters.length), 
-                    op.operation.info)
-                );
-            foreach(i, param; op.parameters)
-            {
-                enforce(
-                    param.type == wanted.params[i], 
-                    new CompilerException(format("For opcode '%s', expected operand %s to be of type %s", 
-                        op.operation.type, i, wanted.params[i]),
-                    op.operation.info)
-                    );
-
-                switch(param.type) with(NodeType)
-                {
-                    case String:
-                        auto p = cast(StringNode)param;
-                        this.writeString8(p.token.text);
-                        break;
-
-                    case Number:
-                        auto    p = cast(NumberNode)param;
-                        ubyte[] data;
-
-                        switch(wanted.numTypes[i]) with(NumType)
-                        {
-                            case Int8:      data = this.numParamToBytes!Int8(p)[];      break;
-                            case Int16:     data = this.numParamToBytes!Int16(p)[];     break;
-                            case Int32:     data = this.numParamToBytes!Int32(p)[];     break;
-                            case UInt8:     data = this.numParamToBytes!UInt8(p)[];     break;
-                            case UInt16:    data = this.numParamToBytes!UInt16(p)[];    break;
-                            case UInt32:    data = this.numParamToBytes!UInt32(p)[];    break;
-
-                            default:
-                                assert(false);
-                        }
-
-                        output.put(data);
-                        break;
+                    case "Static":      flag |= FuncFlags.IsStatic; break;
+                    case "EntryPoint":  flag |= FuncFlags.IsEntry; break;
 
                     default:
-                        assert(false, "Unhandled type");
+                        throw new CompileException("Invalid attribute: " ~ attr.token.text);
                 }
+            }
+
+            this.write(flag);
+
+            this._funcDefs[func.signature] = FuncInfo(this._index, this._index + uint.sizeof);
+            this.write(cast(uint)0); // Save space for the pointer
+            this.write(cast(uint)0); // Save space for the size
+        }
+
+        // <ClassDef>
+        void writeClassDef(ClassNode cls)
+        {
+            import std.algorithm : each;
+            this.writeString8(cls.name);
+
+            ubyte flag = 0;
+            foreach(attr; cls.attributes)
+            {
+                switch(attr.token.text)
+                {
+                    case "Static": flag |= ClassFlags.IsStatic; break;
+
+                    default:
+                        throw new CompileException("Invalid attribute: " ~ attr.token.text);
+                }
+            }
+
+            this.write(flag);
+            this.write(cast(uint)cls.functions.length);
+            cls.functions.each!((f) => this.writeFunctionDef(f));
+        }
+
+        // <NamespaceDef>
+        void writeNamespaceDef(NamespaceNode ns)
+        {
+            import std.algorithm : each;
+            this.writeString8(ns.name.fullName);
+
+            this.write(cast(uint)ns.classes.length);
+            ns.classes.each!((c) => this.writeClassDef(c));
+        }
+
+        // <Opcodes[]>
+        void writeOpcodes()
+        {
+            import std.algorithm : each, map;
+
+            // TODO: Merge the same namespaces into a single FileNode
+            this.write(cast(uint)this._files.length);
+            this._files.each!((f) => this.writeNamespaceDef(f.namespace));
+            
+            // Write out all of the opcodes            
+            auto old = this._index;
+            this.write(cast(uint)0); // Reserve space for the Opcode section size.
+
+            auto opStart = this._index;
+            foreach(file; this._files)
+                foreach(cls; file.namespace.classes)
+                    foreach(func; cls.functions)
+                        this.writeFunctionBody(func, opStart);
+            
+            // And then how many bytes they take up
+            auto otherOld = this._index;
+            this._index = old;
+            this.write(cast(uint)((otherOld - uint.sizeof) - old));
+            this._index = otherOld;
+        }
+
+        // <Opcodes[]>
+        void writeFunctionBody(FunctionNode func, uint opcodeStart)
+        {
+            // Write the pointer
+            auto funcInfo = this._funcDefs[func.signature];
+            auto start    = this._index;
+            this._index   = funcInfo.pointerPtr;
+            this.write(cast(uint)(start - opcodeStart)); // The pointer is relative to the first opcode, not the start of the file
+            this._index   = start;
+
+            foreach(op; func.ops)
+            {
+                // Make sure it's an opcode
+                auto type = op.operation.type;
+                assert(type > TokenType.CODE_START && type < TokenType.CODE_END, format("Invalid opcode: %s", type));
+
+                // Find the information about the opcode
+                auto code = cast(Opcode)(type - TokenType.CODE_START);
+                auto info = this._opcodes[code];
+
+                this.write(cast(ubyte)code);
+
+                // Make sure there's enough parameters
+                enforce(op.parameters.length == info.params.length, 
+                    new CompileException(
+                        format("Expected %s parameters for %s, but only got %s", 
+                                info.params.length, type, op.parameters.length)
+                        ));
+                foreach(i, param; info.params)
+                {
+                    auto given = op.parameters[i];
+
+                    // Make sure the parameters are of the right type
+                    // The First byte of an Opcode.Param value is metadata, so it is ANDed to only get the parameter's type.
+                    enforce(
+                            (given.type == NodeType.String && param == OpcodeInfo.Param.String)
+                         || (given.type == NodeType.Number && ((param & 0x00FF) >= OpcodeInfo.Param.Int8 && (param & 0x00FF) <= OpcodeInfo.Param.Int32)),
+                            new CompileException(format("For opcode %s, expected a %s as the %sst/nd/th opcode, but got %s", type, param, i, given.type))
+                        );
+
+                    switch(given.type)
+                    {
+                        case NodeType.String:
+                            auto x = cast(StringNode)given;
+                            this.write(this.makeStringTableEntry(x));
+                            break;
+
+                        case NodeType.Number:
+                            auto x = cast(NumberNode)given;
+                            if(param & OpcodeInfo.Param.Unsigned)
+                                this.writeNumberParameter!false(x.token.text, param);
+                            else
+                                this.writeNumberParameter!true(x.token.text, param);
+                            break;
+
+                        default: assert(0);
+                    }
+                }
+            }
+
+            // Write the size
+            auto end        = this._index;
+            this._index     = funcInfo.sizePtr;
+            this.write(cast(uint)(end - start));
+            this._index     = end;
+        }
+
+        /// Returns:
+        ///     The index of the string
+        uint makeStringTableEntry(StringNode node)
+        {
+            foreach(i, str; this._strings)
+                if(str == node.token.text)
+                    return i;
+
+            this._strings ~= node.token.text;
+            return cast(uint)(this._strings.length - 1);
+        }
+
+        void writeNumberParameter(bool signed)(string numText, OpcodeInfo.Param numType)
+        {
+            T validateNumber(T, OpcodeInfo.Param Num)()
+            {
+                import std.conv : to;
+
+                static if(!signed)
+                    enforce(numText[0] != '-', new CompileException("Expected a non-negative number."));
+
+                static if(signed)
+                    long value = numText.to!long;
+                else
+                    ulong value = numText.to!ulong;
+
+                static if(Num == OpcodeInfo.Param.Int8)
+                    enum max = byte.max;
+                else static if(Num == OpcodeInfo.Param.Int16)
+                    enum max = short.max;
+                else static if(Num == OpcodeInfo.Param.Int32)
+                    enum max = int.max;
+
+                static if(signed)
+                    enforce(value <= max && value >= -(max + 1), 
+                        new CompileException(format("Value is too large/too small. Min = %s, Max = %s, Got = %s", -(max + 1), max, value)));
+                else
+                    enforce(value <= (max * 2) + 1, new CompileException(format("Value is too large. Min = 0, Max = %s, Got = %s", (max * 2) + 1, value)));
+
+                return cast(T)value;
+            }
+
+            switch(numType & 0x00FF) with(OpcodeInfo.Param)
+            {
+                case Int8:  this.write(validateNumber!(ubyte,  Int8));  break;
+                case Int16: this.write(validateNumber!(ushort, Int16)); break;
+                case Int32: this.write(validateNumber!(uint,   Int32)); break;
+
+                default:
+                    assert(0);
+            }
+        }
+
+        struct OpcodeInfo
+        {
+            enum Param : ushort
+            {
+                None        = 0,
+                String      = 0x0001,
+                Int8        = 0x0002,
+                Int16       = 0x0003,
+                Int32       = 0x0004,
+                Unsigned    = 0xFF00,
+
+                UInt8       = Int8  | Unsigned,
+                UInt16      = Int16 | Unsigned,
+                UInt32      = Int32 | Unsigned
+            }
+
+            Param[] params;
+        }
+        OpcodeInfo[Opcode] _opcodes;
+        void setupOpcodes()
+        {
+            with(OpcodeInfo.Param)
+            {
+                this._opcodes =
+                [
+                    Opcode.PUSH_STRING:             OpcodeInfo([String]),
+                    Opcode.PUSH_INT32:              OpcodeInfo([Int32]),
+                    Opcode.STORE_LOCAL:             OpcodeInfo([UInt8]),
+                    Opcode.DEBUG_LOCALS:            OpcodeInfo([])
+                ];
             }
         }
     }
 }
 
-package
-{
-    /++
-     + See nativeToBigEndian.
-     + 
-     + This just makes sure it's the same endianness as the system's
-     + ++/
-    auto toBytes(T)(T thing)
-    {
-        version(BigEndian)
-            return nativeToBigEndian!T(thing);
-        else
-            return nativeToLittleEndian!T(thing);
-    }
-}
-
-/// The exception that is thrown by the copmiler.
-class CompilerException : Exception
+/// The exception that is thrown by the Compiler.
+class CompileException : Exception
 {
     public
     {
         /++
-         + Creates a new CompilerException.
+         + Creates a new CompileException.
          + 
          + Parameters:
          +  msg = The error message.
-         +  info = The debug info for where things went wrong.
          + ++/
         @safe
-        this(string msg, TokenDebugInfo info, string file = __FILE__, size_t line = __LINE__, Throwable next = null)
+        this(string msg, string file = __FILE__, size_t line = __LINE__, Throwable next = null)
         {
-            super(format("[%s] on line %s column %s: '%s'", info.file, info.line, info.column, msg), file, line, next);
+            super(msg, file, line, next);
         }
     }
 }

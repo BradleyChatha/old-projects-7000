@@ -1,4 +1,4 @@
-File format: [Header][NamespaceDef[] namespaces][Opcodes[] program]
+File format: [Header][NamespaceDef[] namespaces][Opcodes[] program][String16[] string table]
 
 The system's native endianess is used.
 
@@ -28,14 +28,15 @@ Format:  [String16, name_and_paramtypes][String16, localTypes][ubyte, flags][uin
 Example: 0x001C,MyFunction&int32&string$void,0x000D,&string&int32,0x00,0x000001EF,0xDEADBEEF
 Description:
 	Contains a defintion about a function.
-	The definition contains the signature of the function, as well as where the function is found in the file.
 	
-	The `localTypes` string contains the types of the function's local variables, delimited by an & sign,
-	with the return type of the function being prefixed with a $.
+	"name_and_paramtypes" contains the name of the function, as well as the parameters (Seperted by &), and ending with the return type,
+	which is seperated with $.
+	
+	The `localTypes` string contains the types of the function's local variables, delimited by an & sign.
 	
 	It should be noted that the pointer is relative to the first opcode, not relative to the beginning of the file.
 	
-	The size of the function's data is also stored.
+	"size" is the amount of space, in bytes, the function's code takes up in the JEXE.
 	
 	The function used in the example would be expressed as
 	{		
