@@ -215,7 +215,7 @@ if(isInputRange!R && is(Unqual!(ElementType!R) == ubyte))
                     {
                         enforce(func.pointer + func.size <= this._instructions.length, 
                             new JExeException(format("For function '%s', it's pointer and size are invalid.", func)));
-
+                            
                         func.data = this._instructions[func.pointer..func.pointer + func.size];
                     }
                 }

@@ -54,7 +54,7 @@ enum Opcode : ubyte
      +  Pushes a string value onto the top of the stack.
      + 
      + Parameters:
-     +  [0] String8 = The string to push onto the stack.
+     +  [0] UInt32 = The index in the String table of which string to push.
      + ++/
     PUSH_STRING                 = 1,
 

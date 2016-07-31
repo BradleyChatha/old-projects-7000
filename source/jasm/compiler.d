@@ -213,11 +213,12 @@ class Compiler
             // Write out all of the opcodes            
             auto old = this._index;
             this.write(cast(uint)0); // Reserve space for the Opcode section size.
-            
+
+            auto opStart = this._index;
             foreach(file; this._files)
                 foreach(cls; file.namespace.classes)
                     foreach(func; cls.functions)
-                        this.writeFunctionBody(func);
+                        this.writeFunctionBody(func, opStart);
             
             // And then how many bytes they take up
             auto otherOld = this._index;
@@ -227,18 +228,28 @@ class Compiler
         }
 
         // <Opcodes[]>
-        void writeFunctionBody(FunctionNode func)
+        void writeFunctionBody(FunctionNode func, uint opcodeStart)
         {
+            // Write the pointer
+            auto funcInfo = this._funcDefs[func.signature];
+            auto start    = this._index;
+            this._index   = funcInfo.pointerPtr;
+            this.write(cast(uint)(start - opcodeStart)); // The pointer is relative to the first opcode, not the start of the file
+            this._index   = start;
+
             foreach(op; func.ops)
             {
+                // Make sure it's an opcode
                 auto type = op.operation.type;
                 assert(type > TokenType.CODE_START && type < TokenType.CODE_END, format("Invalid opcode: %s", type));
 
+                // Find the information about the opcode
                 auto code = cast(Opcode)(type - TokenType.CODE_START);
                 auto info = this._opcodes[code];
 
                 this.write(cast(ubyte)code);
 
+                // Make sure there's enough parameters
                 enforce(op.parameters.length == info.params.length, 
                     new CompileException(
                         format("Expected %s parameters for %s, but only got %s", 
@@ -248,6 +259,8 @@ class Compiler
                 {
                     auto given = op.parameters[i];
 
+                    // Make sure the parameters are of the right type
+                    // The First byte of an Opcode.Param value is metadata, so it is ANDed to only get the parameter's type.
                     enforce(
                             (given.type == NodeType.String && param == OpcodeInfo.Param.String)
                          || (given.type == NodeType.Number && ((param & 0x00FF) >= OpcodeInfo.Param.Int8 && (param & 0x00FF) <= OpcodeInfo.Param.Int32)),
@@ -273,6 +286,12 @@ class Compiler
                     }
                 }
             }
+
+            // Write the size
+            auto end        = this._index;
+            this._index     = funcInfo.sizePtr;
+            this.write(cast(uint)(end - start));
+            this._index     = end;
         }
 
         /// Returns:
