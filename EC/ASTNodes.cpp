@@ -1,6 +1,6 @@
 #include "ASTNodes.h"
 
-ASTNode::ASTNode()
+ASTNode_String::ASTNode_String()
 {
+	//Type = TokenType::
 }
-

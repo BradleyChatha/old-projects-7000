@@ -12,16 +12,14 @@ int main(int argc, char** argv)
 {
 	ofstream file("Tokens.txt");
 
-	Lexer Lex = Lexer("var MyInt as int = 10;", "meme");
+	Lexer Lex = Lexer("var MyString as string = \"Hello World\";", "meme");
 	try
 	{
 		while (!Lex.Empty())
 		{
 			Lex.FrontToken().print(cout);
 			Lex.FrontToken().print(file);
-
-			cout << Lex.FrontToken().IsAnyOf({ TokenType::TOKENTYPE_KEYWORD_INT, TokenType::TOKENTYPE_KEYWORD_AS }) << endl;
-
+			
 			Lex.PopFront();
 		}
 

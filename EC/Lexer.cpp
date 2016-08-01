@@ -172,6 +172,8 @@ Token Lexer::NextStringToken(void)
 			StringSize++;
 	}
 
+	StringSize += 1;
+
 	Index = OldIndex;
 	Debug = OldDebug;
 
