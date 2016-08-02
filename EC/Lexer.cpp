@@ -123,8 +123,8 @@ Token Lexer::NextNumberToken(void)
 	{
 		auto c = NextCharacter(false);
 		TokenType Type = ToTokenType(string(1, c));
-		
-		if (isspace(c) || Type != TokenType::TOKENTYPE_UNKOWN)
+
+		if (Type != TokenType::TOKENTYPE_NUMBER && Type != TokenType::TOKENTYPE_OPERATOR_SUBTRACTION && Type != TokenType::TOKENTYPE_OPERATOR_DOTOPERATOR)
 		{
 			StepBack();
 			break;
@@ -143,11 +143,7 @@ Token Lexer::NextStringToken(void)
 {
 	SkipWhiteSpace();
 
-	char c =  NextCharacter(false);
-
-	cout << c << endl;
-
-	if ( c != '"')
+	if ( NextCharacter(false) != '"')
 		throw runtime_error("Incorrect function call. Given value is not a string.");
 
 	///The values have to be reset later in the function so we need to keep a copy of the old values alive.
@@ -335,6 +331,9 @@ TokenType Lexer::ToTokenType(string text)
 		GenerateIfCase(value, '[', TokenType::TOKENTYPE_OPERATOR_OPENSQUAREBRACKET);
 		GenerateIfCase(value, ']', TokenType::TOKENTYPE_OPERATOR_CLOSESQUAREBRACKET);
 		GenerateIfCase(value, '=', TokenType::TOKENTYPE_OPERATOR_EQUALS);
+	
+		if (IsNumber(string(1, value)))
+			return TokenType::TOKENTYPE_NUMBER;
 	}
 
 	return TokenType::TOKENTYPE_UNKOWN;

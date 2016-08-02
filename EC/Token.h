@@ -50,6 +50,11 @@ struct Token
 		DebugInfo = Debug;
 	}
 
+	Token(Token& Tok)
+	{
+		*this = Tok;
+	}
+
 	Token() {}
 
 	void print(ostream& stream)

@@ -13,14 +13,13 @@ int main(int argc, char** argv)
 {
 	ofstream file("Tokens.txt");
 
-	Lexer Lex = Lexer("var MyString as string = \"Hello World\";", "meme");
+	Lexer Lex = Lexer("var MyPoint as Point = -10.4;", "meme");
 	try
 	{
 		ASTNode_Variable var = ReadVariable(Lex);
 
 		var.Name.print(cout);
 		var.Value.Value.print(cout);
-		cout << (int)var.Value.Type << endl;
 	}
 	catch (exception& e) 
 	{

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <iostream>
 #include "Lexer.h"
 #include "Token.h"
 
@@ -12,7 +13,8 @@ enum class ASTNodeType
 	NODETYPE_VARIABLE = 0,
 	NODETYPE_STRING,
 	NODETYPE_NUMBER,
-	NODETYPE_USERDEFINED ///For classes etc.. There wont be a node of this, just need somewhere to put it.
+	NODETYPE_USERDEFINED, ///For classes, namespaces etc..
+	NODETYPE_NAMESAPCE
 };
 
 class ASTNode
@@ -35,6 +37,14 @@ class ASTNode_Variable : public ASTNode
 public:
 	Token Name;
 	ASTNode_VariableBase Value;
+};
+
+///For namespaces
+class ASTNode_Namespace : public ASTNode
+{
+public:
+	Token Namespace;
+	ASTNode_VariableBase Name;
 };
 
 ///For string type variables
@@ -68,7 +78,9 @@ public:
 		this->Value = value;
 		this->Type = ASTNodeType::NODETYPE_USERDEFINED;
 	}
+
+	ASTNode_UserDefined() {}
 };
 
-
 extern ASTNode_Variable ReadVariable(Lexer &lexer);
+extern ASTNode_Namespace ReadNamespace(Lexer &lexer);

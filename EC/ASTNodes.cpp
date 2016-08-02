@@ -3,12 +3,15 @@
 ///For ease functions
 namespace
 {
-	///Checks the tokens and then pops the front token
-	void EnforceToken(Lexer &lexer, TokenType type)
+	///Checks the tokens and then pops the front token. Returns the then front token
+	Token EnforceToken(Lexer &lexer, TokenType type)
 	{
-		if (!lexer.FrontToken().IsType(type))
+		Token tok = lexer.FrontToken();
+		if (!tok.IsType(type))
 			throw runtime_error("Unexpected Token");
 		lexer.PopFront();
+
+		return tok;
 	}
 
 	///Makes sure for just semicolons.
@@ -29,11 +32,7 @@ ASTNode_Variable ReadVariable(Lexer &lexer)
 	EnforceToken(lexer, TokenType::TOKENTYPE_KEYWORD_VAR);
 
 	///Check that it is a name that is given.
-	Token Name = lexer.FrontToken();
-	if(!Name.IsType(TokenType::TOKENTYPE_IDENTIFIER))
-		throw runtime_error("Unexpected Token");
-	lexer.PopFront();
-	VariableNode.Name = Name;
+	VariableNode.Name = EnforceToken(lexer, TokenType::TOKENTYPE_IDENTIFIER);
 
 	///Check for "as"
 	EnforceToken(lexer, TokenType::TOKENTYPE_KEYWORD_AS);
@@ -57,9 +56,12 @@ ASTNode_Variable ReadVariable(Lexer &lexer)
 
 		///Check if is any of these types
 		///An (u)integer, (u)byte, float, string, indetifier (classes).
-		if (Value.IsAnyOf({ TokenType::TOKENTYPE_STRING, TokenType::TOKENTYPE_IDENTIFIER, TokenType::TOKENTYPE_NUMBER }))
+		if (Value.IsAnyOf({ TokenType::TOKENTYPE_STRING, TokenType::TOKENTYPE_IDENTIFIER, TokenType::TOKENTYPE_NUMBER,  TokenType::TOKENTYPE_OPERATOR_SUBTRACTION}))
 		{
-			switch (Name.Type)
+			///Because C++ is rude and this is for negative numbers.
+			Token Number;
+
+			switch (Value.Type)
 			{
 			case TokenType::TOKENTYPE_STRING:
 				VariableNode.Value = ASTNode_String(Value);
@@ -67,6 +69,15 @@ ASTNode_Variable ReadVariable(Lexer &lexer)
 
 			case TokenType::TOKENTYPE_NUMBER:
 				VariableNode.Value = ASTNode_Number(Value);
+				break;
+
+			case TokenType::TOKENTYPE_OPERATOR_SUBTRACTION:
+				///The negation is lost because of the way the lexer works so it needs to be re-added.
+				lexer.PopFront();
+				Number = lexer.FrontToken();
+				Number.TokenData.insert(0, "-");
+
+				VariableNode.Value = ASTNode_Number(Number);
 				break;
 
 			case TokenType::TOKENTYPE_IDENTIFIER:
@@ -82,4 +93,21 @@ ASTNode_Variable ReadVariable(Lexer &lexer)
 
 	EnforceSemicolon(lexer);
 	return VariableNode;
+}
+
+ASTNode_Namespace ReadNamespace(Lexer &lexer)
+{
+	ASTNode_Namespace NamespaceNode;
+
+	///Check for "namespace".
+	Token Namespace = EnforceToken(lexer, TokenType::TOKENTYPE_KEYWORD_NAMESPACE);
+	NamespaceNode.Namespace = Namespace;
+
+	///Check for its name (e.g. namespace SuperComplexMath;)
+	Token NamespaceName = EnforceToken(lexer, TokenType::TOKENTYPE_IDENTIFIER);
+	NamespaceNode.Name = ASTNode_UserDefined(NamespaceName);
+
+	///Check for the semicolon.
+	EnforceSemicolon(lexer);
+	return NamespaceNode;
 }
