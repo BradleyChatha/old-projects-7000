@@ -1,5 +1,9 @@
 ﻿  Lexer.cpp
-e:\programming\c++\ec\ec\lexer.cpp(182): warning C4018: '<': signed/unsigned mismatch
-e:\programming\c++\ec\ec\lexer.cpp(214): warning C4018: '<': signed/unsigned mismatch
+e:\programming\c++\ec\ec\lexer.cpp(185): warning C4018: '<': signed/unsigned mismatch
+e:\programming\c++\ec\ec\lexer.cpp(220): warning C4018: '<': signed/unsigned mismatch
+  ASTNodes.cpp
+  Generating Code...
+  Skipping... (no relevant changes detected)
+  Main.cpp
   EC.vcxproj -> E:\Programming\C++\EC\Debug\EC.exe
   EC.vcxproj -> E:\Programming\C++\EC\Debug\EC.pdb (Full PDB)

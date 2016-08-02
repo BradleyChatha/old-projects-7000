@@ -16,7 +16,7 @@ void Lexer::Test(void)
 {
 	try
 	{
-		NextToken().print(cout);
+		throw runtime_error("Not in current use.");
 	}
 	catch(exception& e)
 	{
@@ -143,7 +143,11 @@ Token Lexer::NextStringToken(void)
 {
 	SkipWhiteSpace();
 
-	if (NextCharacter(false) != '"')
+	char c =  NextCharacter(false);
+
+	cout << c << endl;
+
+	if ( c != '"')
 		throw runtime_error("Incorrect function call. Given value is not a string.");
 
 	///The values have to be reset later in the function so we need to keep a copy of the old values alive.
@@ -155,15 +159,14 @@ Token Lexer::NextStringToken(void)
 	size_t StringSize = 0;
 	while(true)
 	{
-		if (Index > RawCode.length())
+		if (Index >= RawCode.length())
 			throw runtime_error("Unexpected EOF. String undetermined.");
 
 		char c = NextCharacter(false);
 
 		if (c == '"')
 			break;
-
-		else if (c == '\\')
+		if (c == '\\')
 		{
 			StringSize++;
 			NextCharacter(false);
@@ -172,17 +175,16 @@ Token Lexer::NextStringToken(void)
 			StringSize++;
 	}
 
-	StringSize += 1;
-
 	Index = OldIndex;
 	Debug = OldDebug;
-
-	StringToken.TokenData.reserve(StringSize);
 
 	for(int i = 0; i < StringSize; i++)
 	{
 		StringToken.TokenData += NextCharacter(false);
 	}
+	NextCharacter(false);
+	
+	cout << StringToken.TokenData << endl;
 
 	return StringToken;
 }

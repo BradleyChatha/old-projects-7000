@@ -55,11 +55,11 @@ struct Token
 	void print(ostream& stream)
 	{
 		stream << "[Token Debug] " 
-			<< "TokenType[\"" << TokenTypeNames[(int)Type] << "\"] "
-			<< "TokenData[\"" << TokenData << "\"] " 
-			<< "TokenDebugInfo:File[\"" << DebugInfo.File  << "\"] "
-			<< "TokenDebugInfo:Line[\"" << DebugInfo.Line << "\"] "
-			<< "TokenDebugInfo:Column[\"" << DebugInfo.Column << "\"] " << endl;
+			<< "TokenType[" << TokenTypeNames[(int)Type] << "] "
+			<< "TokenData[" << TokenData << "] " 
+			<< "TokenDebugInfo:File[" << DebugInfo.File  << "] "
+			<< "TokenDebugInfo:Line[" << DebugInfo.Line << "] "
+			<< "TokenDebugInfo:Column[" << DebugInfo.Column << "]" << endl;
 	}
 
 	///Checks if the token type is the the same as the given token type.
