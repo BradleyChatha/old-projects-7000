@@ -67,6 +67,22 @@ struct JExeFunction
     uint        size;
 }
 
+private void _isJExeReader(R)(JExeReader!R) {}
+
+/++
+ + Determines if $(B R) is a `JExeReader`.
+ + ++/
+template isJExeReader(R) 
+{
+    enum isJExeReader = is(typeof(_isJExeReader(R.init)));
+}
+///
+unittest
+{
+    assert(isJExeReader!(JExeReader!(ubyte[])));
+    assert(!isJExeReader!int);
+}
+
 /++
  + 
  + ++/
@@ -131,7 +147,7 @@ if(isInputRange!R && is(Unqual!(ElementType!R) == ubyte))
         /++
          + Reads a string from the data.
          + 
-         + Parameters:
+         + Params:
          +  T = What type of prefix the string has.
          + ++/
         string readString(T)()
@@ -176,7 +192,7 @@ if(isInputRange!R && is(Unqual!(ElementType!R) == ubyte))
         /++
          + Creates a reader around the given input range.
          + 
-         + Parameters:
+         + Params:
          +  range = The input range of ubytes that contains all of the data for a JEXE.
          + ++/
         this(R range)

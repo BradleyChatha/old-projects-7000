@@ -18,7 +18,7 @@ void main()
     auto bytes    = compiler.compile();
     std.file.write("Test.bin", bytes);
 
-    writeln(JExeReader!(ubyte[])(bytes));
+    //writeln(JExeReader!(ubyte[])(bytes));
 
     version(unittest)
     {

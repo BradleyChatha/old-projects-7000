@@ -72,7 +72,7 @@ private
      +  assert(toTokenType("I'm a boob") == TokenType.UNIQ_UNKNOWN);
      + ---
      + 
-     + Parameters:
+     + Params:
      +  text = The text to convert.
      + 
      + Returns:
@@ -179,7 +179,7 @@ struct Lexer
         /++
          + Private constructor, for unittests.
          + 
-         + Parameters:
+         + Params:
          +  pop = True if popFront should be called. False otherwise.
          + ++/
         @safe
@@ -202,7 +202,7 @@ struct Lexer
         /++
          + Constructs a new lexer that will lex the code given to it.
          + 
-         + Parameters:
+         + Params:
          +  code = The code to lex.
          +  fileName = Debug information. This is given to the debug data for each token this lexer creates.
          + ++/
@@ -251,7 +251,7 @@ struct Lexer
          + Reads and returns the next character.
          + Handles updating the _debug field for debug tokens.
          + 
-         + Parameters:
+         + Params:
          +  escape = If True, handles escape characters. False otherwise.
          + 
          + Throws:
@@ -743,7 +743,7 @@ class LexerException : Exception
         /++
          + Creates a new LexerException.
          + 
-         + Parameters:
+         + Params:
          +  msg = The error message.
          +  info = The debug info for where things went wrong.
          + ++/

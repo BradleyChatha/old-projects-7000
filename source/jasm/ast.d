@@ -69,7 +69,7 @@ abstract class Node
     public
     {
         /++
-         + Parameters:
+         + Params:
          +  type = The type of the node.
          + ++/
         @safe @nogc
@@ -106,7 +106,7 @@ class OpcodeNode : Node
          + Throws:
          +  `ASTException` if either $(D operation) or any of the $(D parameters) are incorrect types.
          + 
-         + Parameters:
+         + Params:
          +  operation  = The token holding the operation.
          +  parameters = The tokens being used as parameters.
          + ++/
@@ -150,7 +150,7 @@ class OpcodeNode : Node
 /++
  + A simple, and generic class for representing a basic node that simply holds a token.
  + 
- + Parameters:
+ + Params:
  +  TType = The type of the token that should be passed.
  +  Type  = The Node type of this node.
  + ++/
@@ -167,7 +167,7 @@ class ValueNode(TokenType TType, NodeType Type) : Node
          + Throws:
          +  `ASTException` if $(D tok)'s type is not the same as $(D TType).
          + 
-         + Parameters:
+         + Params:
          +  tok = The value of the node.
          + ++/
         @safe
@@ -210,7 +210,7 @@ class TypeListNode : Node
          + Assertions:
          +  $(D types) should not be null.
          + 
-         + Parameters:
+         + Params:
          +  types = The list of types.
          + ++/
         @safe @nogc
@@ -270,7 +270,7 @@ class FunctionNode : Node
          + Assertions:
          +  Some of the parameters should not be null.
          + 
-         + Parameters:
+         + Params:
          +  name        = The function's name.
          +  params      = The function's parameters.
          +  retType     = The return type of the function.
@@ -403,7 +403,7 @@ class ClassNode : Node
          + Throws:
          +  `ASTException` if $(D name) is not an identifier.
          + 
-         + Parameters:
+         + Params:
          +  name        = The name of the class.
          +  attributes  = The attributes of the class.    
          + ++/
@@ -420,7 +420,7 @@ class ClassNode : Node
         /++
          + Registers a function with the class.
          + 
-         + Parameters:
+         + Params:
          +  func = The function to register.
          + ++/
         @safe
@@ -483,7 +483,7 @@ struct NamespaceName
     public
     {
         /++
-         + Parameters:
+         + Params:
          +  nameTokens = The tokens that make up the name of the namespace.
          + ++/
         @safe
@@ -546,7 +546,7 @@ class NamespaceNode : Node
          + Throws:
          +  `ASTException` if the name is invalid.
          + 
-         + Parameters:
+         + Params:
          +  name = The name of the namespace.
          + ++/
         @safe
@@ -559,7 +559,7 @@ class NamespaceNode : Node
         /++
          + Registers a new class to the Namespace
          + 
-         + Parameters:
+         + Params:
          +  node = The node to register.
          + ++/
         @safe
@@ -606,7 +606,7 @@ class ImportNode : Node
     public
     {
         /++
-         + Parameters:
+         + Params:
          +  name = The namespace's name.
          + ++/
         @safe @nogc
@@ -617,7 +617,7 @@ class ImportNode : Node
         }
 
         /++
-         + Parameters:
+         + Params:
          +  name = The tokens making up the namespace's name.
          + ++/
         @safe
@@ -657,7 +657,7 @@ class FileNode : Node
          + Assertions:
          +  $(D namespace) must not be `null`.
          + 
-         + Parameters:
+         + Params:
          +  namespace = The namespace that the code adds to.
          + ++/
         @safe @nogc
@@ -672,7 +672,7 @@ class FileNode : Node
         /++
          + Adds a namespace that is to be imported.
          + 
-         + Parameters:
+         + Params:
          +  name = The name of the namespace to import.
          + ++/
         @safe
@@ -705,7 +705,7 @@ class FileNode : Node
 /++
  + Determines if a token can be used a parameter to an operation.
  + 
- + Parameters:
+ + Params:
  +  param = The token to check.
  + 
  + Returns:
@@ -727,7 +727,7 @@ bool validOpParameter(Token param) nothrow pure
  + Throws:
  +  `ASTException` if something is invalid.
  + 
- + Parameters:
+ + Params:
  +  lex = The input range of tokens.
  + 
  + Returns:
@@ -774,7 +774,7 @@ FileNode parseCode(R)(ref R lex)
  + Throws:
  +  `ASTException` if something is invalid.
  + 
- + Parameters:
+ + Params:
  +  lex = The input range of tokens.
  + 
  + Returns:
@@ -834,7 +834,7 @@ unittest
  + Throws:
  +  `ASTException` if something is invalid.
  + 
- + Parameters:
+ + Params:
  +  lex = The input range of tokens.
  + 
  + Returns:
@@ -894,7 +894,7 @@ ClassNode nextClass(R)(ref R lex)
  + Throws:
  +  `ASTException` if something is invalid.
  + 
- + Parameters:
+ + Params:
  +  lex = The input range of tokens.
  + 
  + Returns:
@@ -1032,7 +1032,7 @@ unittest
  + Throws:
  +  `ASTException` if something is invalid.
  + 
- + Parameters:
+ + Params:
  +  lex = The input range of tokens.
  + 
  + Returns:
@@ -1068,7 +1068,7 @@ unittest
  + Throws:
  +  `ASTException` if something is invalid.
  + 
- + Parameters:
+ + Params:
  +  lex = The input range of tokens.
  + 
  + Returns:
@@ -1131,7 +1131,7 @@ unittest
  + Throws:
  +  `ASTException` if something's incorrect.
  + 
- + Parameters:
+ + Params:
  +  lex = The input range of Tokens.
  + 
  + Returns:
@@ -1187,7 +1187,7 @@ unittest
  + Throws:
  +  `ASTException` if something's invalid.
  + 
- + Parameters:
+ + Params:
  +  lex = The input range of Tokens.
  + 
  + Returns:
@@ -1258,7 +1258,7 @@ void enforceToken(Token t, TokenType type, string wanted)
 /++
  + Determines if the number in the node is a floating point.
  + 
- + Parameters:
+ + Params:
  +  node = The number node to check.
  + 
  + Returns:
@@ -1282,7 +1282,7 @@ class ASTException : Exception
         /++
          + Creates a new ASTException.
          + 
-         + Parameters:
+         + Params:
          +  msg = The error message.
          +  info = The debug info for where things went wrong.
          + ++/

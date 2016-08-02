@@ -53,7 +53,7 @@ enum Opcode : ubyte
      + Description:
      +  Pushes a string value onto the top of the stack.
      + 
-     + Parameters:
+     + Params:
      +  [0] UInt32 = The index in the String table of which string to push.
      + ++/
     PUSH_STRING                 = 1,
@@ -65,7 +65,7 @@ enum Opcode : ubyte
      + Description:
      +  Pushes a 32-bit signed integer onto the top of the stack.
      + 
-     + Parameters:
+     + Params:
      +  [0] Int32 = The interger to push onto the stack.
      + ++/
     PUSH_INT32                  = 2,
@@ -81,7 +81,7 @@ enum Opcode : ubyte
      +  An TODO: Make exception name, should be thrown if the type of the popped off value is not convertable to
      +  the type of the local variable.
      + 
-     + Parameters:
+     + Params:
      +  [0] UInt8 = The index of the local variable to store the value into.
      + ++/
     STORE_LOCAL                 = 3,
@@ -99,7 +99,7 @@ enum Opcode : ubyte
 /++
  + Converts a `TokenType` into an `Opcode`.
  + 
- + Parameters:
+ + Params:
  +  type = The type to convert.
  + 
  + Returns:

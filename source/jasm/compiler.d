@@ -91,7 +91,7 @@ class Compiler
          +  $(D file) must not be `null`.
          +  $(D file) must not have already been included.
          + 
-         + Parameters:
+         + Params:
          +  file = The node of the file to include.
          + ++/
         void include(FileNode file)
@@ -390,7 +390,7 @@ class CompileException : Exception
         /++
          + Creates a new CompileException.
          + 
-         + Parameters:
+         + Params:
          +  msg = The error message.
          + ++/
         @safe
