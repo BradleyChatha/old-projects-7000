@@ -13,13 +13,13 @@ int main(int argc, char** argv)
 {
 	ofstream file("Tokens.txt");
 
-	Lexer Lex = Lexer("var MyPoint as Point = -10.4;", "meme");
+	Lexer Lex = Lexer("namespace MyModule;", "meme");
 	try
 	{
-		ASTNode_Variable var = ReadVariable(Lex);
+		ASTNode_Namespace name = ReadNamespace(Lex);
 
-		var.Name.print(cout);
-		var.Value.Value.print(cout);
+		name.Namespace.print(cout);
+		name.Name.Value.print(cout);
 	}
 	catch (exception& e) 
 	{
