@@ -97,6 +97,7 @@ if(isInputRange!R && is(Unqual!(ElementType!R) == ubyte))
         ubyte[] _instructions;
 
         JExeNamespace[] _namespaces;
+        string[]        _stringTable;
 
         /++
          + Reads a certain amount of bytes from the input range.
@@ -210,6 +211,15 @@ if(isInputRange!R && is(Unqual!(ElementType!R) == ubyte))
         {
             return this._namespaces;
         }
+
+        /++
+         + Returns the string table found in the JExe
+         + ++/
+        @property @safe @nogc
+        string[] stringTable() nothrow pure
+        {
+            return this._stringTable;
+        }
     }
 
     private
@@ -238,6 +248,21 @@ if(isInputRange!R && is(Unqual!(ElementType!R) == ubyte))
             }
 
             this._namespaces = namespaces;
+            this.readStrings();
+        }
+
+        /++
+         + Reads in the string table.
+         + ++/
+        void readStrings()
+        {
+            auto length = this.read!uint;
+            this._stringTable.reserve(length);
+
+            debug writefln("Reading in %s strings from the string table.", length);
+
+            foreach(i; 0..length)
+                this._stringTable ~= this.readString16;
         }
 
         /++
