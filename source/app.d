@@ -1,7 +1,7 @@
 ﻿module app;
 
 import std.stdio, std.file, std.format;
-import jasm.lexer, jasm.compiler, jasm.ast, jasm.reader;
+import jasm.lexer, jasm.compiler, jasm.ast, jasm.reader, jasm.vm;
 
 void main()
 {
@@ -17,8 +17,6 @@ void main()
     compiler.include(lex.parseCode);
     auto bytes    = compiler.compile();
     std.file.write("Test.bin", bytes);
-
-    //writeln(JExeReader!(ubyte[])(bytes));
 
     version(unittest)
     {

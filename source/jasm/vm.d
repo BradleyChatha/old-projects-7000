@@ -2,6 +2,9 @@
 
 private
 {
+    import std.exception    : enforce;
+    import std.traits       : isNumeric;
+
     import jasm.ast, jasm.compiler, jasm.lexer, jasm.opcodes, jasm.reader;
 }
 
@@ -11,10 +14,10 @@ private
 struct Namespace
 {
     /// The name of the namespace.
-    string  name;
+    string          name;
 
     /// The classes that belong to this namespace.
-    Class[] classes;
+    Class[string]   classes;
 }
 
 /++
@@ -23,16 +26,16 @@ struct Namespace
 struct Class
 {
     /// The name of the class.
-    string      name;
+    string              name;
 
     /// The namespace this class belongs to.
-    Namespace   namespace;
+    Namespace           namespace;
 
     /// The flags about this class.
-    ClassFlags  flags;
+    ClassFlags          flags;
 
     /// The functions that belong to this class.
-    Function[]  functions;
+    Function[string]    functions;
 }
 
 /++
@@ -41,30 +44,25 @@ struct Class
 struct Function
 {
     /// The name of the function.
-    string          name;
+    string      name;
 
     /// The class this function belongs to.
-    Class           parentClass;
+    Class       parentClass;
 
     /// The flags of the function.
-    FuncFlags       flags;
+    FuncFlags   flags;
+
+    /// The function's parameter types.
+    string[]    paramTypes;
+    
+    /// The function's local variables types.
+    string[]    localTypes;
+    
+    /// The funciton's return type.
+    string      retType;
 
     /// The pointer to where the function's instructions start.
-    const(size_t)   pointer;
-}
-
-/++
- + ++/
-class JasmVirtualMachine
-{
-    private
-    {
-        Memory  _mem;
-    }
-
-    public
-    {
-    }
+    size_t      pointer;
 }
 
 /++
@@ -133,6 +131,40 @@ struct Memory
             mem.addOpcodes(data);
 
             assert(mem.getOpcodes(1, 3) == data[1..3]);
+        }
+
+        /++
+         + Reads a number from memory.
+         + 
+         + Params:
+         +  [T]   = The numeric type to read in.
+         +  index = The index of the first byte of the number.
+         + 
+         + Returns:
+         +  The $(D T) found at $(D index).
+         + ++/
+        T getNumber(T)(size_t index)
+        if(isNumeric!T)
+        {
+            auto a = this.getOpcodes(index, index + T.sizeof);
+            auto b = cast(void[])a;
+            auto c = cast(T[])b;
+
+            return c[0];
+        }
+        ///
+        unittest
+        {
+            version(BigEndian)
+                ubyte[] data = [0xEA, 0xCB, 0x28, 0x58];
+            else
+                ubyte[] data = [0x58, 0x28, 0xCB, 0xEA];
+
+            Memory mem;
+            mem.addOpcodes(data);
+
+            assert(mem.getNumber!ushort(1) == 0xCB28);
+            assert(mem.getNumber!uint(0)   == 0xEACB2858);
         }
 
         /++

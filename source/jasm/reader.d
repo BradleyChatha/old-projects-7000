@@ -220,6 +220,15 @@ if(isInputRange!R && is(Unqual!(ElementType!R) == ubyte))
         {
             return this._stringTable;
         }
+
+        /++
+         + Returns the instructions in the JExe.
+         + ++/
+        @property @safe @nogc
+        ubyte[] instructions() nothrow pure
+        {
+            return this._instructions;
+        }
     }
 
     private
@@ -362,8 +371,10 @@ if(isInputRange!R && is(Unqual!(ElementType!R) == ubyte))
             // Parse name, param types, and return type
             auto   temp         = this.readString16;
             bool   foundReturn  = false;
+            bool   foundName    = false;
             size_t x, y;
 
+            func.name = temp;
             foreach(ch; temp)
             {
                 if(ch == '&' || ch == '$')
@@ -371,11 +382,11 @@ if(isInputRange!R && is(Unqual!(ElementType!R) == ubyte))
                     enforce(x - y != 0, new JExeException("Malformed function name(General): " ~ temp));
 
                     bool skip = false;
-                    if(func.name is null)
+                    if(!foundName)
                     {
-                        func.name = temp[x..y];
                         x         = y + 1;
                         skip      = true;
+                        foundName = true;
                     }
 
                     if(ch == '$')
