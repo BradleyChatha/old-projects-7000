@@ -1,5 +1,6 @@
 #include "Lexer.h"
 #include "Token.h"
+#include "ASTNodes.h"
 
 #include <fstream>
 #include <vector>
@@ -15,16 +16,11 @@ int main(int argc, char** argv)
 	Lexer Lex = Lexer("var MyString as string = \"Hello World\";", "meme");
 	try
 	{
-		while (!Lex.Empty())
-		{
-			Lex.FrontToken().print(cout);
-			Lex.FrontToken().print(file);
-			
-			Lex.PopFront();
-		}
+		ASTNode_Variable var = ReadVariable(Lex);
 
-		Lex.FrontToken().print(cout);
-		Lex.FrontToken().print(file);
+		var.Name.print(cout);
+		var.Value.Value.print(cout);
+		cout << (int)var.Value.Type << endl;
 	}
 	catch (exception& e) 
 	{
