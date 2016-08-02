@@ -1,0 +1,2 @@
+﻿module jasm.vm;
+
