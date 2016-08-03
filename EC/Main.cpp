@@ -13,13 +13,12 @@ int main(int argc, char** argv)
 {
 	ofstream file("Tokens.txt");
 
-	Lexer Lex = Lexer("namespace MyModule;", "meme");
+	Lexer Lex = Lexer("Print(var Str as string, var length as int) as void", "meme");
 	try
 	{
-		ASTNode_Namespace name = ReadNamespace(Lex);
+		ASTNode_Function func = ReadDefineFunction(Lex);
 
-		name.Namespace.print(cout);
-		name.Name.Value.print(cout);
+
 	}
 	catch (exception& e) 
 	{

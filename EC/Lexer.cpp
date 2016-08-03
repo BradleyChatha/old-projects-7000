@@ -313,6 +313,7 @@ TokenType Lexer::ToTokenType(string text)
 		GenerateIfCase(text, "public", TokenType::TOKENTYPE_KEYWORD_PUBLIC);
 		GenerateIfCase(text, "private", TokenType::TOKENTYPE_KEYWORD_PRIVATE);
 		GenerateIfCase(text, "import", TokenType::TOKENTYPE_KEYWORD_IMPORT);
+		GenerateIfCase(text, "void", TokenType::TOKENTYPE_KEYWORD_VOID);
 	}
 	else ///Character
 	{
@@ -331,6 +332,7 @@ TokenType Lexer::ToTokenType(string text)
 		GenerateIfCase(value, '[', TokenType::TOKENTYPE_OPERATOR_OPENSQUAREBRACKET);
 		GenerateIfCase(value, ']', TokenType::TOKENTYPE_OPERATOR_CLOSESQUAREBRACKET);
 		GenerateIfCase(value, '=', TokenType::TOKENTYPE_OPERATOR_EQUALS);
+		GenerateIfCase(value, ',', TokenType::TOKENTYPE_OPERATOR_COMMA);
 	
 		if (IsNumber(string(1, value)))
 			return TokenType::TOKENTYPE_NUMBER;

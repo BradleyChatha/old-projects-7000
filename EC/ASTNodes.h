@@ -2,6 +2,7 @@
 
 #include <string>
 #include <iostream>
+#include <vector>
 #include "Lexer.h"
 #include "Token.h"
 
@@ -47,6 +48,17 @@ public:
 	ASTNode_VariableBase Name;
 };
 
+///For creating functions
+class ASTNode_Function : public ASTNode
+{
+public:
+	Token Function;
+	Token ReturnType;
+	vector<ASTNode_Variable> Parameters;
+	///TODO: Add if statement nodes when they're made.
+	///TODO: Think of way to contain function body.
+};
+
 ///For string type variables
 class ASTNode_String : public ASTNode_VariableBase
 {
@@ -82,5 +94,14 @@ public:
 	ASTNode_UserDefined() {}
 };
 
+///TODO: Make a function to handle the different ways that identifiers can just be there:
+/// - Function definitions.
+/// - Non member function calls.
+/// - Variable reassignmeny.
+/// - Object reassignment.
+/// - Object member variable access.
+/// - Object memeber function call.
+
 extern ASTNode_Variable ReadVariable(Lexer &lexer);
 extern ASTNode_Namespace ReadNamespace(Lexer &lexer);
+extern ASTNode_Function ReadDefineFunction(Lexer &lexer);

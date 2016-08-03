@@ -24,7 +24,7 @@ namespace
 }
 
 ///Reads a variable declaration line. (e.g. var MyInt as int = 10;)
-ASTNode_Variable ReadVariable(Lexer &lexer)
+ASTNode_Variable ReadVariable(Lexer &lexer, bool IsParam)
 {
 	ASTNode_Variable VariableNode;
 
@@ -91,7 +91,8 @@ ASTNode_Variable ReadVariable(Lexer &lexer)
 		lexer.PopFront();
 	}
 
-	EnforceSemicolon(lexer);
+	if(!IsParam)
+		EnforceSemicolon(lexer);
 	return VariableNode;
 }
 
@@ -110,4 +111,51 @@ ASTNode_Namespace ReadNamespace(Lexer &lexer)
 	///Check for the semicolon.
 	EnforceSemicolon(lexer);
 	return NamespaceNode;
+}
+
+ASTNode_Function ReadDefineFunction(Lexer &lexer)
+{
+	ASTNode_Function FunctionNode;
+
+	///Get the function name from an identifier.
+	FunctionNode.Function = EnforceToken(lexer, TokenType::TOKENTYPE_IDENTIFIER);
+	
+	///Check for '('
+	EnforceToken(lexer, TokenType::TOKENTYPE_OPERATOR_OPENBRACKET);
+
+	///Check for parameters
+	if(!lexer.FrontToken().IsType(TokenType::TOKENTYPE_OPERATOR_CLOSEBRACKET))
+	{
+		while(true)
+		{
+			Token CurrentToken = lexer.FrontToken();
+
+			if (CurrentToken.IsType(TokenType::TOKENTYPE_OPERATOR_COMMA))
+				continue;
+			else if (CurrentToken.IsType(TokenType::TOKENTYPE_OPERATOR_CLOSEBRACKET))
+				break;
+
+			FunctionNode.Parameters.push_back(ReadVariable(lexer, true));
+
+			//lexer.PopFront();
+		}
+
+		lexer.PopFront();
+	}
+
+	///Check for the return type (as type)
+	EnforceToken(lexer, TokenType::TOKENTYPE_KEYWORD_AS);
+	
+	///Check for the return type.
+	Token ReturnType = lexer.FrontToken();
+	lexer.PopFront();
+
+	if (!ReturnType.IsAnyOf({ TokenType::TOKENTYPE_KEYWORD_INT, TokenType::TOKENTYPE_KEYWORD_UINT, TokenType::TOKENTYPE_KEYWORD_BYTE,
+		TokenType::TOKENTYPE_KEYWORD_UBYTE, TokenType::TOKENTYPE_KEYWORD_FLOAT, TokenType::TOKENTYPE_KEYWORD_STRING, 
+		TokenType::TOKENTYPE_KEYWORD_VOID, TokenType::TOKENTYPE_IDENTIFIER }))
+		throw runtime_error("Unkown return type");
+
+	///TODO: handle the main body of the function...
+
+	return FunctionNode;
 }
