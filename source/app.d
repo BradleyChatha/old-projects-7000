@@ -12,11 +12,6 @@ void main()
         chdir("bin");
     }
 
-    auto lex      = new Lexer(readText("Test.jasm"), "Test.jasm");
-    auto compiler = new Compiler();
-    compiler.include(lex.parseCode);
-    auto bytes    = compiler.compile();
-    std.file.write("Test.bin", bytes);
 
     version(unittest)
     {

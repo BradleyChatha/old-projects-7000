@@ -1,5 +1,6 @@
 ﻿module jasm.reader;
 
+version(none):
 private
 {
     import std.format       : format;

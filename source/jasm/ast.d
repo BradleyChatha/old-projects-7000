@@ -10,6 +10,7 @@ private
     import jasm.lexer;
 }
 
+version(none):
 /++
  + A `Node`'s type.
  + ++/

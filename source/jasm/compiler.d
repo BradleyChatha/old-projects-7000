@@ -1,5 +1,6 @@
 ﻿module jasm.compiler;
 
+version(none):
 private
 {
     import std.array     : appender, Appender;

@@ -1,5 +1,6 @@
 ﻿module jasm.vm;
 
+version(none):
 private
 {
     import std.exception    : enforce;
