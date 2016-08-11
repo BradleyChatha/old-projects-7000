@@ -29,7 +29,7 @@ Jasm:
                        :'}'
 
     # Functions
-                                        #Name           #ParamTypes   #ReturnType #Attributes
+                                       #Name            #ParamTypes   #ReturnType #Attributes
     FunctionDeclaration < :'.function' ^identifier :'(' VarType* :')' VarType     Attribute*
                           :'{'
                                 LocalsDeclaration   #LocalTypes
@@ -88,6 +88,67 @@ r"
 }
 ");
     //std.file.write("Debug.txt", tree.toString);
+}
+
+// String
+unittest
+{
+    import pegged.tester.grammartester;
+
+    auto test = new GrammarTester!(Jasm, "String");
+    test.assertSimilar("\"Hello World\"",       "String");
+    test.assertSimilar("'Hello \\' \\n World'", "String");
+}
+
+// Number
+unittest
+{
+    import pegged.tester.grammartester;
+    
+    auto test = new GrammarTester!(Jasm, "Number");
+    test.assertSimilar("2016",      "Number->DecNum");
+    test.assertSimilar("0x329AB",   "Number->HexNum");
+}
+
+// MneumonicStatement
+unittest
+{
+    import pegged.tester.grammartester;
+    
+    auto test = new GrammarTester!(Jasm, "Mneumonic");
+    test.assertSimilar("push.str", "Mneumonic");
+    test.assertSimilar("push.i32", "Mneumonic");
+
+    auto testt = new GrammarTester!(Jasm, "MneumonicStatement");
+    testt.assertSimilar("push.str 'Daniel is a moob', 20, 0xDEADBEEF;",
+        r"
+            MneumonicStatement->
+            {
+                Mneumonic
+                MneumonicOperand->String
+                MneumonicOperand->Number->DecNum
+                MneumonicOperand->Number->HexNum
+            }
+        ");
+}
+
+// LocalsDeclaration
+unittest
+{
+    import pegged.tester.grammartester;
+    
+    auto test = new GrammarTester!(Jasm, "VarType");
+    test.assertSimilar("&void", "VarType");
+    
+    auto testt = new GrammarTester!(Jasm, "LocalsDeclaration");
+    testt.assertSimilar(".locals {&void &int32}",
+        r"
+            LocalsDeclaration->
+            {
+                VarType
+                VarType
+            }
+        ");
 }
 
 /++

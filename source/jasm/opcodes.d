@@ -36,7 +36,7 @@ enum FuncFlags : ubyte
 /++
  + Contains all of the opcodes used in a JEXE.
  + 
- + Unlikes the CODE_XXX values inside of `jasm.lexer`, the documentation for the `Opcode` values is talking about
+ + This documentation for the `Opcode` values is talking about
  + how the VM should function, instead of how it works inside of JASM.
  + ++/
 enum Opcode : ubyte
