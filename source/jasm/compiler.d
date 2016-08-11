@@ -1,8 +1,8 @@
 ﻿module jasm.compiler;
 
-version(none):
 private
 {
+    import std.algorithm : filter, map;
     import std.array     : appender, Appender;
     import std.bitmanip;
     import std.exception : enforce;
@@ -10,7 +10,7 @@ private
     import std.traits    : isArray, isSomeString;
     import std.format    : format;
 
-    import jasm.ast, jasm.opcodes, jasm.lexer;
+    import jasm.grammar, jasm.opcodes;
 }
 
 /++
@@ -33,7 +33,7 @@ class Compiler
 
     private
     {
-        FileNode[]          _files;
+        ParseTree[]         _files;
         ubyte[]             _output;
         size_t              _index;
         FuncInfo[string]    _funcDefs; // The key is the function's signature.
@@ -86,23 +86,23 @@ class Compiler
         }
 
         /++
-         + Includes a file to be compiled.
+         + Includes a piece of code to be compiled.
          + 
          + Exceptions:
-         +  $(D file) must not be `null`.
-         +  $(D file) must not have already been included.
+         +  $(D tree)'s name must be "Jasm"
+         +  $(D tree) must not have already been included.
          + 
          + Params:
-         +  file = The node of the file to include.
+         +  tree = The parse tree of the code.
          + ++/
-        void include(FileNode file)
+        void include(ParseTree tree)
         {
             import std.algorithm : all;
 
-            enforce(file !is null,                      new CompileException("Attempted to include a null FileNode"));
-            enforce(this._files.all!((f) => f != file), new CompileException("This FileNode has already been included."));
+            enforce(tree.name == "Jasm" && tree.children[0].name == "Jasm.Code");
+            enforce(this._files.all!((f) => f.input != tree.input), new CompileException("This ParseTree has already been included."));
 
-            this._files ~= file;
+            this._files ~= tree.children[0];
         }
 
         /++
@@ -144,72 +144,96 @@ class Compiler
         }
 
         // <FunctionDef>
-        void writeFunctionDef(FunctionNode func)
+        void writeFunctionDef(ParseTree func)
         {
-            this.writeString16(func.signature);
-            this.writeString16(func.locals.asList);
+            import std.array : array;
+            assert(func.name == "Jasm.FunctionDeclaration", func.name);
+
+            // Get all the information about the function
+            auto name       = func.children.filter!((c) => c.name == "identifier").front.matches[0];
+            auto types      = func.children.filter!((c) => c.name == "Jasm.VarType").map!((c) => c.matches[0]).array;
+            auto attribs    = func.children.filter!((c) => c.name == "Jasm.Attribute").map!((c) => c.matches[0]);
+            auto locals     = func.children.filter!((c) => c.name == "Jasm.LocalsDeclaration").front.matches;
+            auto sig        = name.asFunctionSignature(types);
+
+            this.writeString16(sig);
+            this.writeString16(locals.asVarTypeList);
 
             ubyte flag = 0;
-            foreach(attr; func.attributes)
+            foreach(attr; attribs)
             {
-                switch(attr.token.text)
+                switch(attr)
                 {
                     case "Static":      flag |= FuncFlags.IsStatic; break;
                     case "EntryPoint":  flag |= FuncFlags.IsEntry; break;
 
                     default:
-                        throw new CompileException("Invalid attribute: " ~ attr.token.text);
+                        throw new CompileException("Invalid attribute: " ~ attr);
                 }
             }
 
             this.write(flag);
 
-            this._funcDefs[func.signature] = FuncInfo(this._index, this._index + uint.sizeof);
+            this._funcDefs[sig] = FuncInfo(this._index, this._index + uint.sizeof);
             this.write(cast(uint)0); // Save space for the pointer
             this.write(cast(uint)0); // Save space for the size
         }
 
         // <ClassDef>
-        void writeClassDef(ClassNode cls)
+        void writeClassDef(ParseTree cls)
         {
             import std.algorithm : each;
-            this.writeString8(cls.name);
+            import std.array     : array;
+            assert(cls.name == "Jasm.ClassDeclaration", cls.name);
+
+            // Get all the information about the class
+            auto name       = cls.children.filter!((c) => c.name == "identifier").front.matches[0];
+            auto attribs    = cls.children.filter!((c) => c.name == "Jasm.Attribute").map!((c) => c.matches[0]);
+            auto functions  = cls.children.filter!((c) => c.name == "Jasm.FunctionDeclaration").array;
+
+            this.writeString8(name);
 
             ubyte flag = 0;
-            foreach(attr; cls.attributes)
+            foreach(attr; attribs)
             {
-                switch(attr.token.text)
+                switch(attr)
                 {
                     case "Static": flag |= ClassFlags.IsStatic; break;
 
                     default:
-                        throw new CompileException("Invalid attribute: " ~ attr.token.text);
+                        throw new CompileException("Invalid attribute: " ~ attr);
                 }
             }
 
             this.write(flag);
-            this.write(cast(uint)cls.functions.length);
-            cls.functions.each!((f) => this.writeFunctionDef(f));
+            this.write(cast(uint)functions.length);
+            functions.each!((f) => this.writeFunctionDef(f));
         }
 
         // <NamespaceDef>
-        void writeNamespaceDef(NamespaceNode ns)
+        void writeNamespaceDef(ParseTree ns)
         {
             import std.algorithm : each;
-            this.writeString8(ns.name.fullName);
+            import std.array     : array;
+            assert(ns.name == "Jasm.Code");
 
-            this.write(cast(uint)ns.classes.length);
-            ns.classes.each!((c) => this.writeClassDef(c));
+            auto name       = ns.children.filter!((c) => c.name == "Jasm.Namespace").front.matches[0];
+            auto classes    = ns.children.filter!((c) => c.name == "Jasm.ClassDeclaration").array;
+
+            this.writeString8(name);
+
+            this.write(cast(uint)classes.length);
+            classes.each!((c) => this.writeClassDef(c));
         }
 
         // <Opcodes[]>
         void writeOpcodes()
         {
-            import std.algorithm : each, map;
+            import std.algorithm : each;
 
             // TODO: Merge the same namespaces into a single FileNode
             this.write(cast(uint)this._files.length);
-            this._files.each!((f) => this.writeNamespaceDef(f.namespace));
+            this._files.each!((f) => this.writeNamespaceDef(f));
             
             // Write out all of the opcodes            
             auto old = this._index;
@@ -217,10 +241,10 @@ class Compiler
 
             auto opStart = this._index;
             foreach(file; this._files)
-                foreach(cls; file.namespace.classes)
-                    foreach(func; cls.functions)
+                foreach(cls; file.children.filter!((c) => c.name == "Jasm.ClassDeclaration"))
+                    foreach(func; cls.children.filter!((c) => c.name == "Jasm.FunctionDeclaration"))
                         this.writeFunctionBody(func, opStart);
-            
+        
             // And then how many bytes they take up
             auto otherOld = this._index;
             this._index = old;
@@ -229,58 +253,67 @@ class Compiler
         }
 
         // <Opcodes[]>
-        void writeFunctionBody(FunctionNode func, uint opcodeStart)
+        void writeFunctionBody(ParseTree func, uint opcodeStart)
         {
+            import std.array : array;
+
+            // Information about the function
+            auto name       = func.children.filter!((c) => c.name == "identifier").front.matches[0];
+            auto types      = func.children.filter!((c) => c.name == "Jasm.VarType").map!((c) => c.matches[0]).array;
+            auto sig        = name.asFunctionSignature(types);
+
             // Write the pointer
-            auto funcInfo = this._funcDefs[func.signature];
+            auto funcInfo = this._funcDefs[sig];
             auto start    = this._index;
             this._index   = funcInfo.pointerPtr;
             this.write(cast(uint)(start - opcodeStart)); // The pointer is relative to the first opcode, not the start of the file
             this._index   = start;
 
-            foreach(op; func.ops)
+            foreach(op; func.children.filter!((c) => c.name == "Jasm.MneumonicStatement"))
             {
-                // Make sure it's an opcode
-                auto type = op.operation.type;
-                assert(type > TokenType.CODE_START && type < TokenType.CODE_END, format("Invalid opcode: %s", type));
+                import std.array  : replace;
+                import std.conv   : to;
+                import std.string : toUpper;
 
                 // Find the information about the opcode
-                auto code = cast(Opcode)(type - TokenType.CODE_START);
+                auto code = op.matches[0].replace(".", "_").toUpper.to!Opcode;
                 auto info = this._opcodes[code];
 
                 this.write(cast(ubyte)code);
 
                 // Make sure there's enough parameters
-                enforce(op.parameters.length == info.params.length, 
+                auto parameters = op.children.filter!((c) => c.name == "Jasm.MneumonicOperand").array;
+
+                enforce(parameters.length == info.params.length, 
                     new CompileException(
                         format("Expected %s parameters for %s, but only got %s", 
-                                info.params.length, type, op.parameters.length)
+                                info.params.length, op.matches[0], parameters.length)
                         ));
                 foreach(i, param; info.params)
                 {
-                    auto given = op.parameters[i];
+                    auto given = parameters[i];
+                    auto type  = given.children[0].name;
 
                     // Make sure the parameters are of the right type
                     // The First byte of an Opcode.Param value is metadata, so it is ANDed to only get the parameter's type.
                     enforce(
-                            (given.type == NodeType.String && param == OpcodeInfo.Param.String)
-                         || (given.type == NodeType.Number && ((param & 0x00FF) >= OpcodeInfo.Param.Int8 && (param & 0x00FF) <= OpcodeInfo.Param.Int32)),
-                            new CompileException(format("For opcode %s, expected a %s as the %sst/nd/th opcode, but got %s", type, param, i, given.type))
+                            (type == "Jasm.String" && param == OpcodeInfo.Param.String)
+                         || (type == "Jasm.Number" && ((param & 0x00FF) >= OpcodeInfo.Param.Int8 && (param & 0x00FF) <= OpcodeInfo.Param.Int32)),
+                            new CompileException(format("For opcode %s, expected a %s as the %sst/nd/th opcode, but got %s", code, param, i, type))
                         );
 
-                    switch(given.type)
+                    switch(type)
                     {
-                        case NodeType.String:
-                            auto x = cast(StringNode)given;
-                            this.write(this.makeStringTableEntry(x));
+                        case "Jasm.String":
+                            this.write(this.makeStringTableEntry(given.matches[0]));
                             break;
 
-                        case NodeType.Number:
-                            auto x = cast(NumberNode)given;
+                        case "Jasm.Number":
+                            auto x = given.matches[0];
                             if(param & OpcodeInfo.Param.Unsigned)
-                                this.writeNumberParameter!false(x.token.text, param);
+                                this.writeNumberParameter!false(x, param);
                             else
-                                this.writeNumberParameter!true(x.token.text, param);
+                                this.writeNumberParameter!true(x, param);
                             break;
 
                         default: assert(0);
@@ -297,13 +330,13 @@ class Compiler
 
         /// Returns:
         ///     The index of the string
-        uint makeStringTableEntry(StringNode node)
+        uint makeStringTableEntry(string str_)
         {
             foreach(i, str; this._strings)
-                if(str == node.token.text)
+                if(str == str_)
                     return i;
 
-            this._strings ~= node.token.text;
+            this._strings ~= str_;
             return cast(uint)(this._strings.length - 1);
         }
 
@@ -373,8 +406,8 @@ class Compiler
             {
                 this._opcodes =
                 [
-                    Opcode.PUSH_STRING:             OpcodeInfo([String]),
-                    Opcode.PUSH_INT32:              OpcodeInfo([Int32]),
+                    Opcode.PUSH_STR:                OpcodeInfo([String]),
+                    Opcode.PUSH_I32:                OpcodeInfo([Int32]),
                     Opcode.STORE_LOCAL:             OpcodeInfo([UInt8]),
                     Opcode.DEBUG_LOCALS:            OpcodeInfo([])
                 ];
@@ -400,4 +433,22 @@ class CompileException : Exception
             super(msg, file, line, next);
         }
     }
+}
+
+private string asVarTypeList(string[] types)
+{
+    string list;
+    foreach(type; types)
+        list ~= "&" ~ type;
+
+    return list;
+}
+
+private string asFunctionSignature(string funcName, string[] types)
+{
+    auto sig = funcName;
+    foreach(i, type; types)
+        sig ~= (i == types.length - 1) ? "$" ~ type : "&" ~ type;
+
+    return sig;
 }

@@ -1,6 +1,6 @@
 ﻿module jasm.grammar;
 
-private
+public
 {
     import pegged.grammar;
 }
@@ -46,8 +46,8 @@ Jasm:
     VarType < :'&' identifier
 
     # Mneumonics
-    MneumonicStatement < Mneumonic MnuemonicOperand? (',' MnuemonicOperand)* :';'
-    MnuemonicOperand   < String / Number
+    MneumonicStatement < Mneumonic MneumonicOperand? (',' MneumonicOperand)* :';'
+    MneumonicOperand   < String / Number
     Mneumonic < 'push.str'          /
                 'push.i32'          /
                 'store.local'       /
@@ -87,7 +87,7 @@ r"
     }
 }
 ");
-    std.file.write("Debug.txt", tree.toString);
+    //std.file.write("Debug.txt", tree.toString);
 }
 
 /++

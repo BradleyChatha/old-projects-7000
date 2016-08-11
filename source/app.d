@@ -1,7 +1,7 @@
 ﻿module app;
 
 import std.stdio, std.file, std.format;
-import jasm.lexer, jasm.compiler, jasm.ast, jasm.reader, jasm.vm;
+import jasm.compiler, jasm.reader, jasm.vm, jasm.grammar;
 
 void main()
 {
@@ -12,6 +12,14 @@ void main()
         chdir("bin");
     }
 
+    auto code = readText("Test.jasm");
+    auto tree = code.parseJasm;
+    std.file.write("Debug.txt", tree.toString);
+
+    auto comp = new Compiler();
+    comp.include(tree);
+
+    std.file.write("Test.bin", comp.compile);
 
     version(unittest)
     {

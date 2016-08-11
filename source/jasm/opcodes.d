@@ -1,10 +1,5 @@
 ﻿module jasm.opcodes;
 
-private
-{
-    import jasm.lexer;
-}
-
 /++
  + Flags about a class.
  + ++/
@@ -56,7 +51,7 @@ enum Opcode : ubyte
      + Params:
      +  [0] UInt32 = The index in the String table of which string to push.
      + ++/
-    PUSH_STRING                 = 1,
+    PUSH_STR                    = 1,
 
     /++
      + Command:
@@ -68,7 +63,7 @@ enum Opcode : ubyte
      + Params:
      +  [0] Int32 = The interger to push onto the stack.
      + ++/
-    PUSH_INT32                  = 2,
+    PUSH_I32                    = 2,
 
     /++
      + Command:
@@ -94,22 +89,4 @@ enum Opcode : ubyte
      +  Causes the VM to output the values of the function's local variables.
      + ++/
     DEBUG_LOCALS                = 4
-}
-
-/++
- + Converts a `TokenType` into an `Opcode`.
- + 
- + Params:
- +  type = The type to convert.
- + 
- + Returns:
- +  The `Opcode` Equivalent to `type`
- + ++/
-Opcode toOpcode(TokenType type)
-{
-    assert(type > TokenType.CODE_START && type < TokenType.CODE_END);
-
-    auto a = cast(ushort)type;
-    auto b = cast(ushort)TokenType.CODE_START;
-    return cast(Opcode)(a - b);
 }
