@@ -18,8 +18,11 @@ void main()
 
     auto comp = new Compiler();
     comp.include(tree);
+    auto bin  = comp.compile;
 
-    std.file.write("Test.bin", comp.compile);
+    std.file.write("Test.bin", bin);
+
+    auto reader = JExeReader!(ubyte[])(bin);
 
     version(unittest)
     {
