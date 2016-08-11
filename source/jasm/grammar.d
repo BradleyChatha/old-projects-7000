@@ -6,7 +6,12 @@ private
 }
 
 mixin(grammar(r"
-Jasm:    
+Jasm:
+    # .locals
+    LocalsDeclaration < :'.locals' :'{' VarType* :'}'
+
+    # VarType
+    VarType < :'&' identifier
 
     # Mneumonics
     MneumonicStatement < Mneumonic MnuemonicOperand? (',' MnuemonicOperand)* :';'
@@ -30,6 +35,6 @@ unittest
 {
     import std.stdio;
 
-    auto tree = Jasm("push.str 'Hello World', 69, 0x47;");
+    auto tree = Jasm(".locals {&int32 &string}");
     writeln(tree);
 }
