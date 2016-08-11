@@ -1,0 +1,30 @@
+﻿module jasm.grammar;
+
+private
+{
+    import pegged.grammar;
+}
+
+mixin(grammar(r"
+Jasm:
+
+    # Mneumonics
+    MneumonicStatement < Mneumonic MnuemonicOperand? (',' MnuemonicOperand)* :';'
+    MnuemonicOperand   < String
+    Mneumonic < 'push.str'          /
+                'push.i32'          /
+                'store.local'       /
+                'debug.locals'      
+
+    # String
+    String <- :Quote ~(!Quote SChar)* :Quote
+    Quote  <- (quote / doublequote)
+    SChar  <- backslash ('r' / 't' / 'n' / backslash / quote / doublequote) / .
+"));
+unittest
+{
+    import std.stdio;
+
+    auto tree = Jasm("push.str 'Hello World';");
+    writeln(tree);
+}

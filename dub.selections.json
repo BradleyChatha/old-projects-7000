@@ -1,4 +1,6 @@
 {
-	"versions": {},
-	"fileVersion": 1
+	"fileVersion": 1,
+	"versions": {
+		"pegged": "0.3.2"
+	}
 }

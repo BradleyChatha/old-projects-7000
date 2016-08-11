@@ -5,3 +5,5 @@ authors "Sealab"
 
 targetType "executable"
 targetPath "bin"
+
+dependency "pegged" version="~>0.3.2"
