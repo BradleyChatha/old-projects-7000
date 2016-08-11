@@ -15,6 +15,17 @@ JasmUncommented:
 // Then this grammar can be used to properly parse it
 mixin(grammar(r"
 Jasm:
+    # Functions
+                                        #Name           #ParamTypes   #ReturnType #Attributes
+    FunctionDeclaration < :'.function' ^identifier :'(' VarType* :')' VarType     Attribute*
+                          :'{'
+                                LocalsDeclaration   #LocalTypes
+                                MneumonicStatement* #Operations
+                          :'}'
+
+    # Attributes
+    Attribute < :'[' identifier :']'
+
     # .locals
     LocalsDeclaration < :'.locals' :'{' VarType* :'}'
 
@@ -43,7 +54,19 @@ unittest
 {
     import std.stdio;
 
-    auto tree = parseJasm("");
+    auto tree = parseJasm(
+r"
+    .function Test(&int32 &string) &void [EntryPoint]
+    {
+        .locals
+        {
+            &int32
+            &string
+        }
+
+        push.str 'Daniel is super fab';
+    }    
+");
     writeln(tree);
 }
 
