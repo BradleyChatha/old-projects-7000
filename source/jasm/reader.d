@@ -268,7 +268,7 @@ if(isInputRange!R && is(Unqual!(ElementType!R) == ubyte))
             auto length = this.read!uint;
             this._stringTable.reserve(length);
 
-            debug writefln("Reading in %s strings from the string table.", length);
+            //debug writefln("Reading in %s strings from the string table.", length);
 
             foreach(i; 0..length)
                 this._stringTable ~= this.readString16;
