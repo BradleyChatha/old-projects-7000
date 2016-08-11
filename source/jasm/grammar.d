@@ -15,6 +15,19 @@ JasmUncommented:
 // Then this grammar can be used to properly parse it
 mixin(grammar(r"
 Jasm:
+    # Entire file
+    Code < Namespace ClassDeclaration*
+
+    # Namespace
+    Namespace < :'.namespace' qualifiedIdentifier
+
+    # Classes
+                                 #Name       #Attributes
+    ClassDeclaration < :'.class' ^identifier Attribute*
+                       :'{'
+                            FunctionDeclaration*    # Functions
+                       :'}'
+
     # Functions
                                         #Name           #ParamTypes   #ReturnType #Attributes
     FunctionDeclaration < :'.function' ^identifier :'(' VarType* :')' VarType     Attribute*
@@ -52,26 +65,42 @@ Jasm:
 "));
 unittest
 {
-    import std.stdio;
+    import std.stdio, std.file;
 
     auto tree = parseJasm(
 r"
-    .function Test(&int32 &string) &void [EntryPoint]
+.namespace Jasm.Test
+
+.class Test [Static]
+{
+    .function Main() &void [EntryPoint]
     {
         .locals
         {
-            &int32
-            &string
+            &string // 0
         }
-
-        push.str 'Daniel is super fab';
-    }    
+        
+        push.str 'Daniel is a moob';
+        store.local 0;
+        
+        debug.locals; // Prints out all of the locals in the function.
+    }
+}
 ");
-    writeln(tree);
+    std.file.write("Debug.txt", tree.toString);
 }
 
 /++
+ + Parses a piece of JASM code.
  + 
+ + Throws:
+ +  `Exception` if something about `code` is invalid.
+ + 
+ + Params:
+ +  code = The code to parse.
+ + 
+ + Returns:
+ +  A `ParseTree` containing the tree of the parsed `code`.
  + ++/
 @trusted
 ParseTree parseJasm(string code)
