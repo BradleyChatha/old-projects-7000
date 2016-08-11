@@ -6,15 +6,20 @@ private
 }
 
 mixin(grammar(r"
-Jasm:
+Jasm:    
 
     # Mneumonics
     MneumonicStatement < Mneumonic MnuemonicOperand? (',' MnuemonicOperand)* :';'
-    MnuemonicOperand   < String
+    MnuemonicOperand   < String / Number
     Mneumonic < 'push.str'          /
                 'push.i32'          /
                 'store.local'       /
                 'debug.locals'      
+
+    # Number
+    Number < HexNum / DecNum
+    DecNum <~ digit+
+    HexNum <~ '0x' hexDigit+
 
     # String
     String <- :Quote ~(!Quote SChar)* :Quote
@@ -25,6 +30,6 @@ unittest
 {
     import std.stdio;
 
-    auto tree = Jasm("push.str 'Hello World';");
+    auto tree = Jasm("push.str 'Hello World', 69, 0x47;");
     writeln(tree);
 }
