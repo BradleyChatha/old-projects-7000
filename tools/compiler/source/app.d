@@ -21,7 +21,7 @@ void main()
     
     std.file.write("Test.bin", bin);
     
-    auto reader = JExeReader!(ubyte[])(bin);
+    auto reader = bin.readJExe();
     
     version(unittest)
     {

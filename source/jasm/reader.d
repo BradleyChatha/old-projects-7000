@@ -428,6 +428,21 @@ version(unittest)
 }
 
 /++
+ + A freestanding function to create a `JExeReader` from the given `ubyte` range.
+ + 
+ + Params:
+ +  range = The range of `ubyte`s that contain the JExe
+ + 
+ + Returns:
+ +  A `JExeReader` that has read in the JExe provided by `range`.
+ + ++/
+auto readJExe(R)(R range)
+if(isInputRange!R && is(Unqual!(ElementType!R) == ubyte))
+{
+    return JExeReader!R(range);
+}
+
+/++
  + Thrown by the VM whenever something goes wrong.
  + ++/
 class VMException : Exception
