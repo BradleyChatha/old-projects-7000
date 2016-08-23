@@ -252,6 +252,59 @@ class VariableTypeException : VariableException
 }
 
 /++
+ + Determines if `from` can convert into `to`.
+ + 
+ + Params:
+ +  from = The type to convert from.
+ +  to   = The type to convert to.
+ + 
+ + Returns:
+ +  `true` if `from` can convert into `to`.
+ +  `false` otherwise.
+ + ++/
+@safe @nogc
+bool canConvert(Variable.Type from, Variable.Type to) pure nothrow
+{
+    enum _T
+    {
+        String,
+        Integer
+    }
+
+    @safe @nogc
+    _T findT(Variable.Type type) pure nothrow
+    {
+        switch(type) with(Variable.Type)
+        {
+            case String:
+                return _T.String;
+
+            case Int32:
+            case UInt32:
+                return _T.Integer;
+
+            default:
+                assert(false);
+        }
+    }
+
+    auto fromT = findT(from);
+    auto toT   = findT(to);
+
+    return (fromT == toT);
+}
+///
+unittest
+{
+    with(Variable.Type)
+    {
+        static assert( canConvert(Int32,     UInt32));
+        static assert( canConvert(String,    String));
+        static assert(!canConvert(String,    UInt32));
+    }
+}
+
+/++
  + Determines the appropriate `Variable.Type` for `T`.
  + 
  + Params:
