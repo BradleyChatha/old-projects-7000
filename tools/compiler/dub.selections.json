@@ -1,0 +1,7 @@
+{
+	"fileVersion": 1,
+	"versions": {
+		"jasm": {"path":"../../"},
+		"pegged": "0.3.2"
+	}
+}

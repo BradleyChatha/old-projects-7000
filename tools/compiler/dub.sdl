@@ -1,0 +1,10 @@
+name "compiler"
+description "The compiler for JASM"
+authors "Sealab"
+copyright "Copyright © 2016, Sealab"
+license "MIT"
+
+targetType "executable"
+targetPath "bin"
+
+dependency "jasm" path="../../"

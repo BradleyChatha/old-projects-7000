@@ -3,7 +3,7 @@ description "A minimal D application."
 copyright "Copyright © 2016, Sealab"
 authors "Sealab"
 
-targetType "executable"
-targetPath "bin"
+targetType "library"
+targetPath "lib"
 
 dependency "pegged" version="~>0.3.2"
