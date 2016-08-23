@@ -118,28 +118,31 @@ struct Variable
         /++
          + Gets the value of the variable.
          + 
-         + This function is seen as $(B strict), as in, even if the type of the variable is convertable to the type of `T`,
-         + the function will still throw an exception if the types don't match up.
-         + 
+         + If `strict` is `true`, then an exception is thrown if `T` is not the same type as the variable's value.
+         + If `strict` is `false`, however, then an exception is only thrown if `T` is not implicitly convertable to the variable's type.
+         +
          + Assertions:
          +  `T` must have a corresponding `Variable.Type`
          + 
          + Throws:
-         +  `VariableTypeException` if the type of `T` does not match the variable's type.
+         +  If `[strict]` is `true` - `VariableTypeException` if the type of `T` does not match the variable's type.
+         +  If `[strict]` is `false` - `VariableTypeException` if the type of `T` is not implicitly convertable to the variable's type.
          + 
          + Returns:
          +  The value of the variable, as `T`.
          + ++/
         @property
-        inout(T) as(T)() inout
+        inout(T) as(T, bool strict = true)() inout
         {
-            T value = this.asRef!T;
+            T value = this.asRef!(T, strict);
             return value;
         }
         ///
         @safe
         unittest
         {
+            import std.exception : assertThrown, assertNotThrown;
+
             void makeVar(T)(T value)
             {
                 alias type = VarTypeOf!T;
@@ -152,30 +155,39 @@ struct Variable
             makeVar!uint(60);
             makeVar(60);
             makeVar("Soupy Daniel");
+
+            auto var = Variable.make!uint(60);
+            assertThrown(var.as!int);               // It defaults to being strict, and "uint" and "int" result in different `Variable.Type`s
+            assertNotThrown(var.as!(int, false));   // Non-strict
         }
 
         /++
          + Gets a reference to the variable's value.
          + 
-         + This function is seen as $(B strict), as in, even if the type of the variable is convertable to the type of `T`,
-         + the function will still throw an exception if the types don't match up.
+         + If `strict` is `true`, then an exception is thrown if `T` is not the same type as the variable's value.
+         + If `strict` is `false`, however, then an exception is only thrown if `T` is not implicitly convertable to the variable's type.
          +
          + Assertions:
          +  `T` must have a corresponding `Variable.Type`
          + 
          + Throws:
-         +  `VariableTypeException` if the type of `T` does not match the variable's type.
+         +  If `[strict]` is `true` - `VariableTypeException` if the type of `T` does not match the variable's type.
+         +  If `[strict]` is `false` - `VariableTypeException` if the type of `T` is not implicitly convertable to the variable's type.
          + 
          + Returns:
          +  A reference to the variable's value.
          + ++/
         @property
-        ref inout(T) asRef(T)() inout
+        ref inout(T) asRef(T, bool strict = true)() inout
         {
             import std.exception : enforce;
             
             alias type = VarTypeOf!T;
-            enforce(this.type == type, new VariableTypeException(type, this.type));
+
+            static if(strict)
+                enforce(this.type == type, new VariableTypeException(type, this.type));
+            else
+                enforce(this.type.canConvert(type), new VariableTypeException(type, this.type));
             
             static if(type == Type.Int32)
                 return this._value.i32;
@@ -221,7 +233,7 @@ class VariableException : VMException
 }
 
 /++
- + This exception is thrown whenever `Variable.as` is called, but the type to convert to is not the same as the `Variable`'s type.
+ + This exception is thrown whenever the type to convert to is not the same or compatible with the `Variable`'s type.
  + ++/
 class VariableTypeException : VariableException
 {
@@ -247,7 +259,7 @@ class VariableTypeException : VariableException
 
         this.got        = got;
         this.expected   = expected;
-        super(assumeWontThrow(format("Type mismatch, got '%s', but the variable is a '%s'.", got, expected)), file, line, next);
+        super(assumeWontThrow(format("Type mismatch, '%s' is not compatible with '%s' in this context..", got, expected)), file, line, next);
     }
 }
 
