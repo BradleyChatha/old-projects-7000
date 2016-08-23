@@ -158,7 +158,7 @@ struct Variable
 
             auto var = Variable.make!uint(60);
             assertThrown(var.as!int);               // It defaults to being strict, and "uint" and "int" result in different `Variable.Type`s
-            assertNotThrown(var.as!(int, false));   // Non-strict
+            assertNotThrown(var.asImplicit!int);    // Non-strict
         }
 
         /++
@@ -207,6 +207,12 @@ struct Variable
 
             assert(var.as!uint == 1000);
         }
+
+        /// A convinience alias to a non-strict version of `Variable.asRef`
+        alias asRefImplicit(T) = asRef!(T, false);
+
+        /// A convinience alias to a non-strict version of `Variable.as`
+        alias asImplicit(T)    = as!(T, false);
     }
 }
 
