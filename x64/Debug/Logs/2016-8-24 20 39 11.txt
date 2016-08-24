@@ -1,0 +1,8 @@
+20:39:11 [Default] [Logger] Created Log File.
+20:39:11  [Logger] Created Log File.
+20:39:11 [Default] [Core] Created a GameWindow.
+20:39:11  [Core] Created a GameWindow.
+20:39:11 [Default] [Core] FPS limit set to 60 FPS.
+20:39:11  [Core] FPS limit set to 60 FPS.
+20:39:20 [Default] [Logger] Closing Log File.
+20:39:20  [Logger] Closing Log File.

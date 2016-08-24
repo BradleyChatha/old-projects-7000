@@ -1,0 +1,3 @@
+20:49:39 [Default] [Logger] Created Log File.
+20:49:40 [Fatal] [Player] Failed to find player textures.
+20:49:40 [Default] [Logger] Closing Log File.
