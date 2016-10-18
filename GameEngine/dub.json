@@ -1,0 +1,12 @@
+{
+	"name": "gameengine",
+	"authors": [
+		"sherb"
+	],
+	"dependencies": {
+		"gfm": "~>6.1.4"
+	},
+	"description": "MLG SICK GAME ENGINE",
+	"copyright": "Copyright © 2016, sherb",
+	"license": "proprietary"
+}

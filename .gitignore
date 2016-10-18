@@ -1,0 +1,7 @@
+#Files
+*.exe
+*.obj
+
+#Folders
+GamEngine/.dub/
+.git/
