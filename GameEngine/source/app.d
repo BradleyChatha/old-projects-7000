@@ -1,5 +1,8 @@
 import std.stdio;
 
-void main()
+import GameEngine.Core;
+
+void main(string[] Args)
 {
+    Core core = new Core();
 }
