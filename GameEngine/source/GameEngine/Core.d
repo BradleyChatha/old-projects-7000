@@ -2,16 +2,14 @@ module GameEngine.Core;
 
 private
 {
-import std.math,
-       std.random,
-       std.typecons;
+    import  std.typecons;
 
-import derelict.util.loader;
+    import  derelict.util.loader;
 
-import gfm.logger,
-       gfm.sdl2,
-       gfm.opengl,
-       gfm.math;
+    import  gfm.logger,
+            gfm.sdl2,
+            gfm.opengl,
+            gfm.math;
 }
 
 class Core

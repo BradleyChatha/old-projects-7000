@@ -1,6 +1,7 @@
 #Files
 *.exe
 *.obj
+*.dll
 
 #Folders
 GamEngine/.dub/
