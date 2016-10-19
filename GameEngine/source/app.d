@@ -19,6 +19,8 @@ void main(string[] Args)
             col = Colour(0, 1, 0, 1);
         if(input.GetKeyPressed(Key.B))
             col = Colour(0, 0, 1, 1);
+        if(input.GetKeyPressed(Key.C))
+            col = Colour(1, 0, 1, 1);
 
         window.Clear(col);
         window.Draw();

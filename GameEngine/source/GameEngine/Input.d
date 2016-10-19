@@ -133,7 +133,7 @@ class Input
     bool GetKeyPressWithShift(Key key)
     {
         return (glfwGetKey(this.Wnd, key) == GLFW_PRESS &&
-		    glfwGetKey(this.Wnd, Key.LShift) == GLFW_PRESS);
+		        glfwGetKey(this.Wnd, Key.LShift) == GLFW_PRESS);
     }
 private:
     GLFWwindow* Wnd;
