@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1"/>
+		<title>Function Colour.this</title>
+		<link rel="stylesheet" href="../../css/style.min.css"/>
+		<script type="text/javascript" src="../../js/script.min.js"></script>
+	</head>
+	<body onload="setupDdox();">
+		<header>
+		</header>
+		<nav id="main-nav">
+				<noscript>
+					<p style="color: red">The search functionality needs JavaScript enabled</p>
+				</noscript>
+				<div id="symbolSearchPane" style="display: none">
+					<input id="symbolSearch" type="text" placeholder="Search" onchange="performSymbolSearch(24);" onkeypress="this.onchange();" onpaste="this.onchange();" oninput="this.onchange();" autofocus="autofocus"/>
+					<ul id="symbolSearchResults" style="display: none"></ul>
+					<script type="application/javascript" src="../../symbols.js"></script>
+					<script type="application/javascript">
+var symbolSearchRootDir = "../../";
+document.getElementById('symbolSearchPane').style.display = 'block';
+					</script>
+				</div>
+						<ul>
+						<li>
+							<a href="../../GameEngine/Core.html">GameEngine.Core</a>
+						</li>
+						<li>
+							<a href="../../GameEngine/Window.html">GameEngine.Window</a>
+						</li>
+						</ul>
+			<p id="main-nav-footer">
+ Built with
+				<a href="https://github.com/MartinNowak/scod">scod</a>
+			</p>
+		</nav>
+		<div id="main-contents">
+			<h1>Function Colour.this</h1>
+			<section>
+				<p>Creates a new colour.
+</p>
+<section></section>
+
+					<section>
+						<h3>Prototype</h3>
+						<div class="prototype">
+							<code class="lang-d">
+<span class="kwd">ref </span><span class="pln">this</span><span class="pun">(</span>
+								<br/>
+&nbsp;&nbsp;<span class="typ">float</span> <span class="pln">r</span><span class="pun">,</span>
+								<br/>
+&nbsp;&nbsp;<span class="typ">float</span> <span class="pln">g</span><span class="pun">,</span>
+								<br/>
+&nbsp;&nbsp;<span class="typ">float</span> <span class="pln">b</span><span class="pun">,</span>
+								<br/>
+&nbsp;&nbsp;<span class="typ">float</span> <span class="pln">a</span>
+								<br/>
+<span class="pun">)</span><span class="pun">;</span>
+							</code>
+						</div>
+					</section>
+<section><h3>Parameters</h3>
+<table><col class="caption"><tr><th>Name</th><th>Description</th></tr>
+<tr><td id="r">r</td><td> How much red is in the colour.</td></tr>
+<tr><td id="g">g</td><td> How much green is in the colour.</td></tr>
+<tr><td id="b">b</td><td> How much blue is in the colour.</td></tr>
+<tr><td id="a">a</td><td> The alpha intensity.</td></tr>
+</table>
+</section>
+
+			</section>
+			<footer>
+				<hr/>
+				<div id="license-info">
+
+
+
+				</div>
+			</footer>
+		</div>
+	</body>
+</html>

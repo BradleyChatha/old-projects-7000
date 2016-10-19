@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1"/>
+		<title>Module GameEngine.Window</title>
+		<link rel="stylesheet" href="../css/style.min.css"/>
+		<script type="text/javascript" src="../js/script.min.js"></script>
+	</head>
+	<body onload="setupDdox();">
+		<header>
+		</header>
+		<nav id="main-nav">
+				<noscript>
+					<p style="color: red">The search functionality needs JavaScript enabled</p>
+				</noscript>
+				<div id="symbolSearchPane" style="display: none">
+					<input id="symbolSearch" type="text" placeholder="Search" onchange="performSymbolSearch(24);" onkeypress="this.onchange();" onpaste="this.onchange();" oninput="this.onchange();" autofocus="autofocus"/>
+					<ul id="symbolSearchResults" style="display: none"></ul>
+					<script type="application/javascript" src="../symbols.js"></script>
+					<script type="application/javascript">
+var symbolSearchRootDir = "../";
+document.getElementById('symbolSearchPane').style.display = 'block';
+					</script>
+				</div>
+						<ul>
+						<li>
+							<a href="../GameEngine/Core.html">GameEngine.Core</a>
+						</li>
+						<li>
+							<a href="../GameEngine/Window.html">GameEngine.Window</a>
+						</li>
+						</ul>
+			<p id="main-nav-footer">
+ Built with
+				<a href="https://github.com/MartinNowak/scod">scod</a>
+			</p>
+		</nav>
+		<div id="main-contents">
+			<h1>Module GameEngine.Window</h1>
+			<p></p>
+
+			<section></section>
+			<section>
+				<h2>Classes</h2>
+				<table>
+					<col class="caption"/>
+					<tr>
+						<th>Name</th>
+						<th>Description</th>
+					</tr>
+					<tr>
+						<td>
+							<a id="Window" class="public" href="../GameEngine/Window/Window.html">
+								<code>Window</code>
+							</a>
+						</td>
+						<td>Holds the information for creating new windows.
+</td>
+					</tr>
+					<tr>
+						<td>
+							<a id="WindowException" class="public" href="../GameEngine/Window/WindowException.html">
+								<code>WindowException</code>
+							</a>
+						</td>
+						<td>Contains the code for the exceptions thrown by the 'Window' class.
+</td>
+					</tr>
+				</table>
+			</section>
+			<section>
+				<h2>Structs</h2>
+				<table>
+					<col class="caption"/>
+					<tr>
+						<th>Name</th>
+						<th>Description</th>
+					</tr>
+					<tr>
+						<td>
+							<a id="Colour" class="public" href="../GameEngine/Window/Colour.html">
+								<code>Colour</code>
+							</a>
+						</td>
+						<td>Contains information about colours.
+</td>
+					</tr>
+				</table>
+			</section>
+			<footer>
+				<hr/>
+				<div id="license-info">
+
+
+
+				</div>
+			</footer>
+		</div>
+	</body>
+</html>
