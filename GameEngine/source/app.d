@@ -1,15 +1,15 @@
 import std.stdio;
 
-import GameEngine.Core;
-import GameEngine.Window;
-import GameEngine.Input;
-import derelict.glfw3.glfw3;
+import GameEngine.GameEngine;
 
 void main(string[] Args)
 {
     Core core = new Core();
     Window window = new Window("GLFWWindow", 800, 600);
     Input input = new Input(window.GetWindow());
+    Shader shader = new Shader(window.GetWindow());
+
+    
 
     Colour col = Colour(1, 0, 0, 1);
 
@@ -21,6 +21,8 @@ void main(string[] Args)
             col = Colour(0, 0, 1, 1);
         if(input.GetKeyPressed(Key.C))
             col = Colour(1, 0, 1, 1);
+
+        
 
         window.Clear(col);
         window.Draw();
