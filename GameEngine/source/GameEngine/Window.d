@@ -132,6 +132,26 @@ class Window
             glfwSwapInterval(0);
     }
 
+    /++
+    +   Closes the Window if it is open.
+    ++/
+    void Close()
+    {
+        if(this.IsOpen)
+            glfwDestroyWindow(this.Wnd);
+    }
+
+    /++
+    +   Gets a pointer to the GLFWwindow for other systems to use, should they need to.
+    +   
+    +   Returns:
+    +       GLFWwindow*
+    ++/
+    GLFWwindow* GetWindow()
+    {
+        return this.Wnd;
+    }
+
 private:
     GLFWwindow* Wnd;
 }

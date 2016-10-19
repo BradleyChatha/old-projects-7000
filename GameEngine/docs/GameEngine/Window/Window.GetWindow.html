@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1"/>
+		<title>Function Window.GetWindow</title>
+		<link rel="stylesheet" href="../../css/style.min.css"/>
+		<script type="text/javascript" src="../../js/script.min.js"></script>
+	</head>
+	<body onload="setupDdox();">
+		<header>
+		</header>
+		<nav id="main-nav">
+				<noscript>
+					<p style="color: red">The search functionality needs JavaScript enabled</p>
+				</noscript>
+				<div id="symbolSearchPane" style="display: none">
+					<input id="symbolSearch" type="text" placeholder="Search" onchange="performSymbolSearch(24);" onkeypress="this.onchange();" onpaste="this.onchange();" oninput="this.onchange();" autofocus="autofocus"/>
+					<ul id="symbolSearchResults" style="display: none"></ul>
+					<script type="application/javascript" src="../../symbols.js"></script>
+					<script type="application/javascript">
+var symbolSearchRootDir = "../../";
+document.getElementById('symbolSearchPane').style.display = 'block';
+					</script>
+				</div>
+						<ul>
+						<li>
+							<a href="../../GameEngine/Core.html">GameEngine.Core</a>
+						</li>
+						<li>
+							<a href="../../GameEngine/Input.html">GameEngine.Input</a>
+						</li>
+						<li>
+							<a href="../../GameEngine/Window.html">GameEngine.Window</a>
+						</li>
+						</ul>
+			<p id="main-nav-footer">
+ Built with
+				<a href="https://github.com/MartinNowak/scod">scod</a>
+			</p>
+		</nav>
+		<div id="main-contents">
+			<h1>Function Window.GetWindow</h1>
+			<section>
+				<p>Gets a pointer to the GLFWwindow for other systems to use, should they need to.
+</p>
+<section></section>
+
+					<section>
+						<h3>Prototype</h3>
+						<div class="prototype">
+							<code class="lang-d">
+<span class="pln">derelict<wbr/></span><span class="pun">.</span><span class="pln">glfw3<wbr/></span><span class="pun">.</span><span class="pln">types<wbr/></span><span class="pun">.</span><span class="typ">GLFWwindow</span><span class="pun">*</span> <span class="pln">GetWindow<span class="pun">()</span><span class="pun">;</span>
+							</code>
+						</div>
+					</section>
+<section><h3>Returns</h3>
+<p>GLFWwindow*
+</p>
+</section>
+
+			</section>
+			<footer>
+				<hr/>
+				<div id="license-info">
+
+
+
+				</div>
+			</footer>
+		</div>
+	</body>
+</html>
