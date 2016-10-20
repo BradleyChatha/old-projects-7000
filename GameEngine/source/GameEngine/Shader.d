@@ -68,6 +68,7 @@ class Shader
 
         glAttachShader(this.Program, this.VertexShader);
         glAttachShader(this.Program, this.FragmentShader);
+        this.DeleteShaders();
         glLinkProgram(this.Program);
         this.CheckShaderLink();
     }
@@ -83,7 +84,10 @@ class Shader
     if(allSatisfy!(isFloatingPoint, Floats))
     {
         if(floats.length > 4)
+        {
             throw new ShaderException("Length of floats is too large. Max amount is four.");
+
+        }
 
         GLint Location = glGetUniformLocation(this.Program, var.ptr);
         CheckUniformLocation(Location);      
@@ -117,7 +121,7 @@ class Shader
     if(allSatisfy!(isSigned, Ints))
     {
         if(ints.length > 4)
-            throw new ShaderException("Length of v is too large. Max amount is four.");
+            throw new ShaderException("Length of Ints is too large. Max amount is four.");
 
         GLint Location = glGetUniformLocation(this.Program, var.ptr);
         CheckUniformLocation(Location);      
@@ -140,7 +144,7 @@ class Shader
         }
     }
 
-        /++
+    /++
     +   Sets the value of Uniform unsigned ints.
     +
     +   Params:
@@ -150,7 +154,7 @@ class Shader
     void SetUniformUInt(UInts...)(string var, UInts uInts)
     if(allSatisfy!(isUnsigned, UInts))
     {
-        if(ints.length > 4)
+        if(UInts.length > 4)
             throw new ShaderException("Length of v is too large. Max amount is four.");
 
         GLint Location = glGetUniformLocation(this.Program, var.ptr);
@@ -198,6 +202,7 @@ private:
         auto Buffer = new GLchar[InfoLength];
         glGetShaderInfoLog(CompiledShader, InfoLength, &InfoLength, Buffer.ptr);
 
+        this.DeleteShaders();
         throw new ShaderException("Failed to compile shader. GLSL Error Message is: " ~ Buffer.assumeUnique);
     }
 
@@ -228,5 +233,14 @@ private:
     {
         if(Location == -1)
             throw new ShaderException("Uniform does not exsist.");
+    }
+
+    /++
+    +   Delete the compiled shaders.
+    ++/
+    void DeleteShaders()
+    {
+        glDeleteShader(this.VertexShader);
+        glDeleteShader(this.FragmentShader);
     }
 }
