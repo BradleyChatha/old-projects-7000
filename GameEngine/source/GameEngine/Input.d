@@ -68,6 +68,8 @@ enum Key : int
 	Space = GLFW_KEY_SPACE,
 	Up = GLFW_KEY_UP,
 	Down = GLFW_KEY_DOWN,
+	Left = GLFW_KEY_LEFT,
+	Right = GLFW_KEY_RIGHT,
 	Apostrophe = GLFW_KEY_APOSTROPHE,
 	Delete = GLFW_KEY_DELETE,
 	Backspace = GLFW_KEY_BACKSPACE,

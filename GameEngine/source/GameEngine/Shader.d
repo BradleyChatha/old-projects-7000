@@ -7,6 +7,7 @@ private
            derelict.glfw3.glfw3;
 
     import std.string : toStringz;
+    import std.exception;
 }
 
 /++
@@ -62,16 +63,15 @@ class Shader
     {
         auto VCode = VertexCode.toStringz;
         auto FCode = FragmentCode.toStringz;
+
         glShaderSource(this.VertexShader, 1, &VCode, null);
         glShaderSource(this.FragmentShader, 1, &FCode, null);
 
         glCompileShader(this.VertexShader);
         glCompileShader(this.FragmentShader);
 
-        if(!CheckShaderProgram(this.VertexShader))
-            throw new ShaderException("Failed to compile Vertex Shader.");
-        if(!CheckShaderProgram(this.VertexShader))
-            throw new ShaderException("Failed to compile Fragment Shader.");
+        CheckShaderProgram(this.VertexShader);
+        CheckShaderProgram(this.VertexShader);
     }
 
 private:
@@ -82,19 +82,22 @@ private:
     +   Checks if the shader program is compiled.
     +
     +   Params:
-    +       Program = The shader program, compiled, to be checked.
-    +
-    +   Returns:
-    +       True = Compiled correctly.
-    +       False = Didn't compile correctly.
+    +       CompiledShader = The shader program, compiled, to be checked.
     ++/
-    bool CheckShaderProgram(GLuint Program)
+    void CheckShaderProgram(GLuint CompiledShader)
     {
         GLint Compiled;
-        glGetShaderiv(Program, GL_COMPILE_STATUS, &Compiled);        
-        
-        if(!Compiled)
-            return false;
-        return true;
+        glGetShaderiv(CompiledShader, GL_COMPILE_STATUS, &Compiled);     
+
+        if(Compiled)
+            return;
+
+        GLint InfoLength = 0;
+        glGetShaderiv(CompiledShader, GL_INFO_LOG_LENGTH, &InfoLength);
+
+        auto Buffer = new GLchar[InfoLength];
+        glGetShaderInfoLog(CompiledShader, InfoLength, &InfoLength, Buffer.ptr);
+
+        throw new ShaderException("Failed to compile shader. GLSL Error Message is: " ~ Buffer.assumeUnique);
     }    
 }

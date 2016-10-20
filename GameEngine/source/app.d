@@ -9,8 +9,6 @@ void main(string[] Args)
     Input input = new Input(window.GetWindow());
     Shader shader = new Shader(window.GetWindow());
 
-    
-
     Colour col = Colour(1, 0, 0, 1);
 
     while(window.IsOpen())
