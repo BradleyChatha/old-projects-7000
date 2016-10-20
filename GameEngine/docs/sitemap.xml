@@ -19,10 +19,12 @@
 <url><loc>http://127.0.0.1/GameEngine/Shader.html</loc></url>
 <url><loc>http://127.0.0.1/GameEngine/Shader/Shader.html</loc></url>
 <url><loc>http://127.0.0.1/GameEngine/Shader/Shader.CompileShaders.html</loc></url>
+<url><loc>http://127.0.0.1/GameEngine/Shader/Shader.SetUniformFloat.html</loc></url>
+<url><loc>http://127.0.0.1/GameEngine/Shader/Shader.SetUniformInt.html</loc></url>
+<url><loc>http://127.0.0.1/GameEngine/Shader/Shader.SetUniformUInt.html</loc></url>
 <url><loc>http://127.0.0.1/GameEngine/Shader/Shader.this.html</loc></url>
 <url><loc>http://127.0.0.1/GameEngine/Shader/ShaderException.html</loc></url>
 <url><loc>http://127.0.0.1/GameEngine/Shader/ShaderException.this.html</loc></url>
-<url><loc>http://127.0.0.1/GameEngine/Shader/ShaderTypes.html</loc></url>
 <url><loc>http://127.0.0.1/GameEngine/Window.html</loc></url>
 <url><loc>http://127.0.0.1/GameEngine/Window/Colour.html</loc></url>
 <url><loc>http://127.0.0.1/GameEngine/Window/Colour.this.html</loc></url>

@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="UTF-8"/>
 		<meta name="viewport" content="width=device-width, initial-scale=1"/>
-		<title>Enum ShaderTypes</title>
+		<title>Function Shader.SetUniformFloat</title>
 		<link rel="stylesheet" href="../../css/style.min.css"/>
 		<script type="text/javascript" src="../../js/script.min.js"></script>
 	</head>
@@ -46,25 +46,34 @@ document.getElementById('symbolSearchPane').style.display = 'block';
 			</p>
 		</nav>
 		<div id="main-contents">
-			<h1>Enum ShaderTypes</h1>
+			<h1>Function Shader.SetUniformFloat</h1>
 			<section>
-				<p>Which type of shader it is.
+				<p>Sets the value of Uniform floats.
 </p>
+<section></section>
 
-					<p>The enum base type is
-						<code class="prettyprint lang-d"><span class="typ">int</span></code>
-.
-					</p>
 					<section>
-						<h3>Enum members</h3>
-						<table>
-							<col class="caption"/>
-							<tr>
-								<th>Name</th>
-								<th>Description</th>
-							</tr>
-						</table>
+						<h3>Prototype</h3>
+						<div class="prototype">
+							<code class="lang-d">
+<span class="typ">void</span> <span class="pln">SetUniformFloat</span><span class="pun">(</span><span class="typ">Floats</span><span class="pun">...)</span><span class="pun">(</span>
+								<br/>
+&nbsp;&nbsp;<span class="typ">string</span> <span class="pln">var</span><span class="pun">,</span>
+								<br/>
+&nbsp;&nbsp;<span class="typ">Floats</span> <span class="pln">floats</span>
+								<br/>
+<span class="pun">)</span>
+								<br/>
+<span class="kwd">if</span> <span class="pun">(</span><span class="pln">allSatisfy</span><span class="pun">!(</span><span class="pln">isFloatingPoint</span><span class="pun">, </span><span class="typ">Floats</span><span class="pun">)</span><span class="pun">);</span>
+							</code>
+						</div>
 					</section>
+<section><h3>Parameters</h3>
+<table><col class="caption"><tr><th>Name</th><th>Description</th></tr>
+<tr><td id="var">var</td><td> The name of the Uniform variable in the Shader.</td></tr>
+<tr><td id="floats">floats</td><td> The floats to be passed into the shader Uniform variable.</td></tr>
+</table>
+</section>
 
 			</section>
 			<footer>

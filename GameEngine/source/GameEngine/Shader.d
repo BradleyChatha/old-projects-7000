@@ -8,6 +8,8 @@ private
 
     import std.string : toStringz;
     import std.exception;
+    import std.meta;
+    import std.traits;
 }
 
 /++
@@ -28,15 +30,6 @@ class ShaderException : Exception
 }
 
 /++
-+   Which type of shader it is.
-++/
-enum ShaderTypes
-{
-    Vertex,
-    Fragment
-}
-
-/++
 +   Creates Shader programs, and uses Shaders.
 ++/
 class Shader
@@ -50,6 +43,7 @@ class Shader
 
         this.VertexShader = glCreateShader(GL_VERTEX_SHADER);
         this.FragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+        this.Program = glCreateProgram();
     }
 
     /++
@@ -69,14 +63,120 @@ class Shader
 
         glCompileShader(this.VertexShader);
         glCompileShader(this.FragmentShader);
+        this.CheckShaderProgram(this.VertexShader);
+        this.CheckShaderProgram(this.VertexShader);
 
-        CheckShaderProgram(this.VertexShader);
-        CheckShaderProgram(this.VertexShader);
+        glAttachShader(this.Program, this.VertexShader);
+        glAttachShader(this.Program, this.FragmentShader);
+        glLinkProgram(this.Program);
+        this.CheckShaderLink();
+    }
+
+    /++
+    +   Sets the value of Uniform floats.
+    +
+    +   Params:
+    +       var = The name of the Uniform variable in the Shader.
+    +       floats = The floats to be passed into the shader Uniform variable.
+    ++/
+    void SetUniformFloat(Floats...)(string var, Floats floats)
+    if(allSatisfy!(isFloatingPoint, Floats))
+    {
+        if(floats.length > 4)
+            throw new ShaderException("Length of floats is too large. Max amount is four.");
+
+        GLint Location = glGetUniformLocation(this.Program, var.ptr);
+        CheckUniformLocation(Location);      
+
+        static if(floats.length == 1)
+        {
+            glUniform1f(Location, floats);
+        }
+        else static if(floats.length == 2)
+        {
+            glUniform2f(Location, floats);
+        }
+        else static if(floats.length == 3)
+        {
+            glUniform3f(Location, floats);
+        }
+        else static if(floats.length == 4)
+        {
+            glUniform4f(Location, floats);
+        }
+    }
+
+    /++
+    +   Sets the value of Uniform ints.
+    +
+    +   Params:
+    +       var = The name of the Uniform variable in the Shader.
+    +       ints = The ints to be passed into the shader Uniform variable.
+    ++/
+    void SetUniformInt(Ints...)(string var, Ints ints)
+    if(allSatisfy!(isSigned, Ints))
+    {
+        if(ints.length > 4)
+            throw new ShaderException("Length of v is too large. Max amount is four.");
+
+        GLint Location = glGetUniformLocation(this.Program, var.ptr);
+        CheckUniformLocation(Location);      
+
+        static if(ints.length == 1)
+        {
+            glUniform1i(Location, ints);
+        }
+        else static if(ints.length == 2)
+        {
+            glUniform2i(Location, ints);
+        }
+        else static if(ints.length == 3)
+        {
+            glUniform3i(Location, ints);
+        }
+        else static if(ints.length == 4)
+        {
+            glUniform4i(Location, ints);
+        }
+    }
+
+        /++
+    +   Sets the value of Uniform unsigned ints.
+    +
+    +   Params:
+    +       var = The name of the Uniform variable in the Shader.
+    +       uInts = The unsigned ints to be passed into the shader Uniform variable.
+    ++/
+    void SetUniformUInt(UInts...)(string var, UInts uInts)
+    if(allSatisfy!(isUnsigned, UInts))
+    {
+        if(ints.length > 4)
+            throw new ShaderException("Length of v is too large. Max amount is four.");
+
+        GLint Location = glGetUniformLocation(this.Program, var.ptr);
+        CheckUniformLocation(Location);      
+
+        static if(uInts.length == 1)
+        {
+            glUniform1ui(Location, uInts);
+        }
+        else static if(uInts.length == 2)
+        {
+            glUniform2ui(Location, uInts);
+        }
+        else static if(uInts.length == 3)
+        {
+            glUniform3ui(Location, uInts);
+        }
+        else static if(uInts.length == 4)
+        {
+            glUniform4ui(Location, uInts);
+        }
     }
 
 private:
     GLFWwindow* Wnd;
-    GLuint VertexShader, FragmentShader;
+    GLuint VertexShader, FragmentShader, Program;
 
     /++
     +   Checks if the shader program is compiled.
@@ -99,5 +199,34 @@ private:
         glGetShaderInfoLog(CompiledShader, InfoLength, &InfoLength, Buffer.ptr);
 
         throw new ShaderException("Failed to compile shader. GLSL Error Message is: " ~ Buffer.assumeUnique);
-    }    
+    }
+
+    /++
+    +   Checks to make sure that the program has been linked correctly
+    ++/
+    void CheckShaderLink()
+    {
+        GLint Linked;
+        glGetProgramiv(this.Program, GL_LINK_STATUS, &Linked);
+
+        if(Linked)
+            return;
+
+        GLint InfoLength = 0;
+        glGetProgramiv(this.Program, GL_INFO_LOG_LENGTH, &InfoLength);
+
+        auto Buffer = new GLchar[InfoLength];
+        glGetProgramInfoLog(this.Program, InfoLength, &InfoLength, Buffer.ptr);
+
+        throw new ShaderException("Failed to link shader. GLSL Linker Error Message is: " ~ Buffer.assumeUnique);
+    }
+
+    /++
+    +   Checks the given Uniform location is correct.
+    ++/
+    void CheckUniformLocation(GLint Location)
+    {
+        if(Location == -1)
+            throw new ShaderException("Uniform does not exsist.");
+    }
 }
