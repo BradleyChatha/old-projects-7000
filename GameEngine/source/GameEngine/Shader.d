@@ -10,6 +10,8 @@ private
     import std.exception;
     import std.meta;
     import std.traits;
+    import std.stdio;
+    import std.file;
 }
 
 /++
@@ -47,13 +49,14 @@ class Shader
     }
 
     /++
-    +   Compiles the shaders.
+    +   Compiles the shaders from a hard coded string.
     +
     +   Params:
     +       VertexCode = The vertex shader code.
     +       FragmentCode = The fragment shader code.
+    +       UseProgram = If true (by default is) then the program is used straight after complation, otherwise Shader.Use() has to be called in order to enable the shader. 
     ++/
-    void CompileShaders(string VertexCode, string FragmentCode)
+    void CompileShadersFromString(string VertexCode, string FragmentCode, bool UseProgram = true)
     {
         auto VCode = VertexCode.toStringz;
         auto FCode = FragmentCode.toStringz;
@@ -71,6 +74,38 @@ class Shader
         this.DeleteShaders();
         glLinkProgram(this.Program);
         this.CheckShaderLink();
+
+        if(UseProgram)
+        {
+            this.Use();
+        }
+    }
+
+    /++
+    +   Compiles shaders from shader files.
+    +   Params:
+    +       VertexFile = The vertex shader file.
+    +       FragmentFile = The fragment shader file.
+    +       UseProgram = If true (by default is) then the program is used straight after complation, otherwise Shader.Use() has to be called in order to enable the shader. 
+    ++/
+    void CompileShadersFromFile(string VertexFile, string FragmentFile, bool UseProgram = true)
+    {
+        File ShaderFile = File(VertexFile, "R");
+
+        if(!ShaderFile.isOpen())
+            throw new ShaderException("Failed to open shader: " ~ VertexFile);
+        ShaderFile.close();
+        
+        string VertexCode = cast(string)std.file.read(VertexFile);
+
+        ShaderFile.open(FragmentFile, "R");
+        if(!ShaderFile.isOpen())
+            throw new ShaderException("Failed to open shader: " ~ VertexFile);
+        ShaderFile.close();
+        
+        string FragmentCode = cast(string)std.file.read(VertexFile);
+
+        this.CompileShadersFromString(VertexCode, FragmentCode, UseProgram);
     }
 
     /++
@@ -176,6 +211,22 @@ class Shader
         {
             glUniform4ui(Location, uInts);
         }
+    }
+
+    /++
+    +   Use the shader program.
+    ++/
+    void Use()
+    {
+        glUseProgram(this.Program);
+    }
+
+    /++
+    +   Stops the GLSL program and destroys it.
+    ++/
+    void Discard()
+    {
+        
     }
 
 private:

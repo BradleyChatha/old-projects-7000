@@ -9,7 +9,7 @@ void main(string[] Args)
     Input input = new Input(window.GetWindow());
     Shader shader = new Shader(window.GetWindow());
 
-    shader.CompileShaders(
+    shader.CompileShadersFromString(
         "
             uniform float Scale;
 
