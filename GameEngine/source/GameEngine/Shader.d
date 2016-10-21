@@ -225,7 +225,7 @@ class Shader
     void Discard()
     {
         if(glIsProgram(this.Program))
-            glDeleteShader(this.Program);
+            glDeleteShader(this.Program);   
 
         this.Program = -1;
     }
