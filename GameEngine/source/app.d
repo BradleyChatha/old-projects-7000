@@ -18,7 +18,7 @@ void main(string[] Args)
                 vec4 a = gl_Vertex;     
                 a.x = a.x * Scale;     
                 a.y = a.y * Scale;     
-                    
+
                 gl_Position = gl_ModelViewProjectionMatrix * a; 
             }
         ",
@@ -33,6 +33,7 @@ void main(string[] Args)
     );
 
     shader.SetUniformFloat("Scale", 10.0f);
+    shader.Use();
 
     Colour col = Colour(1, 0, 0, 1);
 
@@ -48,4 +49,6 @@ void main(string[] Args)
         window.Clear(col);
         window.Draw();
     }
+
+    shader.Discard();
 }

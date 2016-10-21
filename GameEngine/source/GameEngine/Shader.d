@@ -220,11 +220,14 @@ class Shader
     }
 
     /++
-    +   Stops the GLSL program and destroys it.
+    +   Stops the GLSL program and destroys it, freeing up the memory.
     ++/
     void Discard()
     {
-        
+        if(glIsProgram(this.Program))
+            glDeleteShader(this.Program);
+
+        this.Program = -1;
     }
 
 private:
