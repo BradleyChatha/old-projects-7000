@@ -39,10 +39,8 @@ class Shader
     /++
     +   Sets the Window pointer and constructs the Renderer.
     ++/
-    this(GLFWwindow* Window)
+    this()
     {
-        this.Wnd = Window;
-
         this.VertexShader = glCreateShader(GL_VERTEX_SHADER);
         this.FragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
         this.Program = glCreateProgram();
@@ -71,8 +69,8 @@ class Shader
 
         glAttachShader(this.Program, this.VertexShader);
         glAttachShader(this.Program, this.FragmentShader);
-        this.DeleteShaders();
         glLinkProgram(this.Program);
+        this.DeleteShaders();     
         this.CheckShaderLink();
 
         if(UseProgram)
@@ -190,7 +188,7 @@ class Shader
     if(allSatisfy!(isUnsigned, UInts))
     {
         if(UInts.length > 4)
-            throw new ShaderException("Length of v is too large. Max amount is four.");
+            throw new ShaderException("Length of UInts is too large. Max amount is four.");
 
         GLint Location = glGetUniformLocation(this.Program, var.ptr);
         CheckUniformLocation(Location);      
@@ -230,7 +228,6 @@ class Shader
     }
 
 private:
-    GLFWwindow* Wnd;
     GLuint VertexShader, FragmentShader, Program;
 
     /++
@@ -291,7 +288,18 @@ private:
     ++/
     void DeleteShaders()
     {
+        this.DetachShaders();
+        
         glDeleteShader(this.VertexShader);
         glDeleteShader(this.FragmentShader);
     }
+
+    /++
+    +   Detaches the shdaers from the GL Program
+    ++/ 
+    void DetachShaders()
+    {
+        glDetachShader(this.Program, this.VertexShader);
+        glDetachShader(this.Program, this.FragmentShader);
+    }   
 }
