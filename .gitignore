@@ -1,0 +1,12 @@
+.dub
+dub.userprefs
+dub.selections.json
+docs.json
+
+*.o
+*.obj
+
+__test__*__
+__dummy.html
+
+/lib/*.*

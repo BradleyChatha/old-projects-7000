@@ -1,0 +1,415 @@
+﻿/++
+ + Contains code for creating and manipulating a window.
+ + ++/
+module jengine.graphics.window;
+
+private
+{
+    import std.experimental.logger;
+    import std.exception           : enforce;
+    import std.typecons            : BitFlags;
+    import jengine.core.maths : Vector2u, Vector2f;
+    import jengine.graphics.renderer;
+    import jengine.core.post;
+    import sfml;
+}
+
+/++
+ + Contains an interface to create and manipulate a window.
+ + ++/
+final class Window
+{
+    /++
+     + An enumeration of the different ways to style a window.
+     + ++/
+    enum Style
+    {
+        /++
+         + The window will have a close button.
+         + ++/
+        Close = 1 << 0
+    }
+
+    /++
+     + An alias to a `BitFlags` version of `Style`, used for added safety.
+     + ++/
+    alias StyleFlags = BitFlags!Style;
+
+    /++
+     + An alias to the type used as the window handle.
+     + ++/
+    alias Handle = sfRenderWindow*;
+
+    private
+    {
+        Handle      _handle;
+        string      _title;
+        bool        _usingVsync;
+        Input       _input;
+        Renderer    _renderer;
+    }
+
+    public
+    {
+        /++
+         + Creates a new window.
+         + 
+         + Exceptions:
+         +  `WindowException` if the window couldn't be created.
+         + 
+         + Params:
+         +  name  = The name of the window.
+         +  size  = The size of the window.
+         +  style = The window's style.
+         + ++/
+        this(string name, in Vector2u size, in StyleFlags style = Style.Close)
+        {
+            import std.string : toStringz;
+
+            trace("[Creating Window]");
+            this._handle = sfRenderWindow_create(sfVideoMode(size.x, size.y, 32),
+                                                 name.toStringz,
+                                                 style.toNativeStyle,
+                                                 null);
+
+            enforce(this._handle !is null, new WindowException("Failed to create window."));
+            this.title      = name;
+            this._input     = new Input(this);
+            this._renderer  = new Renderer();
+            this._renderer.onInit(this);
+        }
+
+        /++
+         + Destroys the window.
+         + ++/
+        void onUninit()
+        {
+            trace("[Uninitialisaing Window]");
+            if(this._handle !is null)
+            {
+                trace("[Destroying Window handle]");
+                sfRenderWindow_destroy(this.handle);
+                this._handle = null;
+            }
+
+            if(this._input !is null)
+            {
+                trace("[Destroying Window Input]");
+                this._input = null;
+            }
+
+            if(this._renderer !is null && this._renderer.hasInit)
+            {
+                trace("[Destroying Window Renderer]");
+                this._renderer.onUninit();
+                this._renderer = null;
+            }
+        }
+
+        /++
+         + Closes the window.
+         + ++/
+        @trusted @nogc
+        void close() nothrow
+        {
+            sfRenderWindow_close(this.handle);
+        }
+
+        /++
+         + Displays any changes made to the window.
+         + ++/
+        @trusted @nogc
+        void display() nothrow
+        {
+            sfRenderWindow_display(this.handle);
+        }
+
+        /++
+         + Returns:
+         +  The window's size.
+         + ++/
+        @property @trusted @nogc
+        Vector2u size() nothrow const
+        {
+            auto siz = sfRenderWindow_getSize(this.handle);
+            return Vector2u(siz.x, siz.y);
+        }
+
+        /++
+         + Sets the window's size.
+         + 
+         + Params:
+         +  size_ = The size to set to the window to.
+         + ++/
+        @property @trusted @nogc
+        void size(in Vector2u size_) nothrow
+        {
+            sfRenderWindow_setSize(this.handle, sfVector2u(size_.x, size_.y));
+        }
+
+        /++
+         + Returns:
+         +  The window's title.
+         + ++/
+        @property @safe @nogc
+        string title() nothrow const
+        {
+            return this._title;
+        }
+
+        /++
+         + Sets the window's title.
+         + 
+         + Params:
+         +  title_ = The title to give the window.
+         + ++/
+        @property @trusted
+        void title(string title_) nothrow
+        {
+            import std.string    : toStringz;
+            import std.exception : assumeWontThrow;
+
+            assumeWontThrow(tracef("[Setting Window title to '%s']", title_));
+            sfRenderWindow_setTitle(this.handle, title_.toStringz);
+            this._title = title_;
+        }
+
+        /++
+         + Returns:
+         +  Whether the window is using VSync or not.
+         + ++/
+        @property @safe @nogc
+        bool vsync() nothrow const
+        {
+            return this._usingVsync;
+        }
+
+        /++
+         + Sets whether the window is using vsync or not.
+         + 
+         + Params:
+         +  vsync_ = Should the window use Vsync?
+         + ++/
+        @property @trusted @nogc
+        void vsync(bool vsync_) nothrow
+        {
+            this._usingVsync = vsync_;
+            sfRenderWindow_setVerticalSyncEnabled(this.handle, vsync_);
+        }
+
+        /++
+         + Returns:
+         +  `true` if the window is open. `false` otherwise.
+         + ++/
+        @property @trusted @nogc
+        bool isOpen() nothrow const
+        {
+            return (sfRenderWindow_isOpen(this.handle) == sfTrue);
+        }
+
+        /++
+         + Returns:
+         +  An instance of `Input` that is used to respond to any events the window recieves.
+         + ++/
+        @property @trusted @nogc
+        inout(Input) input() nothrow inout
+        out(output)
+        {
+            assert(output !is null);
+        }
+        body
+        {
+            return this._input;
+        }
+
+        /++
+         + Returns:
+         +  The window's `Renderer`.
+         + ++/
+        @property @safe @nogc
+        inout(Renderer) renderer() nothrow pure inout
+        out(output)
+        {
+            assert(output !is null, "The renderer is null.");
+        }
+        body
+        {
+            return this._renderer;
+        }
+
+        /++
+         + Notes:
+         +  This function should *only* be used in very specific cases, such as for the renderer.
+         +  In every other case, a function should be added to the window (or even a new class entirely) to provide
+         +  a high-level interface.
+         + 
+         + Returns:
+         +  The handle used by the window.
+         + ++/
+        @property @safe @nogc
+        inout(Handle) handle() nothrow inout
+        out(output)
+        {
+            assert(output !is null);
+        }
+        body
+        {
+            return this._handle;
+        }
+    }
+}
+
+/++
+ + Converts `Window.StyleFlags` into flags used by the window library.
+ + ++/
+@trusted @nogc
+private const(sfWindowStyle) toNativeStyle(in Window.StyleFlags flags) nothrow pure
+{
+    sfWindowStyle style;
+
+    with(Window.Style)
+    {
+        if(flags & Close) style |= sfClose;
+    }
+
+    return style;
+}
+///
+unittest
+{
+    enum Window.StyleFlags flags = Window.Style.Close;
+    static assert(toNativeStyle(flags) == sfClose);
+}
+
+/++
+ + This class handles managing the input of a `Window`.
+ + 
+ + Description:
+ +  A `PostOffice` is provided, which the Input class will mail a `Input.MailT` with the type of the mail being
+ +  the same as the event (e.g. sfClose) anytime the `Window` it's attached to recieves an event. 
+ +  The Input class has an `alias this` to it's `PostOffice`, for ease of use 
+ +  (e.g, instead of `input.events.subscribe` you'd be able to use `input.subscribe`).
+ + 
+ +  Basic usage includes using `input.subscribe(sfSomeEvent, &myHandler)` to subscribe to a specific window event.
+ + ++/
+final class Input
+{
+    import jengine.core.post;
+
+    /// The message given when a window event is made. The mail's `Mail.Type` is the same as the event itself.
+    alias MailT = ValueMail!sfEvent;
+    alias events this;
+
+    private
+    {
+        PostOffice  _office;
+        Window      _window;
+        Vector2f    _mouseScreenPos;
+
+        this(Window window)
+        {
+            assert(window !is null, "The window is null.");
+            trace("[Creating Window Input]");
+
+            this._window = window;
+            this._office = new PostOffice();
+
+            this.subscribe(sfEvtMouseMoved, &this.onMouseMove);
+        }
+
+        void onMouseMove(PostOffice, Mail mail)
+        {
+            auto event = cast(Input.MailT)mail;
+            assert(event !is null);
+
+            auto data = event.value;
+            assert(data.type == sfEvtMouseMoved);
+
+            this._mouseScreenPos = Vector2f(data.mouseMove.x, data.mouseMove.y);
+        }
+    }
+
+    public
+    {
+        /++
+         + Processes all pending window events.
+         + 
+         + Description:
+         +  Every window event will be mailed to the `Input.events` office, where the mail's type is the event's type,
+         +  and the mail itself is an `Input.MailT`. For example, when the mouse is moved, a `MailT` with the type
+         +  `sfEvtMouseMoved` is mailed.
+         + ++/
+        void processEvents()
+        {
+            sfEvent e;
+            while(sfRenderWindow_pollEvent(this._window.handle, &e))
+            {
+                // Temporary measure. In the future I want to reuse a single/pool of message objects
+                // instead of constantly allocating them.
+                this.events.mailValue!sfEvent(cast(Mail.MailTypeT)e.type, e);
+            }
+        }
+
+        /++
+         + Description:
+         +  Whenever the window this class is attached to recieves an event, then an `Input.MailT` mail is posted,
+         +  where the mail's type is the same as the event's type.
+         + 
+         +  e.g. To listen for if the close button is pressed, a call such as 
+         +  `window.input.events.subscribe(sfClose, &onClose)` should be made.
+         + 
+         + Returns:
+         +  A `PostOffice` that can be used to listen for mail triggered by a window event.
+         + ++/
+        @property @safe @nogc
+        inout(PostOffice) events() nothrow inout
+        out(output)
+        {
+            assert(output !is null, "The PostOffice is null, for some reason.");
+        }
+        body
+        {
+            return this._office;
+        }
+
+        /++
+         + Returns:
+         +  The position of the mouse on the screen, relative to the top left corner of the window.
+         + ++/
+        @property @safe @nogc
+        Vector2f mouseScreenPos() nothrow const
+        {
+            return this._mouseScreenPos;
+        }
+
+        /++
+         + Returns:
+         +  The position of the mouse in the game world, which is determined by the `View` currently being used.
+         + 
+         + See_Also:
+         +  `Renderer.screenToWorldPos`
+         + ++/
+        @property @safe @nogc
+        Vector2f mouseWorldPos() nothrow const
+        {
+            return this._window.renderer.screenToWorldPos(this._mouseScreenPos);
+        }
+    }
+}
+
+/++
+ + Thrown whenever an issue arrises when using a `Window`.
+ + ++/
+class WindowException : Exception
+{
+    /**
+     * Creates a new instance of Exception. The next parameter is used
+     * internally and should always be $(D null) when passed by user code.
+     * This constructor does not automatically throw the newly-created
+     * Exception; the $(D throw) statement should be used for that purpose.
+     */
+    @nogc @safe pure nothrow this(string msg, string file = __FILE__, size_t line = __LINE__, Throwable next = null)
+    {
+        super(msg, file, line, next);
+    }
+}

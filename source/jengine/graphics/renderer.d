@@ -1,0 +1,1125 @@
+﻿/++
+ + Contains code for rendering basic stuff to the screen.
+ + ++/
+module jengine.graphics.renderer;
+
+private
+{
+    import std.experimental.allocator.mallocator, std.experimental.logger, std.experimental.allocator;
+    import std.typecons  : Flag, Yes, No;
+    import std.exception : enforce;
+
+    import jengine.core.engine;
+    import jengine.core.maths;
+    import jengine.core.cache;
+    import jengine.graphics.window;
+
+    import jaster.smartptr;
+    import sfml;
+    import gl3n.linalg : Vector;
+}
+
+/// Note that because gl3n's `Vector` is buggy (or rather, D is) it will store a `uint` instead of a `ubyte`
+/// The `checkColour` function is provided to make sure all of the values are within 0-255, and fails an assert otherwise.
+alias Colour = Vector!(uint, 4);
+
+/++
+ + Checks a `Colour` to make sure it's values are between 0-255.
+ +
+ + Notes:
+ +  This function makes use of `assert`s, so there is no overhead for using it in release builds.
+ + 
+ + Assertions:
+ +  The `r`, `g`, `b`, and `a` values of `colour` must be between 0-255 (inclusive)
+ +
+ + Params:
+ +  colour = The colour to check.
+ + ++/
+@safe @nogc
+void checkColour(const Colour colour) nothrow pure
+{
+    assert(colour.r >= 0 && colour.r <= 255, "The Red value is out of bounds.");
+    assert(colour.g >= 0 && colour.g <= 255, "The Blue value is out of bounds.");
+    assert(colour.b >= 0 && colour.b <= 255, "The Green value is out of bounds.");
+    assert(colour.a >= 0 && colour.a <= 255, "The Alpha value is out of bounds.");
+}
+
+@safe @nogc
+package sfColor asNativeColour(const Colour colour) nothrow
+{
+    colour.checkColour();
+    return sfColor(cast(ubyte)colour.r, 
+                   cast(ubyte)colour.g, 
+                   cast(ubyte)colour.b, 
+                   cast(ubyte)colour.a);
+}
+
+/++
+ + Contains code that knows how to render things.
+ + ++/
+final class Renderer : IInitialisable!Window
+{
+    /// The type returned by `Renderer.view`
+    alias ViewPointer = AutoSharedPointer!(View, Mallocator, No.useGC);
+    private
+    {
+        Window              _window;
+        View                _view;
+        sfRectangleShape*   _rect;
+    }
+
+    public
+    {
+        /++
+         + Called when the class should initialise everything.
+         + 
+         + Assertions:
+         +  `hasInit` should return `false`.
+         + 
+         + Params:
+         +  window = The `Window` to render to.
+         + ++/
+        void onInit(Window window)
+        {
+            trace("[Initialising renderer]");
+            assert(window !is null);
+            this._window = window;
+            this._rect   = sfRectangleShape_create();
+            this.view    = View.create(); // Make _view non-null
+            this.view    = null;          // Then replace it with the default view
+        }
+        
+        /++
+         + Called when the class should uninitialise everything.
+         + 
+         + Notes:
+         +  If a class should keep a reference to the `Engine` passed by `onInit` if it will require it for cleanup.
+         + ++/
+        void onUninit()
+        {
+            trace("[Uninitialising renderer]");
+            this._window = null;
+            View.dispose(this._view);
+
+            if(this._rect !is null)
+            {
+                sfRectangleShape_destroy(this._rect);
+                this._rect = null;
+            }
+        }
+
+        /++
+         + Clears the screen to a certain colour.
+         + 
+         + Params:
+         +  colour = The colour to clear to.
+         + ++/
+        void clear(const Colour colour)
+        {
+            sfRenderWindow_clear(this.window.handle, colour.asNativeColour);
+        }
+
+        /++
+         + Renders a sprite to the screen.
+         + 
+         + Assertions:
+         +  `sprite` must not be `null`.
+         + 
+         + Params:
+         +  sprite = A reference to the `Sprite` to render.
+         + ++/
+        void render(const Sprite sprite)
+        {
+            assert(sprite !is null, "Attempted to render a null sprite");
+
+            if(sprite.visible)
+                sfRenderWindow_drawSprite(this.window.handle, sprite.handle, null);
+        }
+
+        /++
+         + Renders a rectangle.
+         +
+         + Assertions:
+         +  All `Colour` parameters must pass `checkColour`
+         +
+         + Params:
+         +  rect                = The `FloatRect` which describes the rectangle to draw.
+         +  fillColour          = The `Colour` of the inside of the rectangle.
+         +  outlineThickness    = How thick the outline is.
+         +  outlineColour       = The `Colour` of the outline of the rectangle.
+         + ++/
+        void render(const FloatRect rect, const Colour fillColour = Colour(0, 128, 0, 255), const float outlineThickness = 0, const Colour outlineColour = Colour(0))
+        {
+            sfRectangleShape_setPosition        (this._rect, sfVector2f(rect.position.x, rect.position.y));
+            sfRectangleShape_setSize            (this._rect, sfVector2f(rect.size.x, rect.size.y));
+            sfRectangleShape_setFillColor       (this._rect, fillColour.asNativeColour);
+            sfRectangleShape_setOutlineThickness(this._rect, outlineThickness);
+            sfRectangleShape_setOutlineColor    (this._rect, outlineColour.asNativeColour);
+            sfRenderWindow_drawRectangleShape   (this.window.handle, this._rect, null);
+        }
+
+        /++
+         + Converts a screen position to a world position.
+         + 
+         + Description:
+         +  Imagine that we have the world position (0,0), and that the renderer's main `View` has been moved
+         +  50 pixels to the right. Then, imagine we pass (0,0) to this function, it would return (-50,0) as that's
+         +  where the position (0,0) would be relative to the camera.
+         + 
+         + Params:
+         +  screenPos = The screen position to convert.
+         + 
+         + Returns:
+         +  `screenPos` as a world position.
+         + ++/
+        @trusted @nogc
+        Vector2f screenToWorldPos(in Vector2f screenPos) nothrow const
+        {
+            auto vect = sfRenderWindow_mapPixelToCoords(this.window.handle, 
+                                                        sfVector2i(cast(int)screenPos.x, cast(int)screenPos.y), 
+                                                        this._view.handle);
+            return Vector2f(vect.x, vect.y);
+        }
+
+        /++
+         + Converts a world position to a screen position.
+         + 
+         + Params:
+         +  worldPos = The world position to convert.
+         + 
+         + Returns:
+         +  `worldPos` as a screen position.
+         + ++/
+        @trusted @nogc
+        Vector2f worldToScreenPos(in Vector2f worldPos) nothrow const
+        {
+            auto vect = sfRenderWindow_mapCoordsToPixel(this.window.handle, 
+                                                        sfVector2f(worldPos.x, worldPos.y), 
+                                                        this._view.handle);
+            return Vector2f(vect.x, vect.y);
+        }
+
+        /++
+         + Notes:
+         +  Because the current `View` might be changed, and therefor deallocated while the old one is still being used,
+         +  a $(B copy) of the current view is made, and returned as a `ViewPointer`, which will automatically
+         +  deallocate the View once all `ViewPointers` to it are destroyed.
+         + 
+         + Returns:
+         +  The current `View` being used.
+         + ++/
+        @property @trusted
+        ViewPointer view()
+        {
+            return ViewPointer(ViewPointer.SharedPointerT(this._view.copy));
+        }
+
+        /++
+         + Sets the current `View` of the renderer.
+         + 
+         + Notes:
+         +  A copy of the view is made, so any edits to `view_` after this function will not become visible.
+         + 
+         + Params:
+         +  view_ = The `View` to use.
+         +          If `null`, then the default view will be used.
+         + ++/
+        @property @trusted
+        void view(View view_)
+        {
+            if(view_ is null)
+                this._view._handle = sfRenderWindow_getDefaultView(this.window.handle).sfView_copy();
+            else
+            {
+                View.dispose(this._view);
+                this._view = view_.copy;
+            }
+
+            sfRenderWindow_setView(this.window.handle, this._view.handle);
+        }
+
+        /++
+         + Returns:
+         +  The `Window` being used by the renderer.
+         + ++/
+        @property @safe @nogc
+        inout(Window) window() nothrow pure inout
+        out(output)
+        {
+            assert(output !is null, "The window is null.");
+        }
+        body
+        {
+            return this._window;
+        }
+
+        /++
+         + Returns:
+         +  Whether the class has initialised or not.
+         + ++/
+        @property @safe @nogc
+        bool hasInit() nothrow pure const
+        {
+            return (this._window !is null);
+        }
+    }
+}
+
+/++
+ + Contains a shader, which is a small program on the GPU that makes things super pretty.
+ + Please see http://www.sfml-dev.org/tutorials/2.4/graphics-shader.php for SFML-specific info
+ + about shaders.
+ ++/
+final class Shader : ICacheable
+{
+    /++
+     + An alias to the type used as the shader's handle.
+     ++/
+    alias Handle = sfShader*;
+
+    private
+    {
+        Handle _handle;
+    }
+
+    public
+    {
+        ~this()
+        {
+            if(this._handle !is null)
+                sfShader_destroy(this.handle);
+        }
+
+        /++
+         + Creates a shader from two shader files.
+         +
+         + Exceptions:
+         +  $(P `Exception` if either parameter is `null`.)
+         +  $(P `FileException` if either parameter points to a non-existant file.)
+         +  $(P `GraphicsException` if either parameter is not valid GLSL code.)
+         +
+         + Notes:
+         +  The `Shader` is allocated with `theAllocator`.
+         +
+         + Params:
+         +  vertex   = The file containing the vertex shader.
+         +  fragment = The file containing the fragment shader.
+         +
+         + Returns:
+         +  A newly made `Shader`.
+         ++/
+        @trusted
+        static Shader fromFile(in char[] vertex, in char[] fragment)
+        out(output)
+        {
+            assert(output !is null, "No shader was made.");
+        }
+        body
+        {
+            import std.path    : buildNormalizedPath;
+            import std.string  : toStringz;
+            import std.file    : FileException, exists, isDir;
+
+            enforce(vertex   !is null, "The path to the vertex shader is null.");
+            enforce(fragment !is null, "The path to the fragment shader is null.");
+
+            auto vert = buildNormalizedPath(vertex);
+            auto frag = buildNormalizedPath(fragment);
+
+            enforce(vert.exists && !vert.isDir, new FileException(vertex,   "Path for Vertex Shader does not exist, or points to a directory."));
+            enforce(frag.exists && !frag.isDir, new FileException(fragment, "Path for Fragment Shader does not exist, or points to a directory."));
+
+            tracef("[Loading Shader from files. Frag = %s. Vert = %s]", frag, vert);
+            auto shader    = theAllocator.make!Shader;
+            shader._handle = sfShader_createFromFile(vert.toStringz, frag.toStringz);
+            scope(failure) theAllocator.dispose(shader);
+            tracef("[Shader handle: %s]", shader.handle);
+
+            enforce(shader._handle !is null, new GraphicsException("Unable to create Shader"));
+
+            return shader;
+        }
+
+        /++
+         + Creates a shader from two GLSL sources.
+         + 
+         + Exceptions:
+         +  $(P `Exception` if either parameter is `null`.)
+         +  $(P `GraphicsException` if either parameter is not valid GLSL code.)
+         + 
+         + Notes:
+         +  The `Shader` is allocated with `theAllocator`.
+         +
+         + Params:
+         +  vertex   = The code for the vertex shader.
+         +  fragment = The code for the fragment shader.
+         + 
+         + Returns:
+         +  The newly made `Shader`.
+         + ++/
+        @trusted
+        static Shader fromMemory(in char[] vertex, in char[] fragment)
+        out(output)
+        {
+            assert(output !is null, "No shader was made.");
+        }
+        body
+        {
+            import std.string : toStringz;
+
+            enforce(vertex   !is null, "The code for the vertex shader is null.");
+            enforce(fragment !is null, "The code for the fragment shader is null.");
+
+            trace("[Creating Shader from memory]");
+            auto shader    = theAllocator.make!Shader;
+            shader._handle = sfShader_createFromMemory(vertex.toStringz, fragment.toStringz);
+            scope(failure) theAllocator.dispose(shader); // In case the enforce below throws.
+
+            // I wish there was a way to capture the error message e_e
+            enforce(shader._handle !is null, new GraphicsException("The shader could not be compiled."));
+            tracef("[Shader handle: %s]", shader.handle);
+
+            return shader;
+        }
+
+        /++
+         + Disposes of a `Shader` created by `fromMemory` or `fromFile`.
+         + 
+         + Notes:
+         +  The `shader` $(B must have been created by one of the mentioned functions).
+         + 
+         + Params:
+         +  shader = The shader to dispose of.
+         +           The referenced passed through is then set to `null`.
+         + ++/
+        static void dispose(ref Shader shader)
+        {
+            if(shader !is null)
+            {
+                theAllocator.dispose(shader);
+                shader = null;
+            }
+        }
+
+        /++
+         + Sets which `Shader` to use when rendering.
+         + 
+         + Params:
+         +  shader = The shader to use when rendering.
+         +           Pass `null` to use the default SFML ones again.
+         + ++/
+        @trusted
+        static void use(const(Shader) shader = null)
+        {
+            if(shader is null)
+                sfShader_bind(null);
+            else
+                sfShader_bind(shader.handle);
+        }
+
+        /++
+         + Sets the value of a uniform variable.
+         + 
+         + Assertions:
+         +  $(P `Args` must be supported.)
+         +  $(P `name` can only be up to 254 characters long.)
+         + 
+         + Params:
+         +  name  = The name of the uniform to set.
+         +  value = The value to give the unform. It is advised to read over the function to see which parameters
+         +          are supported.
+         + ++/
+        void setUniform(Args...)(string name, Args value)
+        {
+            import std.typecons : AliasSeq;
+
+            static if(is(Args == AliasSeq!(float)))
+                alias func = sfShader_setFloatParameter;
+            else static if(is(Args == AliasSeq!(float, float)))
+                alias func = sfShader_setFloat2Parameter;
+            else static if(is(Args == AliasSeq!(float, float, float)))
+                alias func = sfShader_setFloat3Parameter;
+            else static if(is(Args == AliasSeq!(float, float, float, float)))
+                alias func = sfShader_setFloat4Parameter;
+            else static if(is(Args == AliasSeq!(Vector2f)))
+            {
+                alias func = sfShader_setVector2Parameter;
+                auto  vect = sfVector2f(value[0].x, value[0].y);
+            }
+            else static if(is(Args == AliasSeq!(Vector3f)))
+            {
+                alias func = sfShader_setVector3Parameter;
+                auto  vect = sfVector3f(value[0].x, value[0].y, value[0].z);
+            }
+            else
+                static assert(false, "The parameters " ~ Args.stringof ~ " are not supported.");
+                
+            assert(name.length <= 254, "The name is too long");
+
+            char[256] buffer;
+            buffer[0..name.length] = name;
+            buffer[name.length]    = '\0';
+
+            static if(is(Args == AliasSeq!Vector2f) || is(Args == AliasSeq!Vector3f))
+                func(this.handle, buffer.ptr, vect);
+            else
+                func(this.handle, buffer.ptr, value);
+        }
+        version(unittest)
+        {
+            // Some test instansiations.
+            alias suf   = setUniform!float;
+            alias suff  = setUniform!(float,float);
+            alias suv3f = setUniform!Vector3f;
+        }
+
+        /++
+         + Returns:
+         +  The shader's handle.
+         ++/
+        @property @safe @nogc
+        inout(Handle) handle() nothrow pure inout
+        out(output)
+        {
+            assert(output !is null, "Attempted to use a null shader handle.");
+        }
+        body
+        {
+            return this._handle;
+        }
+    }
+}
+
+/++
+ + Describes a sprite that can be drawn on screen.
+ ++/
+final class Sprite : ICacheable
+{
+    /++
+     + An alias to the type used as the sprite's handle.
+     ++/
+    alias Handle = sfSprite*;
+
+    private
+    {
+        Handle  _handle;
+        Texture _texture;
+        bool    _visible;
+    }
+
+    public
+    {
+        ~this()
+        {
+            if(this._handle !is null)
+            {
+                tracef("[Destroying Sprite with handle of %s]", this.handle);
+                sfSprite_destroy(this.handle);
+            }
+        }
+
+        /++
+         + Creates a new sprite.
+         +
+         + Notes:
+         +  `theAllocator` is used to allocate the sprite.
+         +
+         + Params:
+         +  texture     = The `Texture` to use for the sprite.
+         +  position    = The sprite's position.
+         +  textureRect = Which part of the texture to actually use.
+         +                Use `IntRect.empty` for the entire texture.
+         +
+         + Returns:
+         +  A new `Sprite`
+         ++/
+        static Sprite create(Texture texture, Vector2f position = Vector2f(0), IntRect textureRect = IntRect.empty)
+        out(output)
+        {
+            assert(output !is null, "No sprite was made.");
+        }
+        body
+        {
+            tracef("[Creating Sprite]");
+            auto sprite = theAllocator.make!Sprite;
+            scope(failure) theAllocator.dispose(sprite);
+            sprite._handle     = sfSprite_create();
+            sprite.texture     = texture;
+            sprite.position    = position;
+            sprite.textureRect = textureRect;
+            sprite.visible     = true;
+
+            tracef("[Sprite Handle = %s]", sprite.handle);
+
+            return sprite;
+        }
+
+        /++
+         + Disposes of a `Sprite` created by `Sprite.create`.
+         + 
+         + Notes:
+         +  The `sprite` $(B must have been created by `Sprite.create`).
+         + 
+         + Params:
+         +  sprite = The sprite to dispose of.
+         +           The referenced passed through is then set to `null`.
+         + ++/
+        static void dispose(ref Sprite sprite)
+        {
+            if(sprite !is null)
+            {
+                theAllocator.dispose(sprite);
+                sprite = null;
+            }
+        }
+
+        /++
+         + Moves the sprite by an offset.
+         + 
+         + Params:
+         +  offset = The offset to move the sprite by.
+         + ++/
+        @property @trusted @nogc
+        void move(Vector2f offset) nothrow
+        {
+            sfSprite_move(this.handle, sfVector2f(offset.x, offset.y));
+        }
+
+        /++
+         + Sets the sprite's texture rectangle, which is the part of the sprite's texture to use when rendering.
+         +
+         + Params:
+         +  rect = The new texture rectangle.
+         +         If `rect` is `IntRect.empty` then the entire texture is used.
+         ++/
+        @property @trusted @nogc
+        void textureRect(IntRect rect) nothrow
+        {
+            if(rect == IntRect.empty)
+            {
+                auto size = this.texture.size;
+                rect      = IntRect(0, 0, size.x, size.y);
+            }
+
+            sfSprite_setTextureRect(this.handle, rect.asSfml);
+        }
+
+        /++
+         + Returns:
+         +  What part of the texture the sprite's using.
+         ++/
+        @property @trusted @nogc
+        IntRect textureRect() nothrow const
+        {
+            return IntRect.fromSfml(sfSprite_getTextureRect(this.handle));
+        }
+
+        /++
+         + Sets the sprite's position.
+         + 
+         + Params:
+         +  pos = The sprite's new position.
+         ++/
+        @property @trusted @nogc
+        void position(Vector2f pos) nothrow
+        {
+            sfSprite_setPosition(this.handle, sfVector2f(pos.x, pos.y));
+        }
+
+        /++
+         + Returns:
+         +  The sprite's position.
+         ++/
+        @property @trusted @nogc
+        Vector2f position() nothrow const
+        {
+            auto vect = sfSprite_getPosition(this.handle);
+            return Vector2f(vect.x, vect.y);
+        }
+
+        /++
+         + Sets the `Texture` that the sprite uses.
+         +
+         + Assertions:
+         +  `text` must not be `null`.
+         +
+         + Notes:
+         +  $(P This property will reset the texture rect for the sprite.)
+         +  $(P A reference to `text` is stored by the sprite.)
+         +
+         + Params:
+         +  text = The texture to use.
+         ++/
+        @property @trusted
+        void texture(Texture text)
+        {
+            assert(text !is null, "The texture given is null.");
+            sfSprite_setTexture(this.handle, text.handle, true);
+            this._texture = text;
+        }
+
+        /++
+         + Returns:
+         +  The `Texture` being used by this sprite.
+         ++/
+        @property @safe @nogc
+        inout(Texture) texture() nothrow pure inout
+        out(output)
+        {
+            assert(output !is null);
+        }
+        body
+        {
+            return this._texture;
+        }
+
+        /++
+         + Sets whether the sprite is visible or not.
+         +
+         + Params:
+         +  vis = Whether the sprite is visible.
+         ++/
+        @property @safe @nogc
+        void visible(bool vis) nothrow
+        {
+            this._visible = vis;
+        }
+
+        /++
+         + Returns:
+         +  `true` if the sprite is visible.
+         +  `false` otherwise.
+         ++/
+        @property @safe @nogc
+        bool visible() nothrow const
+        {
+            return this._visible;
+        }
+
+        /++
+         + Sets the Sprite's colour.
+         +
+         + Assertions:
+         +  `col` must pass `checkColour`.
+         + 
+         + Params:
+         +  col = The colour to use.
+         + ++/
+        @property @trusted @nogc
+        void colour(Colour col) nothrow
+        {
+            sfSprite_setColor(this.handle, col.asNativeColour);
+        }
+
+        /++
+         + Returns:
+         +  The sprite's colour.
+         + ++/
+        @property @trusted @nogc
+        Colour colour() nothrow const
+        {
+            auto col = sfSprite_getColor(this.handle);
+            return Colour(col.r, col.g, col.b, col.a);
+        }
+
+        /++
+         + Returns:
+         +  The `Sprite`'s handle.
+         ++/
+        @property @safe @nogc
+        inout(Handle) handle() nothrow pure inout
+        out(output)
+        {
+            assert(output !is null, "Attempted to use a null sprite handle.");
+        }
+        body
+        {
+            return this._handle;
+        }
+    }
+}
+
+/++
+ + Contains a texture that can be given to something to render with.
+ ++/
+final class Texture : ICacheable
+{
+    /++
+     + An alias to the type used as the texture's handle.
+     ++/
+    alias Handle = sfTexture*;
+
+    private
+    {
+        Handle _handle;
+    }
+
+    public
+    {
+        ~this()
+        {
+            if(this._handle !is null)
+            {
+                tracef("[Destroying Texture with handle of %s]", this.handle);
+                sfTexture_destroy(this.handle);
+            }
+        }
+
+        /++
+         + Loads a `Texture` from a file.
+         +
+         + Notes:
+         +  `theAllocator` is used to allocate the texture.
+         +
+         + Exceptions:
+         +  `FileException` if `file` doesn't point to a file.
+         +  `GraphicsException` if the image couldn't be loaded.
+         +
+         + Params:
+         +  file = The path to the file to load.
+         +
+         + Returns:
+         +  The `Texture` that was loaded from `file`.
+         ++/
+        @trusted
+        static Texture fromFile(in char[] file)
+        {
+            import std.path          : asNormalizedPath;
+            import std.file          : exists, FileException;
+            import jaster.containers : DynamicArray;
+
+            DynamicArray!char path;
+            path.reserve(file.length + 1);
+            path ~= file.asNormalizedPath;
+            path ~= '\0';
+
+            // This *does* use the GC, but the GC-using parts can be disabled via `sharedLogger.logLevel = SomeLogLevelBiggerthanTrace`
+            // So for debugging it's fine.
+            tracef("[Loading Texture from file '%s']", path.range);
+            enforce(path.range.exists, new FileException(path, "Unable to load texture"));
+
+            auto texture    = theAllocator.make!Texture();
+            texture._handle = sfTexture_createFromFile(path.range.ptr, null);
+            scope(failure) theAllocator.dispose(texture);
+
+            enforce(texture._handle !is null, new GraphicsException("Unable to load texture"));
+
+            return texture;
+        }
+
+        /++
+         + Loads a `Texture` from memory.
+         +
+         + Notes: 
+         +  `theAllocator` is used to allocate the texture.
+         +
+         + Exceptions:
+         +  `GraphicsException` if the texture couldn't be loaded.
+         +
+         + Params:
+         +  data = The bytes making up the texture.
+         +
+         + Returns:
+         +  The `Texture` that was loaded from `data`.
+         + ++/
+        @trusted
+        static Texture fromMemory(in ubyte[] data)
+        {
+            trace("[Loading Texture from memory]");
+            auto texture    = theAllocator.make!Texture();
+            texture._handle = sfTexture_createFromMemory(data.ptr, data.length, null);
+            scope(failure) theAllocator.dispose(texture);
+
+            enforce(texture._handle !is null, new GraphicsException("Unable to load texture"));
+            return texture;
+        }
+
+        /++
+         + Disposes of a `Texture` created by `fromMemory` or `fromFile`.
+         + 
+         + Notes:
+         +  The `texture` $(B must have been created by one of the mentioned functions).
+         + 
+         + Params:
+         +  texture = The texture to dispose of.
+         +            The referenced passed through is then set to `null`.
+         + ++/
+        static void dispose(ref Texture texture)
+        {
+            if(texture !is null)
+            {
+                theAllocator.dispose(texture);
+                texture = null;
+            }
+        }
+
+        /++
+         + Returns:
+         +  The size of the texture.
+         ++/
+        @property @trusted @nogc
+        Vector2u size() nothrow const
+        {
+            auto vect = sfTexture_getSize(this.handle);
+            return Vector2u(vect.x, vect.y);
+        }
+
+        /++
+         + Returns:
+         +  The `Texture`'s handle.
+         ++/
+        @property @safe @nogc
+        inout(Handle) handle() nothrow pure inout
+        out(output)
+        {
+            assert(output !is null, "Attempted to use a null texture handle.");
+        }
+        body
+        {
+            return this._handle;
+        }
+    }
+}
+
+/++
+ + Describes a view, which is used to render objects to only a specific portion of the screen.
+ +
+ + Notes:
+ +  Unlike `Sprite` and `Texture`, it's recommended that a `View` is allocated with the GC, since very few
+ +  are likely to be made meaning the GC won't throw a fit.
+ + ++/
+final class View : ICacheable
+{
+    /// The type used as the view's handle.
+    alias Handle = sfView*;
+
+    private
+    {
+        Handle _handle;
+    }
+
+    public
+    {
+        /++
+         + Creates a new `View` that is created from a rectangle.
+         + 
+         + Notes:
+         +  $(P Please see the documentation for `View.viewport` on what `rect`'s values should be.)
+         +  $(P `theAllocator` is used to allocate the view)
+         + 
+         + Assertions:
+         +  An assert is failed if the view couldn't be created for some reason.
+         + 
+         + Params:
+         +  rect = The rectangle that describes the view.
+         + ++/
+        @trusted
+        static View create(FloatRect rect = FloatRect(0, 0, 1, 1))
+        {
+            auto view    = theAllocator.make!View;
+            view._handle = sfView_createFromRect(rect.asSfml);
+            scope(failure) theAllocator.dispose(view);
+
+            assert(view._handle !is null);
+
+            return view;
+        }
+
+        /++
+         + Disposes of a `View` created by `View.create` or `View.copy`.
+         + 
+         + Notes:
+         +  The `view` $(B must have been created by one of the mentioned functions).
+         + 
+         + Params:
+         +  view = The view to dispose of.
+         +         The referenced passed through is then set to `null`.
+         + ++/
+        static void dispose(ref View view)
+        {
+            if(view !is null)
+            {
+                theAllocator.dispose(view);
+                view = null;
+            }
+        }
+
+        ~this()
+        {
+            if(this._handle !is null)
+            {
+                sfView_destroy(this._handle);
+                this._handle = null;
+            }
+        }
+
+        /++
+         + Creates a copy of the View.
+         + 
+         + Notes:
+         +  `theAllocator` is used to allocate the copy.
+         +
+         + Returns:
+         +  A copy of the View.
+         + ++/
+        @trusted
+        View copy() const
+        {
+            auto view    = theAllocator.make!View;
+            view._handle = sfView_copy(this.handle);
+
+            return view;
+        }
+
+        /++
+         + Moves the view by an offset.
+         + 
+         + Params:
+         +  offset = The offset to move the view by.
+         + ++/
+        @trusted @nogc
+        void move(Vector2f offset) nothrow
+        {
+            sfView_move(this.handle, sfVector2f(offset.x, offset.y));
+        }
+
+        /++
+         + Rotates the view.
+         + 
+         + Params:
+         +  rot = The angle to rotate by, in degrees.
+         + ++/
+        @trusted @nogc
+        void rotate(float rot) nothrow
+        {
+            sfView_rotate(this.handle, rot);
+        }
+
+        /++
+         + Sets the center of the view.
+         + 
+         + Params:
+         +  center_ = The new center of the view.
+         + ++/
+        @property @trusted @nogc
+        void center(Vector2f center_) nothrow
+        {
+            sfView_setCenter(this.handle, sfVector2f(center_.x, center_.y));
+        }
+
+        /++
+         + Returns:
+         +  The center of the view.
+         + ++/
+        @property @trusted @nogc
+        Vector2f center() nothrow const
+        {
+            auto vect = sfView_getCenter(this.handle);
+            return Vector2f(vect.x, vect.y);
+        }
+
+        /++
+         + Sets the rotation of the view.
+         + 
+         + Params:
+         +  rot = The rotation of the view in degrees.
+         + ++/
+        @property @trusted @nogc
+        void rotation(float rot) nothrow
+        {
+            sfView_setRotation(this.handle, rot);
+        }
+
+        /++
+         + Returns:
+         +  The rotation of the view in degrees.
+         + ++/
+        @property @trusted @nogc
+        float rotation() nothrow const
+        {
+            return sfView_getRotation(this.handle);
+        }
+
+        /++
+         + Sets the size of the view.
+         + 
+         + Params:
+         +  size_ = The new size of the view.
+         + ++/
+        @property @trusted @nogc
+        void size(Vector2f size_) nothrow
+        {
+            sfView_setSize(this.handle, sfVector2f(size_.x, size_.y));
+        }
+
+        /++
+         + Returns:
+         +  The size of the view.
+         + ++/
+        @property @trusted @nogc
+        Vector2f size() nothrow const
+        {
+            auto vect = sfView_getSize(this.handle);
+            return Vector2f(vect.x, vect.y);
+        }
+
+        /++
+         + Sets the viewport of the view from a rectangle.
+         + 
+         + Notes:
+         +  The viewport is what part of the screen the view's contents are displayed.
+         +  The range for each value is between 0 and 1, so a `FloatRect(0, 0, 0.5f, 1.0f)` would display on the left
+         +  half of the screen.
+         + 
+         + Params:
+         +  rect = The rectangle to set the view to.
+         + ++/
+        @property @trusted @nogc
+        void viewport(FloatRect rect) nothrow
+        {
+            sfView_setViewport(this.handle, rect.asSfml);
+        }
+
+        /++
+         + Returns:
+         +  The viewport.
+         + ++/
+        @property @trusted @nogc
+        FloatRect viewport() nothrow const
+        {
+            return FloatRect.fromSfml(sfView_getViewport(this.handle));
+        }
+
+        /++
+         + Returns:
+         +  The handle for the View.
+         + ++/
+        @property @safe @nogc
+        inout(Handle) handle() nothrow pure inout
+        out(output)
+        {
+            assert(output !is null, "Attempted to use a null viewport handle.");
+        }
+        body
+        {
+            return this._handle;
+        }
+    }
+}
+
+/++
+ + Thrown whenever something regarding graphics goes wrong.
+ + ++/
+class GraphicsException : Exception
+{
+    /**
+     * Creates a new instance of Exception. The next parameter is used
+     * internally and should always be $(D null) when passed by user code.
+     * This constructor does not automatically throw the newly-created
+     * Exception; the $(D throw) statement should be used for that purpose.
+     */
+    @nogc @safe pure nothrow this(string msg, string file = __FILE__, size_t line = __LINE__, Throwable next = null)
+    {
+        super(msg, file, line, next);
+    }
+}
