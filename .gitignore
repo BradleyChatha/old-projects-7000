@@ -10,3 +10,4 @@ __test__*__
 __dummy.html
 
 /lib/*.*
+/tests/*/bin/*.*
