@@ -100,15 +100,15 @@ final class Engine : IPostBox
             assert(app    !is null, "Cannot use a null App with the engine.");
             assert(window !is null, "Cannot use a null Window with the engine.");
 
-            if(!app.hasInit)
-                app.onInit(this);
-
-            this._app    = app;
             this._window = window;
             this._office = new PostOffice();
             this._office.onInit(this);
             this._office.reserveTypes!Events;
             this._office.subscribe(this);
+
+            if(!app.hasInit)
+                app.onInit(this);
+            this._app = app;
             
             this.handleArgs(args, window);
         }
@@ -267,8 +267,9 @@ final class Engine : IPostBox
  + ++/
 abstract class App : IInitialisable!Engine
 {
-    private
+    public
     {
+        // Until getSymbolsByUDA fixes a bug, this has to be public.
         Engine _engine;
     }
 
