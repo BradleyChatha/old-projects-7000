@@ -29,11 +29,11 @@ alias Vector3f = Vector!(float, 3);
  + A type describing a rectangle.
  +
  + Params:
- +  T        = The numeric type that this rectangle stores.
- +  SfmlType = The SFML version of the rectangle.
+ +  T           = The numeric type that this rectangle stores.
+ +  NativeType  = The native version of the rectangle, aka the type used by the underlying C library.
  ++/
-struct Rectangle(T, SfmlType)
-if(isNumeric!T && (is(SfmlType == sfIntRect) || is(SfmlType == sfFloatRect)))
+struct Rectangle(T, NativeType)
+if(isNumeric!T && (is(NativeType == sfIntRect) || is(NativeType == sfFloatRect)))
 {
     /// The vector type being used for this rectangle.
     alias VectorT = Vector!(T, 2);
@@ -66,44 +66,44 @@ if(isNumeric!T && (is(SfmlType == sfIntRect) || is(SfmlType == sfFloatRect)))
         }
 
         /++
-         + Converts an `SfmlType` to the rectangle.
+         + Converts a `NativeType` to the rectangle.
          +
          + Params:
-         +  sfml = The `SfmlType` to convert from.
+         +  rect = The `NativeType` to convert from.
          +
          + Returns:
-         +  `sfml` as a `Rectangle`.
+         +  `rect` as a `Rectangle`.
          ++/
         @property @safe @nogc
-        static typeof(this) fromSfml(SfmlType sfml) nothrow pure
+        static typeof(this) fromNative(NativeType rect) nothrow pure
         {
             alias Type = typeof(this);
-            return Type(VectorT(sfml.left, sfml.top), VectorT(sfml.width, sfml.height));
+            return Type(VectorT(rect.left, rect.top), VectorT(rect.width, rect.height));
         }
         ///
         unittest
         {
             alias This = typeof(this);
-            enum rect  = SfmlType(20, 30, 40, 50);
-            static assert(This.fromSfml(rect) == This(20, 30, 40, 50));
+            enum rect  = NativeType(20, 30, 40, 50);
+            static assert(This.fromNative(rect) == This(20, 30, 40, 50));
         }
 
         /++
-         + Converts the rectangle into `SfmlType`, useful for interacting with SFML.
+         + Converts the rectangle into `NativeType`, useful for interacting with the underlying C library.
          +
          + Returns:
-         +  The rectangle in as a `SfmlType`.
+         +  The rectangle in as a `NativeType`.
          ++/
         @property @safe @nogc
-        SfmlType asSfml() nothrow pure const
+        NativeType asNative() nothrow pure const
         {
-            return SfmlType(this.position.x, this.position.y, this.size.x, this.size.y);
+            return NativeType(this.position.x, this.position.y, this.size.x, this.size.y);
         }
         ///
         unittest
         {
             alias This = typeof(this);
-            static assert(This(20, 30, 40, 50).asSfml == SfmlType(20, 30, 40, 50));
+            static assert(This(20, 30, 40, 50).asNative == NativeType(20, 30, 40, 50));
         }
     }
 }

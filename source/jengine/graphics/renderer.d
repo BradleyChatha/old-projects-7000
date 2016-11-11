@@ -618,7 +618,7 @@ final class Sprite : ICacheable
                 rect      = IntRect(0, 0, size.x, size.y);
             }
 
-            sfSprite_setTextureRect(this.handle, rect.asSfml);
+            sfSprite_setTextureRect(this.handle, rect.asNative);
         }
 
         /++
@@ -628,7 +628,7 @@ final class Sprite : ICacheable
         @property @trusted @nogc
         IntRect textureRect() nothrow const
         {
-            return IntRect.fromSfml(sfSprite_getTextureRect(this.handle));
+            return IntRect.fromNative(sfSprite_getTextureRect(this.handle));
         }
 
         /++
@@ -934,7 +934,7 @@ final class View : ICacheable
         static View create(FloatRect rect = FloatRect(0, 0, 1, 1))
         {
             auto view    = theAllocator.make!View;
-            view._handle = sfView_createFromRect(rect.asSfml);
+            view._handle = sfView_createFromRect(rect.asNative);
             scope(failure) theAllocator.dispose(view);
 
             assert(view._handle !is null);
@@ -1094,7 +1094,7 @@ final class View : ICacheable
         @property @trusted @nogc
         void viewport(FloatRect rect) nothrow
         {
-            sfView_setViewport(this.handle, rect.asSfml);
+            sfView_setViewport(this.handle, rect.asNative);
         }
 
         /++
@@ -1104,7 +1104,7 @@ final class View : ICacheable
         @property @trusted @nogc
         FloatRect viewport() nothrow const
         {
-            return FloatRect.fromSfml(sfView_getViewport(this.handle));
+            return FloatRect.fromNative(sfView_getViewport(this.handle));
         }
 
         /++
@@ -1512,7 +1512,7 @@ final class Text : ICacheable
         @property @trusted @nogc
         Vector2f size() nothrow const
         {
-            return FloatRect.fromSfml(sfText_getGlobalBounds(this.handle)).size;
+            return FloatRect.fromNative(sfText_getGlobalBounds(this.handle)).size;
         }
 
         /++

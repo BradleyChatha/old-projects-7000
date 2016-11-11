@@ -139,9 +139,9 @@ class Game : App, IPostBox
             // It should be noted, that I'm only using raw-sfml stuff because Jengine currently doesn't have this stuff.
             // It really should get it soon though.
             auto psize  = this._playerPaddle.texture.size;
-            auto prect  = FloatRect(playerPos.x, playerPos.y, psize.x, psize.y).asSfml;
-            auto airect = FloatRect(aiPos.x,     aiPos.y,     psize.x, psize.y).asSfml;
-            auto brect  = FloatRect(bpos.x,      bpos.y,      bsize.x, bsize.y).asSfml;
+            auto prect  = FloatRect(playerPos.x, playerPos.y, psize.x, psize.y).asNative;
+            auto airect = FloatRect(aiPos.x,     aiPos.y,     psize.x, psize.y).asNative;
+            auto brect  = FloatRect(bpos.x,      bpos.y,      bsize.x, bsize.y).asNative;
 
             if(sfFloatRect_intersects(&prect, &brect, null))
                 this._ballMoveLeft = false;
