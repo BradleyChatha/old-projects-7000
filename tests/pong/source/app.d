@@ -7,6 +7,7 @@ enum PADDLE_FILE  = "assets/paddle.png";
 enum PADDLE_SPEED = 200.0f; // pixel/s
 enum BALL_FILE    = "assets/tahn.png";
 enum BALL_SPEED   = 300.0f;
+enum SCORE_STRING = "Score: Player(%s) | AI(%s)";
 
 class Game : App, IPostBox
 {
@@ -20,6 +21,8 @@ class Game : App, IPostBox
         Sprite _ball;
         bool   _ballMoveLeft, _ballMoveDown;
         bool   _playerMoveUp, _playerMoveDown;
+        uint   _playerScore,  _aiScore;
+        Text   _scoreText;
     }
 
     public
@@ -35,6 +38,7 @@ class Game : App, IPostBox
             this._playerPaddle = this._cache.cache("Player", Sprite.create(this._cache.get!Texture(PADDLE_FILE), Vector2f(0, 0)));
             this._aiPaddle     = this._cache.cache("AI",     Sprite.create(this._cache.get!Texture(PADDLE_FILE), Vector2f(0, 0)));                    
             this._ball         = this._cache.cache("Ball",   Sprite.create(this._cache.get!Texture(BALL_FILE),   Vector2f(0, 0)));
+            this._scoreText    = this._cache.cache("Score",  Text.create!char(Font.debugFont, ""));
 
             this.resetPositions();
             engine.window.input.subscribe(this);
@@ -64,6 +68,17 @@ class Game : App, IPostBox
 
             // Always start with it going towards the AI
             this._ballMoveLeft = false;
+            this.updateScore();
+        }
+
+        void updateScore()
+        {
+            import std.format;
+            this._scoreText.text = format(SCORE_STRING, this._playerScore, this._aiScore);
+            auto size            = this._scoreText.size;
+            auto screen          = super.engine.window.size;
+
+            this._scoreText.position = Vector2f((screen.x / 2) - (size.x / 2), 0);
         }
         
         override void onUpdate(double delta)
@@ -102,8 +117,16 @@ class Game : App, IPostBox
                 this._ballMoveDown = true;
             else if(bpos.y + bsize.y > screen.y)
                 this._ballMoveDown = false;
-            if(bpos.x < 0 || bpos.x + bsize.x > screen.x)
+            if(bpos.x < 0)
+            {
+                this._aiScore += 1;
                 this.resetPositions();
+            }
+            else if(bpos.x + bsize.x > screen.x)
+            {
+                this._playerScore += 1;
+                this.resetPositions();
+            }
 
             /+ AI Logic(This is next-gen stuff right here) +/
             auto aiPos = this._aiPaddle.position;
@@ -127,6 +150,7 @@ class Game : App, IPostBox
 
             // Render everything.
             auto renderer = super.engine.window.renderer;
+            renderer.render(this._scoreText);
             renderer.render(this._playerPaddle);
             renderer.render(this._aiPaddle);
             renderer.render(this._ball);

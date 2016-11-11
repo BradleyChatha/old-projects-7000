@@ -54,6 +54,8 @@ package sfColor asNativeColour(const Colour colour) nothrow
                    cast(ubyte)colour.a);
 }
 
+private enum _debugFontBytes = cast(immutable(ubyte)[])import("debug_font/font.ttf");
+
 /++
  + Contains code that knows how to render things.
  + ++/
@@ -134,6 +136,21 @@ final class Renderer : IInitialisable!Window
 
             if(sprite.visible)
                 sfRenderWindow_drawSprite(this.window.handle, sprite.handle, null);
+        }
+
+        /++
+         + Renders a `Text` to the screen.
+         + 
+         + Assertions:
+         +  `text` must not be `null`.
+         + 
+         + Params:
+         +  text = The `Text` to render.
+         + ++/
+        void render(const Text text)
+        {
+            assert(text !is null, "Attempted to render a null Text");
+            sfRenderWindow_drawText(this.window.handle, text.handle, null);
         }
 
         /++
@@ -1099,6 +1116,413 @@ final class View : ICacheable
         out(output)
         {
             assert(output !is null, "Attempted to use a null viewport handle.");
+        }
+        body
+        {
+            return this._handle;
+        }
+    }
+}
+
+/++
+ + Contains a font, which can be used alongside `Text` to render text to the screen.
+ + ++/
+final class Font : ICacheable
+{
+    import jaster.containers;
+
+    /// The type used as the font's handle.
+    alias Handle = sfFont*;
+
+    private
+    {
+        Handle             _handle;
+        DynamicArray!ubyte _data;
+    }
+
+    public
+    {
+        ~this()
+        {
+            tracef("[Destroying font with handle of '%s']", this._handle);
+
+            if(this._handle !is null)
+                sfFont_destroy(this._handle);
+        }
+
+        /++
+         + Creates a font from a file.
+         + 
+         + Notes:
+         +  `theAllocator` is used to allocate the font.
+         + 
+         + Exceptions:
+         +  $(P `FileException` if `file` doesn't exist.)
+         +  $(P `GraphicsException` if a font couldn't be loaded from `file`.)
+         + 
+         + Params:
+         +  file = The file to load the font from.
+         + 
+         + Returns:
+         +  The font loaded from `file`.
+         + ++/
+        @trusted
+        static Font fromFile(string file)
+        out(output)
+        {
+            assert(output !is null, "Exceptions exist for a reason. (Says the coder who litters asserts everywhere)");
+        }
+        body
+        {
+            import std.path : asNormalizedPath;
+            import std.file : exists, FileException;
+
+            DynamicArray!char path;
+            path.reserve(file.length + 1);
+            path ~= file.asNormalizedPath;
+            path ~= '\0';
+
+            tracef("[Loading font from file '%s']", path.range);
+            enforce(path.range.exists, new FileException(path.range, "Cannot load Font"));
+
+            auto font    = theAllocator.make!Font;
+            font._handle = sfFont_createFromFile(path.range.ptr);
+            scope(failure) theAllocator.dispose(font);
+
+            enforce(font._handle !is null, new GraphicsException("Unable to load font"));
+            tracef("[Font handle = %s]", font._handle);
+
+            return font;
+        }
+
+        /++
+         + Loads a font from memory.
+         + 
+         + Notes:
+         +  $(P The contents of `bytes` is copied into an internal buffer.)
+         +  $(P `theAllocator` is used to allocate the `Font`, and `Mallocator` is used for the internal buffer.)
+         + 
+         + Exceptions:
+         +  `GraphicsException` if no `Font` could be loaded from `bytes`.
+         + 
+         + Params:
+         +  bytes = The bytes making up the font.
+         + 
+         + Returns:
+         +  The font created from `bytes`.
+         + ++/
+        @trusted
+        static Font fromMemory(const ubyte[] bytes)
+        out(output)
+        {
+            assert(output !is null, "Exceptions exist for a reason.");
+        }
+        body
+        {
+            tracef("[Loading font from memory]");
+
+            auto font    = theAllocator.make!Font;
+            font._data  ~= bytes;
+            font._handle = sfFont_createFromMemory(font._data.range.ptr, font._data.length);
+            scope(failure) theAllocator.dispose(font);
+
+            enforce(font._handle !is null, new GraphicsException("Unable to load font from memory."));
+            tracef("[Font handle = %s]", font._handle);
+
+            return font;
+        }
+
+        /++
+         + Disposes of and deallocates a font.
+         + 
+         + Notes:
+         +  `theAllocator` is used to deallocate the font.
+         + 
+         + Params:
+         +  font = A reference to the `Font` to dispose of and deallocate.
+         +         If the font is `null` then nothing happens.
+         + ++/
+        @trusted
+        static void dispose(ref Font font)
+        {
+            if(font !is null)
+            {
+                theAllocator.dispose(font);
+                font = null;
+            }
+        }
+
+        /++
+         + Returns:
+         +  The `Handle` this font uses.
+         + ++/
+        @property @safe @nogc
+        inout(Handle) handle() nothrow inout
+        out(output)
+        {
+            assert(output !is null, "Attempted to use a null font handle.");
+        }
+        body
+        {
+            return this._handle;
+        }
+
+        /++
+         + Notes:
+         +  Unless something goes wrong, this font should *always* be valid for use.
+         + 
+         + Returns:
+         +  A font to be used for debugging.
+         + ++/
+        @property @trusted
+        static const(Font) debugFont()
+        {
+            static Font instance;
+            if(instance is null)
+                instance = Font.fromMemory(_debugFontBytes);
+
+            return instance;
+        }
+    }
+}
+
+/++
+ + A class which is used to render text to the screen.
+ + ++/
+final class Text : ICacheable
+{
+    import std.traits : isSomeChar;
+    import std.utf    : byDchar;
+    import jaster.containers;
+
+    alias Handle = sfText*;
+
+    private
+    {
+        DynamicArray!dchar _text;
+        Handle             _handle;
+    }
+
+    public
+    {
+        ~this()
+        {
+            tracef("[Destroying Text with handle of %s]", this._handle);
+            if(this._handle !is null)
+                sfText_destroy(this._handle);
+        }
+
+        /++
+         + Creates a new `Text`.
+         + 
+         + Notes:
+         +  `theAllocator` is used to allocate the `Text`.
+         + 
+         + Assertions:
+         +  `font` must not be `null`.
+         + 
+         + Params:
+         +  C        = The char type used for the text. See `Text.text`[set].
+         +  font     = The `Font` to use.
+         +  text     = The text to render.
+         +  position = The position to render the text at.
+         +  charSize = The size of the characters when rendering.
+         +  colour   = The colour of the text when rendering.
+         + 
+         + See_Also:
+         +  `Text.text`[set] for information on what `text` is.
+         + ++/
+        @trusted
+        static Text create(C)(const Font font, const(C)[] text = "", const Vector2f position = Vector2f(0),
+                              const uint charSize = 16, const Colour colour = Colour(0, 0, 0, 255))
+        if(isSomeChar!C)
+        {
+            assert(font !is null, "Attempted to use a null font.");
+            tracef("[Creating a Text, using char type '%s', and font with handle '%s'.]", C.stringof, font.handle);
+
+            auto obj = theAllocator.make!Text;
+            scope(failure) theAllocator.dispose(obj);
+
+            obj._handle = sfText_create();
+            assert(obj._handle !is null, "o_o It's null");
+            tracef("[Text Handle = %s]", obj._handle);
+
+            obj.text     = text;
+            obj.font     = font;
+            obj.position = position;
+            obj.charSize = charSize;
+            obj.colour   = colour;
+
+            return obj;
+        }
+        version(Engine_Tests)
+        {
+            alias testCreate = create!char;
+        }
+
+        /++
+         + Disposes of and deallocates a `Text`.
+         + 
+         + Notes:
+         +  `theAllocator` is used to deallocate the text.
+         + 
+         + Params:
+         +  font = A reference to the `Text` to dispose of and deallocate.
+         +         If the font is `null` then nothing happens.
+         + ++/
+        static void dispose(ref Text text)
+        {
+            if(text !is null)
+            {
+                theAllocator.dispose(text);
+                text = null;
+            }
+        }
+
+        /++
+         + Sets the text to draw.
+         + 
+         + Notes:
+         +  $(P A copy of `txt` is made, so it is safe to deallocate it afterwards.)
+         +  $(P `std.utf.byDchar` is used to convert `txt` into a `dstring` behind the scenes.)
+         + 
+         + Params:
+         +  txt = The text to draw.
+         + ++/
+        @property @trusted @nogc
+        void text(C)(const(C)[] txt) nothrow
+        if(isSomeChar!C)
+        {
+            this._text.length = 0;
+            this._text       ~= txt.byDchar;
+            sfText_setUnicodeString(this.handle, this._text.range.ptr);
+        }
+        version(Engine_Tests)
+        {
+            private alias testText = text!char;
+        }
+
+        /++
+         + Notes:
+         +  $(P The return value of this function is a direct slice to the `Text`'s text.)
+         +  $(P This means that $(B no) references should be kept around after any changes to the `Text`'s text
+         +      is made, as it may cause a crash, so it's advised to create a copy of the text if it needs to be stored.)
+         + 
+         + Returns:
+         +  The text being used when drawing this `Text`.
+         + ++/
+        @property @nogc
+        const(dchar)[] text() nothrow //const
+        {
+            return this._text.range;
+        }
+
+        /++
+         + Sets the position of where to render the text.
+         + 
+         + Params:
+         +  pos = Where the text should be rendered.
+         + ++/
+        @property @trusted @nogc
+        void position(const Vector2f pos) nothrow
+        {
+            sfText_setPosition(this.handle, sfVector2f(pos.x, pos.y));
+        }
+
+        /++
+         + Returns:
+         +  The position of where the text is to be rendered.
+         + ++/
+        @property @trusted @nogc
+        Vector2f position() nothrow const
+        {
+            auto vect = sfText_getPosition(this.handle);
+            return Vector2f(vect.x, vect.y);
+        }
+
+        /++
+         + Sets the font to be used when rendering the text.
+         + 
+         + Assertions:
+         +  `font` must not be `null`.
+         + 
+         + Notes:
+         +  `font` must not be disposed of while there are `Text`s still using it.
+         + 
+         + Params:
+         +  font = The `Font` to use.
+         + ++/
+        @property @trusted @nogc
+        void font(const Font font) nothrow
+        {
+            assert(font !is null, "Attempted to use a null font.");
+            sfText_setFont(this.handle, font.handle);
+        }
+
+        /++
+         + Sets the colour of the text.
+         + 
+         + Params:
+         +  colour = The `Colour` to use.
+         + ++/
+        @property @trusted @nogc
+        void colour(const Colour col) nothrow
+        {
+            sfText_setColor(this.handle, col.asNativeColour);
+        }
+
+        /++
+         + Returns:
+         +  The `Colour` of the text.
+         + ++/
+        @property @trusted @nogc
+        Colour colour() nothrow const
+        {
+            auto col = sfText_getColor(this.handle);
+            return Colour(col.r, col.g, col.b, col.a);
+        }
+
+        /++
+         + Sets the size of the characters.
+         + 
+         + Params:
+         +  siz = The size of the characters.
+         + ++/
+        @property @trusted @nogc
+        void charSize(uint siz) nothrow
+        {
+            sfText_setCharacterSize(this.handle, siz);
+        }
+
+        /++
+         + Returns:
+         +  The size of the characters.
+         + ++/
+        @property @trusted @nogc
+        uint charSize() nothrow const
+        {
+            return sfText_getCharacterSize(this.handle);
+        }
+
+        /++
+         + Returns:
+         +  The size of the text when rendered.
+         + ++/
+        @property @trusted @nogc
+        Vector2f size() nothrow const
+        {
+            return FloatRect.fromSfml(sfText_getGlobalBounds(this.handle)).size;
+        }
+
+        /++
+         + Returns:
+         +  The `Handle` being used by this `Text`.
+         + ++/
+        @property @safe @nogc
+        inout(Handle) handle() nothrow inout
+        out(output)
+        {
+            assert(output !is null, "Attempted to use null Text handle.");
         }
         body
         {
