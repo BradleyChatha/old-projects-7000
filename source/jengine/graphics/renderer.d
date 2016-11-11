@@ -1395,6 +1395,7 @@ final class Text : ICacheable
         {
             this._text.length = 0;
             this._text       ~= txt.byDchar;
+            this._text       ~= '\0';
             sfText_setUnicodeString(this.handle, this._text.range.ptr);
         }
         version(Engine_Tests)
