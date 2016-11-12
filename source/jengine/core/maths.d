@@ -66,6 +66,57 @@ if(isNumeric!T && (is(NativeType == sfIntRect) || is(NativeType == sfFloatRect))
         }
 
         /++
+         + Determines if this rectangle and another rectangle intersect at some point.
+         + 
+         + Limitations:
+         +  Due to laziness, currently `other` must be the same type as this rectangle,
+         +  in the future I will allow any different types of `Rectangle` to be used together.
+         + 
+         + Params:
+         +  other = The other `Rectangle` to check for an intersection with.
+         + 
+         + Returns:
+         +  `true` if this rectangle and `other` intersect eachother.
+         +  `false` otherwise.
+         + ++/
+        @property @trusted @nogc
+        bool intersects(const typeof(this) other) nothrow const
+        {
+            auto rect1 = this.asNative;
+            auto rect2 = other.asNative;
+
+            static if(is(NativeType == sfFloatRect))
+                return sfFloatRect_intersects(&rect1, &rect2, null) == sfTrue;
+            else
+                return sfIntRect_intersects(&rect1, &rect2, null) == sfTrue;
+        }
+        ///
+        unittest
+        {
+            try
+            {
+                loadSFML();
+            }
+            catch(Exception)
+            {
+                import std.experimental.logger;
+                warning("[Cannot run test for Rectangle.intersects, as SFML could not be loaded.]");
+                return;
+            }
+
+            alias This = typeof(this);
+            enum rect1 = This(0,  0,  40, 40);
+            enum rect2 = This(20, 0,  60, 60);
+            enum rect3 = This(60, 60, -3, -3);
+
+            // Can't be static assert for now, not until
+            // I bother to implement "Seperating Axis Theorem", so we don't need SFML for it.
+            assert( rect1.intersects(rect2));
+            assert(!rect1.intersects(rect3));
+            assert( rect2.intersects(rect3));
+        }
+
+        /++
          + Converts a `NativeType` to the rectangle.
          +
          + Params:

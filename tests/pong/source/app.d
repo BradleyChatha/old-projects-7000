@@ -136,16 +136,14 @@ class Game : App, IPostBox
                 this._aiPaddle.move(Vector2f(0, -p_speed));
 
             /+ Ball collision logic +/
-            // It should be noted, that I'm only using raw-sfml stuff because Jengine currently doesn't have this stuff.
-            // It really should get it soon though.
             auto psize  = this._playerPaddle.texture.size;
-            auto prect  = FloatRect(playerPos.x, playerPos.y, psize.x, psize.y).asNative;
-            auto airect = FloatRect(aiPos.x,     aiPos.y,     psize.x, psize.y).asNative;
-            auto brect  = FloatRect(bpos.x,      bpos.y,      bsize.x, bsize.y).asNative;
+            auto prect  = FloatRect(playerPos.x, playerPos.y, psize.x, psize.y);
+            auto airect = FloatRect(aiPos.x,     aiPos.y,     psize.x, psize.y);
+            auto brect  = FloatRect(bpos.x,      bpos.y,      bsize.x, bsize.y);
 
-            if(sfFloatRect_intersects(&prect, &brect, null))
+            if(prect.intersects(brect))
                 this._ballMoveLeft = false;
-            if(sfFloatRect_intersects(&airect, &brect, null))
+            if(airect.intersects(brect))
                 this._ballMoveLeft = true;
 
             // Render everything.
