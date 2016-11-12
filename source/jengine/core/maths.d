@@ -79,7 +79,7 @@ if(isNumeric!T && (is(NativeType == sfIntRect) || is(NativeType == sfFloatRect))
          +  `true` if this rectangle and `other` intersect eachother.
          +  `false` otherwise.
          + ++/
-        @property @trusted @nogc
+        @trusted @nogc
         bool intersects(const typeof(this) other) nothrow const
         {
             auto rect1 = this.asNative;
@@ -114,6 +114,52 @@ if(isNumeric!T && (is(NativeType == sfIntRect) || is(NativeType == sfFloatRect))
             assert( rect1.intersects(rect2));
             assert(!rect1.intersects(rect3));
             assert( rect2.intersects(rect3));
+        }
+
+        /++
+         + Determines if this rectangle contains a certain point.
+         + 
+         + Limitations:
+         +  Due to laziness, currently `point` must be the same type as `Rectange.VectorT`.
+         +  In the future I will allow any type of `Vector!(???, 2)` to be used.
+         + 
+         + Params:
+         +  point = The point to check for inside this rectangle.
+         + 
+         + Returns:
+         +  `true` if this rectangle contains `point`.
+         +  `false` otherwise.
+         + ++/
+        @trusted @nogc
+        bool hasPoint(VectorT vect) nothrow const
+        {
+            auto rect = this.asNative;
+            static if(is(NativeType == sfFloatRect))
+                return sfFloatRect_contains(&rect, vect.x, vect.y) == sfTrue;
+            else
+                return sfIntRect_contains(&rect, vect.x, vect.y) == sfTrue;
+        }
+        ///
+        unittest
+        {
+            try
+            {
+                loadSFML();
+            }
+            catch(Exception)
+            {
+                import std.experimental.logger;
+                warning("[Cannot run test for Rectangle.contains, as SFML could not be loaded.]");
+                return;
+            }
+            
+            alias This = typeof(this);
+            alias Vect = This.VectorT;
+            enum rect  = This(0, 0, 100, 100);
+
+            assert( rect.hasPoint(Vect(0,  0)));
+            assert( rect.hasPoint(Vect(50, 50)));
+            assert(!rect.hasPoint(Vect(-1, -1)));
         }
 
         /++
