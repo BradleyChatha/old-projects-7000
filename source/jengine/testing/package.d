@@ -10,7 +10,7 @@ version(Engine_Tests)
     unittest
     {
         import std.experimental.logger, std.file, std.path, sfml, std.parallelism, std.experimental.allocator, std.experimental.allocator.mallocator;
-        import jengine.testing.t01, jengine.testing.t02, jengine.testing.t03;
+        import jengine.testing.t01, jengine.testing.t03;
         theAllocator = allocatorObject(Mallocator.instance);
 
         struct Test
@@ -22,7 +22,6 @@ version(Engine_Tests)
         [
             Test("Dummy Test",                              &dummyTest),
             Test("Window and Input test",                   &t01),
-            Test("Rendering Test(TODO. Make standalone)",   &t02),
             Test("Basic test of Engine",                    &t03)
         ];
 
