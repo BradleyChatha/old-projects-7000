@@ -16,6 +16,7 @@ void t01()
     // There's no point testing to make sure input.events works, since without Input.processEvents,
     // it functions just as a normal PostOffice
     testMouseMoved(input);
+    testMouseButtons(input);
     testTitleChange(window);
     testSizeChange(window);
     testVsyncChange(window);
@@ -30,7 +31,34 @@ private void testMouseMoved(Input input)
     event.mouseMove.y = 400;
     input.mailValue!sfEvent(sfEvtMouseMoved, event);
     
-    assert(input.mouseScreenPos == Vector2f(200, 400));
+    assert(input.mouse.position == Vector2f(200, 400));
+}
+
+private void testMouseButtons(Input input)
+{
+    auto types = [sfMouseLeft, sfMouseRight, sfMouseMiddle];
+
+    sfEvent event;
+    void sendEvent()
+    {
+        foreach(type; types)
+        {
+            event.mouseButton.button = type;
+            input.mailValue!sfEvent(cast(Mail.MailTypeT)event.type, event);
+        }
+    }
+
+    event.type = sfEvtMouseButtonPressed;
+    sendEvent();
+    assert(input.mouse.leftButtonDown);
+    assert(input.mouse.rightButtonDown);
+    assert(input.mouse.middleButtonDown);
+
+    event.type = sfEvtMouseButtonReleased;
+    sendEvent();
+    assert(!input.mouse.leftButtonDown);
+    assert(!input.mouse.rightButtonDown);
+    assert(!input.mouse.middleButtonDown);
 }
 
 private void testTitleChange(Window window)

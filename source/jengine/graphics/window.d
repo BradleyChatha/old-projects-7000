@@ -287,24 +287,47 @@ unittest
  + Description:
  +  A `PostOffice` is provided, which the Input class will mail a `Input.MailT` with the type of the mail being
  +  the same as the event (e.g. sfClose) anytime the `Window` it's attached to recieves an event. 
+ +  
  +  The Input class has an `alias this` to it's `PostOffice`, for ease of use 
  +  (e.g, instead of `input.events.subscribe` you'd be able to use `input.subscribe`).
  + 
+ +  A `Mouse` struct is provided via `Input.mouse`, which will keep the state of the mouse up to date.
+ + 
  +  Basic usage includes using `input.subscribe(sfSomeEvent, &myHandler)` to subscribe to a specific window event.
  + ++/
-final class Input
+final class Input : IPostBox
 {
     import jengine.core.post;
+
+    mixin(IPostBox.generateOnMail!Input);
 
     /// The message given when a window event is made. The mail's `Mail.Type` is the same as the event itself.
     alias MailT = ValueMail!sfEvent;
     alias events this;
 
+    /++
+     + Contains the state of the mouse.
+     + ++/
+    struct Mouse
+    {
+        /// The position of the mouse, relative to the top left corner of the screen.
+        Vector2f position;
+
+        /// `true` if the left mouse button is down. `false` otherwise.
+        bool     leftButtonDown;
+
+        /// `true` if the right mouse button is down. `false` otherwise.
+        bool     rightButtonDown;
+
+        /// `true` if the middle mouse button is down. `false` otherwise.
+        bool     middleButtonDown;
+    }
+
     private
     {
         PostOffice  _office;
         Window      _window;
-        Vector2f    _mouseScreenPos;
+        Mouse       _mouse;
 
         this(Window window)
         {
@@ -313,19 +336,47 @@ final class Input
 
             this._window = window;
             this._office = new PostOffice();
-
-            this.subscribe(sfEvtMouseMoved, &this.onMouseMove);
+            
+            this.subscribe(this);
         }
 
-        void onMouseMove(PostOffice, Mail mail)
+        @MailBox(sfEvtMouseMoved)
+        void onMouseMove(PostOffice, ValueMail!sfEvent event)
         {
-            auto event = cast(Input.MailT)mail;
-            assert(event !is null);
-
             auto data = event.value;
             assert(data.type == sfEvtMouseMoved);
 
-            this._mouseScreenPos = Vector2f(data.mouseMove.x, data.mouseMove.y);
+            this._mouse.position = Vector2f(data.mouseMove.x, data.mouseMove.y);
+        }
+
+        @MailBox(sfEvtMouseButtonPressed)
+        void onMousePress(PostOffice, ValueMail!sfEvent event)
+        {
+            auto data = event.value;
+            assert(data.type == sfEvtMouseButtonPressed);
+            
+            auto button = data.mouseButton;
+            if(button.button == sfMouseLeft)
+                this._mouse.leftButtonDown = true;
+            if(button.button == sfMouseRight)
+                this._mouse.rightButtonDown = true;
+            if(button.button == sfMouseMiddle)
+                this._mouse.middleButtonDown = true;
+        }
+
+        @MailBox(sfEvtMouseButtonReleased)
+        void onMouseRelease(PostOffice, ValueMail!sfEvent event)
+        {
+            auto data = event.value;
+            assert(data.type == sfEvtMouseButtonReleased);
+            
+            auto button = data.mouseButton;
+            if(button.button == sfMouseLeft)
+                this._mouse.leftButtonDown = false;
+            if(button.button == sfMouseRight)
+                this._mouse.rightButtonDown = false;
+            if(button.button == sfMouseMiddle)
+                this._mouse.middleButtonDown = false;
         }
     }
 
@@ -374,25 +425,12 @@ final class Input
 
         /++
          + Returns:
-         +  The position of the mouse on the screen, relative to the top left corner of the window.
+         +  The state of the `Mouse`.
          + ++/
         @property @safe @nogc
-        Vector2f mouseScreenPos() nothrow const
+        Mouse mouse() nothrow pure const
         {
-            return this._mouseScreenPos;
-        }
-
-        /++
-         + Returns:
-         +  The position of the mouse in the game world, which is determined by the `View` currently being used.
-         + 
-         + See_Also:
-         +  `Renderer.screenToWorldPos`
-         + ++/
-        @property @safe @nogc
-        Vector2f mouseWorldPos() nothrow const
-        {
-            return this._window.renderer.screenToWorldPos(this._mouseScreenPos);
+            return this._mouse;
         }
     }
 }
