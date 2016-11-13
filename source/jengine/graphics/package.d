@@ -1,4 +1,7 @@
-﻿module jengine.graphics;
+﻿/++
+ + Contains all the graphics-related code.
+ + ++/
+module jengine.graphics;
 
 public
 {

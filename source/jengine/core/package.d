@@ -1,4 +1,7 @@
-﻿module jengine.core;
+﻿/++
+ + Contains the core code for the engine.
+ + ++/
+module jengine.core;
 
 public
 {
