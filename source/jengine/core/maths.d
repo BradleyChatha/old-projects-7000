@@ -10,6 +10,7 @@ private
 {
     import std.traits  : isNumeric;
     import gl3n.linalg : Vector;
+    import gl3n.util   : is_vector;
     import sfml;
 }
 
@@ -24,6 +25,9 @@ alias Vector2u = Vector!(uint,  2);
 
 ///
 alias Vector3f = Vector!(float, 3);
+
+///
+alias isVector = is_vector; // I don't like the style of "is_vector"
 
 /++
  + A type describing a rectangle.
@@ -210,3 +214,24 @@ alias FloatRect = Rectangle!(float, sfFloatRect);
 
 ///
 alias IntRect = Rectangle!(int, sfIntRect);
+
+private void _isRectangle(T, N)(Rectangle!(T, N)){}
+
+/++
+ + Determines if a type is an instansiation of `Rectangle`.
+ + 
+ + Params:
+ +  T = The type to check.
+ + 
+ + Returns:
+ +  `true` if `T` is an instantiation of `Rectangle`.
+ +  `false` otherwise.
+ + ++/
+enum isRectangle(T) = is(typeof({_isRectangle(T.init);}));
+///
+unittest
+{
+    static assert( isRectangle!FloatRect);
+    static assert( isRectangle!IntRect);
+    static assert(!isRectangle!int);
+}
