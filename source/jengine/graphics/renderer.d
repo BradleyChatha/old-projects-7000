@@ -65,9 +65,8 @@ final class Renderer : IInitialisable!Window
     alias ViewPointer = AutoSharedPointer!(View, Mallocator, No.useGC);
     private
     {
-        Window              _window;
-        View                _view;
-        sfRectangleShape*   _rect;
+        Window _window;
+        View   _view;
     }
 
     public
@@ -86,7 +85,6 @@ final class Renderer : IInitialisable!Window
             trace("[Initialising renderer]");
             assert(window !is null);
             this._window = window;
-            this._rect   = sfRectangleShape_create();
             this.view    = View.create(); // Make _view non-null
             this.view    = null;          // Then replace it with the default view
         }
@@ -102,12 +100,6 @@ final class Renderer : IInitialisable!Window
             trace("[Uninitialising renderer]");
             this._window = null;
             View.dispose(this._view);
-
-            if(this._rect !is null)
-            {
-                sfRectangleShape_destroy(this._rect);
-                this._rect = null;
-            }
         }
 
         /++
@@ -157,22 +149,15 @@ final class Renderer : IInitialisable!Window
          + Renders a rectangle.
          +
          + Assertions:
-         +  All `Colour` parameters must pass `checkColour`
+         +  `rect` must not be `null`.
          +
          + Params:
-         +  rect                = The `FloatRect` which describes the rectangle to draw.
-         +  fillColour          = The `Colour` of the inside of the rectangle.
-         +  outlineThickness    = How thick the outline is.
-         +  outlineColour       = The `Colour` of the outline of the rectangle.
+         +  rect = The `RectangleShape` to render.
          + ++/
-        void render(const FloatRect rect, const Colour fillColour = Colour(0, 128, 0, 255), const float outlineThickness = 0, const Colour outlineColour = Colour(0))
+        void render(const RectangleShape rect)
         {
-            sfRectangleShape_setPosition        (this._rect, sfVector2f(rect.position.x, rect.position.y));
-            sfRectangleShape_setSize            (this._rect, sfVector2f(rect.size.x, rect.size.y));
-            sfRectangleShape_setFillColor       (this._rect, fillColour.asNativeColour);
-            sfRectangleShape_setOutlineThickness(this._rect, outlineThickness);
-            sfRectangleShape_setOutlineColor    (this._rect, outlineColour.asNativeColour);
-            sfRenderWindow_drawRectangleShape   (this.window.handle, this._rect, null);
+            assert(rect !is null, "Attempted to render a null RectangleShape");
+            sfRenderWindow_drawRectangleShape(this.window.handle, rect.handle, null);
         }
 
         /++
@@ -1526,6 +1511,218 @@ final class Text : ICacheable
             assert(output !is null, "Attempted to use null Text handle.");
         }
         body
+        {
+            return this._handle;
+        }
+    }
+}
+
+/++
+ + Describes a drawable rectangle.
+ + ++/
+final class RectangleShape : ICacheable
+{
+    /// The type used as the handle.
+    alias Handle = sfRectangleShape*;
+
+    private
+    {
+        Handle  _handle;
+    }
+
+    public
+    {
+        ~this()
+        {
+            tracef("[Destroying rectangle shape with handle of %s]", this._handle);
+            if(this._handle !is null)
+                sfRectangleShape_destroy(this._handle);
+        }
+
+        /++
+         + Creates a new `RectangleShape`.
+         + 
+         + Notes:
+         +  `theAllocator` is used to allocate the object.
+         + 
+         + Params:
+         +  rect            = The `Rectangle` describing the position and size of the shape.
+         +  fillColour      = The `Colour` to use for the inside of the Rectangle.
+         +  thickness       = How thick the rectangle's outline is.
+         +  outlineColour   = The `Colour` of the shape's outline.
+         + 
+         + Returns:
+         +  The newly made rectangle shape.
+         + ++/
+        @trusted
+        static RectangleShape create(Rect)(const Rect rect,           const Colour fillColour    = Colour(0, 0, 0, 255),
+                                           const float thickness = 0, const Colour outlineColour = Colour(0, 0, 0, 255))
+        if(isRectangle!Rect)
+        {
+            auto shape      = theAllocator.make!RectangleShape;
+            shape._handle   = sfRectangleShape_create();
+            scope(failure) theAllocator.dispose(shape);
+
+            assert(shape._handle !is null, "For some reason the handle wasn't made.");
+
+            tracef("[Creating rectangle shape with handle of %s]", shape._handle);
+            shape.position      = rect.position;
+            shape.size          = rect.size;
+            shape.fillColour    = fillColour;
+            shape.thickness     = thickness;
+            shape.outlineColour = outlineColour;
+
+            return shape;
+        }
+
+        /++
+         + Disposes of and deallocates a `RectangleShape`.
+         + 
+         + Notes:
+         +  `theAllocator` is used to deallocate the shape.
+         + 
+         + Params:
+         +  font = A reference to the `RectangleShape` to dispose of and deallocate.
+         +         If the shape is `null` then nothing happens.
+         + ++/
+        @trusted
+        static void dispose(ref RectangleShape shape)
+        {
+            if(shape !is null)
+            {
+                theAllocator.dispose(shape);
+                shape = null;
+            }
+        }
+
+        /++
+         + Sets the position of the shape.
+         + 
+         + Notes:
+         +  While this function accepts any 2D `Vector` type, the position will always end up as a `Vector2f`.
+         + 
+         + Params:
+         +  pos = The new position.
+         + ++/
+        @property
+        void position(Vect)(const Vect pos)
+        if(isVector!Vect && Vect.dimension == 2)
+        {
+            sfRectangleShape_setPosition(this.handle, sfVector2f(cast(float)pos.x, cast(float)pos.y));
+        }
+
+        /++
+         + Returns:
+         +  The position of the shape.
+         + ++/
+        @property @trusted @nogc
+        Vector2f position() nothrow const
+        {
+            auto pos = sfRectangleShape_getPosition(this.handle);
+            return Vector2f(pos.x, pos.y);
+        }
+
+        /++
+         + Sets the size of the shape.
+         + 
+         + Notes:
+         +  While this function accepts any 2D `Vector` type, the size will always end up as a `Vector2f`.
+         + 
+         + Params:
+         +  siz = The new size.
+         + ++/
+        @property
+        void size(Vect)(const Vect siz)
+        if(isVector!Vect && Vect.dimension == 2)
+        {
+            sfRectangleShape_setSize(this.handle, sfVector2f(cast(float)siz.x, cast(float)siz.y));
+        }
+
+        /++
+         + Returns:
+         +  The size of the shape.
+         + ++/
+        @property @trusted @nogc
+        Vector2f size() nothrow const
+        {
+            auto siz = sfRectangleShape_getSize(this.handle);
+            return Vector2f(siz.x, siz.y);
+        }
+
+        /++
+         + Sets the colour for the inside of the rectangle.
+         + 
+         + Params:
+         +  col = The `Colour` to use.
+         + ++/
+        @property @trusted @nogc
+        void fillColour(const Colour col) nothrow
+        {
+            sfRectangleShape_setFillColor(this.handle, col.asNativeColour);
+        }
+
+        /++
+         + Returns:
+         +  The `Colour` for the inside of the rectangle.
+         + ++/
+        @property @trusted @nogc
+        Colour fillColour() nothrow const
+        {
+            auto col = sfRectangleShape_getFillColor(this.handle);
+            return Colour(col.r, col.g, col.b, col.a);
+        }
+
+        /++
+         + Sets how thick the outline of the shape is.
+         + 
+         + Params:
+         +  thick = The thickness.
+         + ++/
+        @property @trusted @nogc
+        void thickness(const float thick) nothrow
+        {
+            sfRectangleShape_setOutlineThickness(this.handle, thick);
+        }
+
+        /++
+         + Returns:
+         +  How thick the outline of the shape is.
+         + ++/
+        @property @trusted @nogc
+        float thickness() nothrow const
+        {
+            return sfRectangleShape_getOutlineThickness(this.handle);
+        }
+
+        /++
+         + Sets the colour for the outline of the shape.
+         + 
+         + Params:
+         +  colour = The `Colour` to use.
+         + ++/
+        @property @trusted @nogc
+        void outlineColour(const Colour colour) nothrow
+        {
+            sfRectangleShape_setOutlineColor(this.handle, colour.asNativeColour);
+        }
+
+        /++
+         + Returns:
+         +  The `Colour` for the outline of the shape.
+         + ++/
+        @property @trusted @nogc
+        Colour outlineColour() nothrow const
+        {
+            auto col = sfRectangleShape_getOutlineColor(this.handle);
+            return Colour(col.r, col.g, col.b, col.a);
+        }
+
+        /++
+         + Returns:
+         +  The `Handle` for this rectangle shape.
+         + ++/
+        @property @safe @nogc
+        inout(Handle) handle() nothrow inout
         {
             return this._handle;
         }
