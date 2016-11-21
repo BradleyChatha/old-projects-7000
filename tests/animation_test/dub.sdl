@@ -1,0 +1,10 @@
+name "animation_test"
+description "A minimal D application."
+authors "Sealab"
+copyright "Copyright © 2016, Sealab"
+license "MIT"
+dependency "derelict-sfml2" version="~>3.0.2"
+dependency "jengine" version="*" path="../../"
+dependency "jlib" version="*"
+
+targetPath "bin"

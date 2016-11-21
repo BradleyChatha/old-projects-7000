@@ -5,5 +5,5 @@ module jengine.graphics;
 
 public
 {
-    import jengine.graphics.renderer, jengine.graphics.window;
+    import jengine.graphics.renderer, jengine.graphics.window, jengine.graphics.animation;
 }
