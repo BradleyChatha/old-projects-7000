@@ -57,7 +57,8 @@ final class Animation : ICacheable
          + This is the area of the texture that contains all of the animation frames.
          + 
          + Notes:
-         +  If this value is `IntRect.empty`, then the entire texture is used.
+         +  If either the X or Y of the area's size is 0, they will be changed to the X or Y of the texture's size,
+         +  respectively.
          + 
          + See_Also:
          +  `Sprite.textureRect`
@@ -105,7 +106,8 @@ final class Animation : ICacheable
          +
          + Exceptions:
          +  $(P `GraphicsException` if `texture` is `null`.)
-         +  $(P `GraphicsException` if `info.frameArea.size` isn't evenly divisble by `info.frameSize`)
+         +  $(P `GraphicsException` if `info.frameArea.size` isn't evenly divisble by `info.frameSize`.)
+         +  $(P `GraphicsException` if either the X or Y of `info.frameSize` is 0.)
          +
          + Notes:
          +  $(P `theAllocator` is used to allocate the object.)
@@ -124,6 +126,7 @@ final class Animation : ICacheable
         {
             import std.exception : enforce;
             import std.format    : format;
+            import std.conv      : to;
 
             tracef("[Creating new Animation using Texture with handle %s]", texture.handle);
             enforce(texture !is null, new GraphicsException("Attempted to make an Animation using a null Texture."));
@@ -131,19 +134,23 @@ final class Animation : ICacheable
             auto anim = theAllocator.make!Animation;
             scope(failure) theAllocator.dispose(anim);
 
-            if(info.frameArea == IntRect.empty)
-                info.frameArea.size = Vector2i(texture.size.x, texture.size.y);
+            // Fix the frameArea's size
+            auto textSize = texture.size;
+            if(info.frameArea.size.x == 0) info.frameArea.size.x = textSize.x;
+            if(info.frameArea.size.y == 0) info.frameArea.size.y = textSize.y;
 
-            // Tis a bit ugly to look at ;_;
+            // Error checking
             tracef("[Animation FrameInfo = %s]", info);
-            enforce(cast(float)info.frameArea.size.x % cast(float)info.frameSize.x == 0, 
-                    new GraphicsException(format("The frameArea's width(%s) is not evenly divisble by the frameSize's width(%s).", 
-                                                 info.frameArea.size.x, info.frameSize.x)));
+            enforce(info.frameSize.x != 0, new GraphicsException("The FrameSize's width is 0. This is not valid."));
+            enforce(info.frameSize.y != 0, new GraphicsException("The FrameSize's height is 0. This is not valid."));
+            auto area = info.frameArea.size;
+            auto size = info.frameSize;
+            enforce(area.x % size.x == 0, new GraphicsException(format("The FrameArea's width(%s) is not evenly divisble by the FrameSize's width(%s)",
+                                                                       area.x, size.x)));
+            enforce(area.y % size.y == 0, new GraphicsException(format("The FrameArea's height(%s) is not evenly divisble by the FrameSize's height(%s)",
+                                                                       area.y, size.y)));
 
-            enforce(cast(float)info.frameArea.size.y % cast(float)info.frameSize.y == 0, 
-                    new GraphicsException(format("The frameArea's height(%s) is not evenly divisble by the frameSize's height(%s).", 
-                                                 info.frameArea.size.y, info.frameSize.y)));
-                        
+            // Setup the object
             anim._sprite        = Sprite.create(texture, Vector2f(0), info.frameArea);
             anim._info          = info;
             anim._frameRowCount = Vector2u(info.frameArea.size.x / info.frameSize.x,
@@ -239,8 +246,8 @@ final class Animation : ICacheable
             import std.exception : enforce;
             import std.format;
 
-            enforce(frame < this.frameCount, 
-                new GraphicsException(format("Attempted to set the current frame to too high a value(%s). FrameCount = %s", frame, this.frameCount)));
+            enforce(frame < this.frameCount, new GraphicsException(format("Attempted to set the current frame to too high a value(%s). FrameCount = %s", 
+                                                                          frame, this.frameCount)));
             this._currentFrameRow.x = frame;
 
             this.updateSprite();
@@ -271,8 +278,8 @@ final class Animation : ICacheable
             import std.exception : enforce;
             import std.format;
             
-            enforce(row < this.rowCount, 
-                new GraphicsException(format("Attempted to set the current row to too high a value(%s). RowCount = %s", row, this.rowCount)));
+            enforce(row < this.rowCount, new GraphicsException(format("Attempted to set the current row to too high a value(%s). RowCount = %s", 
+                                                                      row, this.rowCount)));
             this._currentFrameRow.y = row;
 
             this.updateSprite();
@@ -313,7 +320,7 @@ final class Animation : ICacheable
          +
          + For example, if the frameTime is `2.0f`, then after 2 seconds the next frame in the row is displayed.
          +
-         + If `time` is negative, then the animation won't automatically advance to the next frame.
+         + If `time` is 0 or less, then the animation won't automatically advance to the next frame.
          +
          + Params:
          +  time = The frame time, in seconds.
