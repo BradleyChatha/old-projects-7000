@@ -235,3 +235,23 @@ unittest
     static assert( isRectangle!IntRect);
     static assert(!isRectangle!int);
 }
+
+/++
+ + Converts a vector from one type to another.
+ + 
+ + Params:
+ +  T    = The numeric type to convert to.
+ +  vect = The `Vector` to convert.
+ + 
+ + Returns:
+ +  `Vect` as a `Vector!(T, 2)`.
+ + ++/
+Vector!(T, 2) asVector2(T, Vect)(Vect vect)
+if(isVector!Vect && Vect.dimension == 2)
+{
+    return typeof(return)(cast(T)vect.x, cast(T)vect.y);
+}
+unittest
+{
+    static assert(Vector2f(32, 64).asVector2!int == Vector2i(32, 64));
+}
