@@ -143,7 +143,7 @@ final class Cache : IInitialisable!Engine
          +  $(P If `object` inherits from `jengine.core.engine.IInitilisable!Engine` or `Iinitialisable!()` then the cache
          +      will ensure that it's been initialised.)
          +  $(P If `object` inherits from `jengine.core.engine.IUninitialisable` then the cache will make sure it's
-         +      uninitialised when destroyed.
+         +      uninitialised when destroyed.)
          +
          + Params:
          +  name   = The name to associate with the object, this can later be used to retrieve it.
@@ -317,12 +317,12 @@ unittest
         bool hasInit()  {return initted;}
     }
 
-    // TODO: Once Engine is finally implemented fix this unitest to use it.
-    auto cache = new Cache(); // Thankfully, "onInit" currently isn't a requirement.
-                              // However, we can't actually use onUninit due to a contract failing because of onInit not being called.
+    auto cache = new Cache();  // Note: Usually, the call `cache.onInit(myEngineObject)` should be used.
+                               // But this is only required if any `IInitialisable!Engine` objects are to be stored.
     cache.cache("A", new C());
     cache.cache("B", new C());
 
+    // _assets is a private variable. This is simply here to show that "A" will have its "onUninit" function called when destroyed.
     assert(cache._assets["A"].flags & Cache.Asset.Is.Uninitable);
 
     assert(cache.isCached("A"));
@@ -339,7 +339,7 @@ unittest
 
     assert(!cache.isCached("A"));
     assert( cache.isCached("B"));
-    assert(cache._assets["B"].flags & Cache.Asset.Is.MarkedForDispoal);
+    assert(cache._assets["B"].flags & Cache.Asset.Is.MarkedForDispoal); // Here to clarify that "B" is only marked for disposal.
 
     cache.cleanup();
     assert(!cache.isCached("B"));

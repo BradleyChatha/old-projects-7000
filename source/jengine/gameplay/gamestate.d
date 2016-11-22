@@ -289,8 +289,9 @@ final class GamestateManager : IInitialisable!Engine
          +  $(P `GamestateNotFoundException` if there is no game state called `name`.)
          +
          + Params:
-         +  GS = The type to cast the game state to.
-         +       Use the base `Gamestate` class if no specific class is needed.
+         +  GS   = The type to cast the game state to.
+         +         Use the base `Gamestate` class if no specific class is needed.
+         +  name = The name of the game state to get.
          +
          + Returns:
          +  The `Gamestate` called `name` casted to `GS`.
@@ -462,6 +463,9 @@ class GamestateNotFoundException : GamestateException
      + Params:
      +  gameStateName = The name of the game state that was not found.
      +  msg           = Additional information about what went wrong.
+     +  file          = N/A
+     +  line          = N/A
+     +  next          = N/A
      + ++/
     @safe
     this(string gameStateName, string msg = "", string file = __FILE__, size_t line = __LINE__, Throwable next = null) pure nothrow

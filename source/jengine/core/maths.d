@@ -135,13 +135,13 @@ if(isNumeric!T && (is(NativeType == sfIntRect) || is(NativeType == sfFloatRect))
          +  `false` otherwise.
          + ++/
         @trusted @nogc
-        bool hasPoint(VectorT vect) nothrow const
+        bool hasPoint(VectorT point) nothrow const
         {
             auto rect = this.asNative;
             static if(is(NativeType == sfFloatRect))
-                return sfFloatRect_contains(&rect, vect.x, vect.y) == sfTrue;
+                return sfFloatRect_contains(&rect, point.x, point.y) == sfTrue;
             else
-                return sfIntRect_contains(&rect, vect.x, vect.y) == sfTrue;
+                return sfIntRect_contains(&rect, point.x, point.y) == sfTrue;
         }
         ///
         unittest

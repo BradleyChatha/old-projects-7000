@@ -1370,7 +1370,7 @@ final class Text : ICacheable
          +  `theAllocator` is used to deallocate the text.
          + 
          + Params:
-         +  font = A reference to the `Text` to dispose of and deallocate.
+         +  text = A reference to the `Text` to dispose of and deallocate.
          +         If the font is `null` then nothing happens.
          + ++/
         static void dispose(ref Text text)
@@ -1467,7 +1467,7 @@ final class Text : ICacheable
          + Sets the colour of the text.
          + 
          + Params:
-         +  colour = The `Colour` to use.
+         +  col = The `Colour` to use.
          + ++/
         @property @trusted @nogc
         void colour(const Colour col) nothrow
@@ -1600,8 +1600,8 @@ final class RectangleShape : ICacheable
          +  `theAllocator` is used to deallocate the shape.
          + 
          + Params:
-         +  font = A reference to the `RectangleShape` to dispose of and deallocate.
-         +         If the shape is `null` then nothing happens.
+         +  shape = A reference to the `RectangleShape` to dispose of and deallocate.
+         +          If the shape is `null` then nothing happens.
          + ++/
         @trusted
         static void dispose(ref RectangleShape shape)
