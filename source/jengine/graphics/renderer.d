@@ -177,7 +177,7 @@ final class Renderer : IInitialisable!Window
         Vector2f screenToWorldPos(in Vector2f screenPos) nothrow const
         {
             auto vect = sfRenderWindow_mapPixelToCoords(this.window.handle, 
-                                                        sfVector2i(cast(int)screenPos.x, cast(int)screenPos.y), 
+                                                        screenPos.asNativeVector2!int, 
                                                         this._view.handle);
             return Vector2f(vect.x, vect.y);
         }
@@ -195,7 +195,7 @@ final class Renderer : IInitialisable!Window
         Vector2f worldToScreenPos(in Vector2f worldPos) nothrow const
         {
             auto vect = sfRenderWindow_mapCoordsToPixel(this.window.handle, 
-                                                        sfVector2f(worldPos.x, worldPos.y), 
+                                                        worldPos.asNativeVector2!float, 
                                                         this._view.handle);
             return Vector2f(vect.x, vect.y);
         }
@@ -583,7 +583,7 @@ final class Sprite : ICacheable
         @property @trusted @nogc
         void move(Vector2f offset) nothrow
         {
-            sfSprite_move(this.handle, sfVector2f(offset.x, offset.y));
+            sfSprite_move(this.handle, offset.asNativeVector2!float);
         }
 
         /++
@@ -619,7 +619,7 @@ final class Sprite : ICacheable
             FloatRect rect;
             auto      size = this.textureRect.size;
             rect.position  = this.position;
-            rect.size      = Vector2f(size.x, size.y);
+            rect.size      = size.asVector2!float;
 
             return rect;
         }
@@ -643,7 +643,7 @@ final class Sprite : ICacheable
         @property @trusted @nogc
         void position(Vector2f pos) nothrow
         {
-            sfSprite_setPosition(this.handle, sfVector2f(pos.x, pos.y));
+            sfSprite_setPosition(this.handle, pos.asNativeVector2!float);
         }
 
         /++
@@ -1000,7 +1000,7 @@ final class View : ICacheable
         @trusted @nogc
         void move(Vector2f offset) nothrow
         {
-            sfView_move(this.handle, sfVector2f(offset.x, offset.y));
+            sfView_move(this.handle, offset.asNativeVector2!float);
         }
 
         /++
@@ -1024,7 +1024,7 @@ final class View : ICacheable
         @property @trusted @nogc
         void center(Vector2f center_) nothrow
         {
-            sfView_setCenter(this.handle, sfVector2f(center_.x, center_.y));
+            sfView_setCenter(this.handle, center_.asNativeVector2!float);
         }
 
         /++
@@ -1069,7 +1069,7 @@ final class View : ICacheable
         @property @trusted @nogc
         void size(Vector2f size_) nothrow
         {
-            sfView_setSize(this.handle, sfVector2f(size_.x, size_.y));
+            sfView_setSize(this.handle, size_.asNativeVector2!float);
         }
 
         /++
@@ -1430,7 +1430,7 @@ final class Text : ICacheable
         @property @trusted @nogc
         void position(const Vector2f pos) nothrow
         {
-            sfText_setPosition(this.handle, sfVector2f(pos.x, pos.y));
+            sfText_setPosition(this.handle, pos.asNativeVector2!float);
         }
 
         /++
@@ -1626,7 +1626,7 @@ final class RectangleShape : ICacheable
         void position(Vect)(const Vect pos)
         if(isVector!Vect && Vect.dimension == 2)
         {
-            sfRectangleShape_setPosition(this.handle, sfVector2f(cast(float)pos.x, cast(float)pos.y));
+            sfRectangleShape_setPosition(this.handle, pos.asNativeVector2!float);
         }
 
         /++
@@ -1653,7 +1653,7 @@ final class RectangleShape : ICacheable
         void size(Vect)(const Vect siz)
         if(isVector!Vect && Vect.dimension == 2)
         {
-            sfRectangleShape_setSize(this.handle, sfVector2f(cast(float)siz.x, cast(float)siz.y));
+            sfRectangleShape_setSize(this.handle, size.asNativeVector2!float);
         }
 
         /++

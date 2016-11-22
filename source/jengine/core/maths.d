@@ -246,12 +246,33 @@ unittest
  + Returns:
  +  `Vect` as a `Vector!(T, 2)`.
  + ++/
-Vector!(T, 2) asVector2(T, Vect)(Vect vect)
+Vector!(T, 2) asVector2(T, Vect)(const Vect vect)
 if(isVector!Vect && Vect.dimension == 2)
 {
     return typeof(return)(cast(T)vect.x, cast(T)vect.y);
 }
+///
 unittest
 {
     static assert(Vector2f(32, 64).asVector2!int == Vector2i(32, 64));
+}
+
+/++
+ + Like `asVector2` but converts `vect` into it's native version.
+ + This function is intended for internal use only, hence the lacking documentation.
+ + ++/
+public auto asNativeVector2(T, Vect)(Vect vect)
+if(isVector!Vect && Vect.dimension == 2)
+{
+    static if(is(T == float))       alias V = sfVector2f;
+    else static if(is(T == int))    alias V = sfVector2i;
+    else static if(is(T == uint))   alias V = sfVector2u;
+    else static assert(false, "No Native version for " ~ T.stringof);
+
+    return V(cast(T)vect.x, cast(T)vect.y);
+}
+///
+unittest
+{
+    static assert(Vector2f(32, 64).asNativeVector2!float == sfVector2f(32, 64));
 }
