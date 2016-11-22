@@ -1,4 +1,7 @@
-﻿module jengine.graphics.animation;
+﻿/++
+ + Provides a way to create animated sprites.
+ + ++/
+module jengine.graphics.animation;
 
 private
 {
