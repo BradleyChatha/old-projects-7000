@@ -9,6 +9,7 @@ docs.json
 __test__*__
 __dummy.html
 
+/docs/
 /lib/*.*
 /tests/*/bin/*.*
 /tools/dub/
