@@ -11,3 +11,5 @@ __dummy.html
 
 /lib/*.*
 /tests/*/bin/*.*
+/tools/dub/
+/tools/*.exe
