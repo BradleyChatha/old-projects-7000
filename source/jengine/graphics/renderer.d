@@ -434,14 +434,10 @@ final class Shader : ICacheable
         {
             import std.typecons : AliasSeq;
 
-            static if(is(Args == AliasSeq!(float)))
-                alias func = sfShader_setFloatParameter;
-            else static if(is(Args == AliasSeq!(float, float)))
-                alias func = sfShader_setFloat2Parameter;
-            else static if(is(Args == AliasSeq!(float, float, float)))
-                alias func = sfShader_setFloat3Parameter;
-            else static if(is(Args == AliasSeq!(float, float, float, float)))
-                alias func = sfShader_setFloat4Parameter;
+            static if(is(Args == AliasSeq!(float)))                           alias func = sfShader_setFloatParameter;
+            else static if(is(Args == AliasSeq!(float, float)))               alias func = sfShader_setFloat2Parameter;
+            else static if(is(Args == AliasSeq!(float, float, float)))        alias func = sfShader_setFloat3Parameter;
+            else static if(is(Args == AliasSeq!(float, float, float, float))) alias func = sfShader_setFloat4Parameter;
             else static if(is(Args == AliasSeq!(Vector2f)))
             {
                 alias func = sfShader_setVector2Parameter;
