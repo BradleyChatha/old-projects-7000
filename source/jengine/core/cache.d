@@ -26,7 +26,7 @@ interface ICacheable
  + This class has the ability to cache any `ICacheable`.
  + 
  + Description:
- +  The programmer caches something, for example, a `game.grphics.renderer.Texture`.
+ +  The programmer caches something, for example, a `jengine.graphics.renderer.Texture`.
  +  The programmer then no longer needs the cached item, so `Cache.disposeOf` is called on it.
  +  The cached item is destroyed, memory is freed, and the name given to it can then be reused.
  +
