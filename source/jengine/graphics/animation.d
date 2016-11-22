@@ -96,7 +96,7 @@ final class Animation : ICacheable
     {
         ~this()
         {
-            tracef("[Disposing of Animation with Texture with handle %s]", this.texture.handle);
+            tracef("[Disposing of Animation with Sprite with handle %s]", (this._sprite is null) ? null : this._sprite.handle);
             if(this._sprite !is null)
                 theAllocator.dispose(this._sprite);
         }
@@ -128,11 +128,11 @@ final class Animation : ICacheable
             import std.format    : format;
             import std.conv      : to;
 
-            tracef("[Creating new Animation using Texture with handle %s]", texture.handle);
             enforce(texture !is null, new GraphicsException("Attempted to make an Animation using a null Texture."));
+            tracef("[Creating new Animation using Texture with handle %s]", texture.handle);
 
             auto anim = theAllocator.make!Animation;
-            scope(failure) theAllocator.dispose(anim);
+            scope(failure) Animation.dispose(anim);
 
             // Fix the frameArea's size
             auto textSize = texture.size;
@@ -157,6 +157,7 @@ final class Animation : ICacheable
                                            info.frameArea.size.y / info.frameSize.y);
             anim.frameTime      = frameTime;
             anim.updateSprite();
+            tracef("[Animation Sprite Handle = %s]", anim._sprite.handle);
 
             return anim;
         }
@@ -353,11 +354,6 @@ final class Animation : ICacheable
          + ++/
         @property @safe @nogc
         inout(Sprite) sprite() nothrow inout
-        out(output)
-        {
-            assert(output !is null, "The sprite is null for some reason. (Future me, fix it)");
-        }
-        body
         {
             return this._sprite;
         }
