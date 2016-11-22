@@ -136,10 +136,9 @@ class Game : App, IPostBox
                 this._aiPaddle.move(Vector2f(0, -p_speed));
 
             /+ Ball collision logic +/
-            auto psize  = this._playerPaddle.texture.size;
-            auto prect  = FloatRect(playerPos.x, playerPos.y, psize.x, psize.y);
-            auto airect = FloatRect(aiPos.x,     aiPos.y,     psize.x, psize.y);
-            auto brect  = FloatRect(bpos.x,      bpos.y,      bsize.x, bsize.y);
+            auto prect  = this._playerPaddle.bounds;
+            auto airect = this._aiPaddle.bounds;
+            auto brect  = this._ball.bounds;
 
             if(prect.intersects(brect))
                 this._ballMoveLeft = false;

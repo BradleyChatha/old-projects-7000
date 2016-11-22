@@ -606,6 +606,25 @@ final class Sprite : ICacheable
         }
 
         /++
+         + Notes:
+         +  The returned rectangle's `position` will be the same as `Sprite.position`.
+         +  The returned rectangle's `size` will be the same as `Sprite.textureRect`.
+         + 
+         + Returns:
+         +  A `FloatRect` representing the position and size of the Sprite.
+         + ++/
+        @property @safe @nogc
+        FloatRect bounds() nothrow const
+        {
+            FloatRect rect;
+            auto      size = this.textureRect.size;
+            rect.position  = this.position;
+            rect.size      = Vector2f(size.x, size.y);
+
+            return rect;
+        }
+
+        /++
          + Returns:
          +  What part of the texture the sprite's using.
          ++/

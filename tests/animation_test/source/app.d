@@ -27,6 +27,10 @@ final class Game : App, IPostBox
                                                                      Animation.FrameInfo(Vector2u(32, 32)),
                                                                      TIME));
 
+            // Quick test to make sure Sprite.bounds uses Sprite.textureRect correctly
+            // E.G the texture is something like 160x90, but the bounds' size should be 32x32, same as the texture rect.
+            assert(this._ani.bounds.size == Vector2f(32, 32));
+
             super.engine.window.input.subscribe(this);
             this.tests();
         }
