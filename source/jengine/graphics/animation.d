@@ -3,10 +3,14 @@
 private
 {
     import std.experimental.allocator, std.experimental.logger;
-    import std.typecons : Flag, Yes, No;
 
     import jengine.core.maths, jengine.core.cache;
     import jengine.graphics.renderer;
+}
+
+public
+{
+    import std.typecons : Flag, Yes, No;
 }
 
 /++

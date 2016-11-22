@@ -6,9 +6,13 @@ module jengine.core.engine;
 private
 {
     import std.experimental.logger;
-    import std.typecons : Flag;
 
     import jengine.graphics.window, jengine.graphics.renderer, jengine.core.post;
+}
+
+public
+{
+    import std.typecons : Flag, Yes, No;
 }
 
 /++

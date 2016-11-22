@@ -6,9 +6,13 @@ module jengine.core.cache;
 private
 {
     import std.experimental.logger, std.experimental.allocator;
-    import std.typecons : BitFlags, Flag, Yes, No;
     import jaster.containers;
     import jengine.core.engine;
+}
+
+public
+{
+    import std.typecons : BitFlags, Flag, Yes, No;
 }
 
 /++

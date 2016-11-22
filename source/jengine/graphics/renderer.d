@@ -6,7 +6,6 @@ module jengine.graphics.renderer;
 private
 {
     import std.experimental.allocator.mallocator, std.experimental.logger, std.experimental.allocator;
-    import std.typecons  : Flag, Yes, No;
     import std.exception : enforce;
 
     import jengine.core.engine;
