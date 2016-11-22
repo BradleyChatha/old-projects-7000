@@ -32,7 +32,6 @@ final class Game : App, IPostBox
             assert(this._ani.bounds.size == Vector2f(32, 32));
 
             super.engine.window.input.subscribe(this);
-            this.tests();
         }
 
         override void onUninit()
@@ -89,29 +88,6 @@ final class Game : App, IPostBox
                 default: break;
             }
         }
-    }
-
-    // Just testing some stuff regarding the animation.
-    private void tests()
-    {
-        import std.exception;
-        auto tex = this._cache.get!Texture(ANIMATION);
-
-        // Some strange notes:
-        //  The scope(failure) guard in Animation.create doesn't seem to actually trigger the deconstructor with the
-        //  call to theAllocator.dispose, but instead of seems to end up calling Animation.sprite...? External bug is my only guess.
-
-        // Exception if FrameSize is 0 for either X or Y.
-        assertThrown!GraphicsException(Animation.create(tex, Animation.FrameInfo(Vector2u(0, 1))));
-        assertThrown!GraphicsException(Animation.create(tex, Animation.FrameInfo(Vector2u(1, 0))));
-
-        // Exception if FrameArea is not evenly divisible by FrameSize
-        assertThrown!GraphicsException(Animation.create(tex, Animation.FrameInfo(Vector2u(2, 2), IntRect(0, 0, 9, 8))));
-        assertThrown!GraphicsException(Animation.create(tex, Animation.FrameInfo(Vector2u(2, 2), IntRect(0, 0, 8, 9))));
-        assertThrown!GraphicsException(Animation.create(tex, Animation.FrameInfo(Vector2u(2, 2), IntRect(0, 0, 9, 9))));
-
-        // Exception if Texture is null
-        assertThrown!GraphicsException(Animation.create(null, Animation.FrameInfo(Vector2u(1, 1))));
     }
 }
 
