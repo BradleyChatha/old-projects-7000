@@ -1,7 +1,7 @@
 /++
  + Contains code that a game might use to manage game states.
  + ++/
-module jengine.gameplay.jengine;
+module jengine.gameplay.gamestate;
 
 private
 {
