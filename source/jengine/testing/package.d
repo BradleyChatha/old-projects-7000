@@ -3,14 +3,13 @@
 /// Tests needing human interaction should be created as a sub-package or something.
 module jengine.testing;
 
-@disable:
 version(Engine_Tests)
 {
     ///
     alias TestFunc = void function();
     unittest
     {
-        import std.experimental.logger, std.file, std.path, sfml, std.parallelism, std.experimental.allocator, std.experimental.allocator.mallocator;
+        import std.experimental.logger, std.file, std.path, jengine.thirdparty, std.parallelism, std.experimental.allocator, std.experimental.allocator.mallocator;
         import jengine.testing.t01, jengine.testing.t02, jengine.testing.t03;
         theAllocator = allocatorObject(Mallocator.instance);
 
@@ -23,8 +22,8 @@ version(Engine_Tests)
         [
             Test("Dummy Test",                              &dummyTest),
             Test("Window and Input test",                   &t01),
-            Test("Animation.create exceptions",             &t02),
-            Test("Basic test of Engine",                    &t03)
+            //Test("Animation.create exceptions",             &t02),
+            //Test("Basic test of Engine",                    &t03)
         ];
 
         // Make sure we're in the "lib" folder.
@@ -42,7 +41,7 @@ version(Engine_Tests)
             infof("[Running tests in folder %s]", getcwd);
 
             try
-                loadSFML();
+                loadLibraries();
             catch(Exception ex)
             {
                 fatalf("[Unable to load Derelict. Aborting tests. Reason = %s]", ex.msg);

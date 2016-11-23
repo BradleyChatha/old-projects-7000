@@ -81,7 +81,7 @@ if(isNumeric!T)
          +  `true` if this rectangle and `other` intersect eachother.
          +  `false` otherwise.
          + ++/
-    version(none):
+        version(none)
         @trusted @nogc
         bool intersects(const typeof(this) other) nothrow const
         {
@@ -94,6 +94,7 @@ if(isNumeric!T)
                 return sfIntRect_intersects(&rect1, &rect2, null) == sfTrue;
         }
         ///
+        version(none)
         unittest
         {
             try
@@ -144,6 +145,7 @@ if(isNumeric!T)
                 return sfIntRect_contains(&rect, point.x, point.y) == sfTrue;
         }
         ///
+        version(none)
         unittest
         {
             try

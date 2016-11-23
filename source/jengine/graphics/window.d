@@ -8,7 +8,7 @@ private
     import std.experimental.logger;
     import std.exception           : enforce;
     import std.typecons            : BitFlags;
-    import jengine.core.maths : Vector2u, Vector2f;
+    import jengine.core.maths : Vector2u, Vector2f, Vector2i, asVector2;
     import jengine.graphics.renderer;
     import jengine.core.post;
     import jengine.thirdparty;
@@ -48,10 +48,11 @@ final class Window
         //Input       _input;
         //Renderer    _renderer;
 
-        extern(C) static void onGlfwError(int code, const(char)* message)
+        extern(C) static void onGlfwError(int code, const(char)* message) nothrow
         {
-            import std.string : fromStringz;
-            errorf("[GLFW has reported an error. Code = %s. Message = %s]", code, message.fromStringz);
+            import std.string    : fromStringz;
+            import std.exception : assumeWontThrow;
+            errorf("[GLFW has reported an error. Code = %s. Message = %s]", code, message.fromStringz).assumeWontThrow;
         }
     }
 
@@ -64,27 +65,38 @@ final class Window
          +  `WindowException` if the window couldn't be created.
          + 
          + Params:
-         +  name  = The name of the window.
-         +  size  = The size of the window.
-         +  style = The window's style.
+         +  name        = The name of the window.
+         +  size        = The size of the window.
+         +  style       = The window's style.
+         +  glVersion   = The version of OpenGL to use. X = Major, Y = Minor.
          + ++/
-        this(string name, in Vector2u size, in StyleFlags style = Style.Close)
+        this(string name, in Vector2u size, in StyleFlags style = Style.Close, in Vector2u glVersion = Vector2u(4, 0))
         {
             import std.string : toStringz;
+
+            // Setup GLFW
             enforce(glfwInit(), new WindowException("Unable to initialise GLFW."));
             glfwSetErrorCallback(&onGlfwError);
 
             trace("[Creating Window]");
-            this._handle = sfRenderWindow_create(sfVideoMode(size.x, size.y, 32),
-                                                 name.toStringz,
-                                                 style.toNativeStyle,
-                                                 null);
+            tracef("[Window Name = %s. Size = %s. Style = %s. GL = %s.]", name, size, style, glVersion);
 
+            // Setup the window
+            glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, glVersion.x);
+            glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, glVersion.y);
+            this._handle = glfwCreateWindow(size.x, size.y, name.toStringz, null, null);
             enforce(this._handle !is null, new WindowException("Failed to create window."));
+
+            // Setup OpenGL
+            glfwMakeContextCurrent(this.handle);
+            auto vers = DerelictGL3.reload();
+            tracef("[OpenGL version that was loaded = %s]", vers);
+
+            // Setup the other sub-systems.
             this.title      = name;
             //this._input     = new Input(this);
             //this._renderer  = new Renderer();
-            this._renderer.onInit(this);
+            //this._renderer.onInit(this);
         }
 
         /++
@@ -96,10 +108,11 @@ final class Window
             if(this._handle !is null)
             {
                 trace("[Destroying Window handle]");
-                sfRenderWindow_destroy(this.handle);
+                glfwDestroyWindow(this.handle);
                 this._handle = null;
             }
 
+            /+
             if(this._input !is null)
             {
                 trace("[Destroying Window Input]");
@@ -111,7 +124,7 @@ final class Window
                 trace("[Destroying Window Renderer]");
                 this._renderer.onUninit();
                 this._renderer = null;
-            }
+            }+/
         }
 
         /++
@@ -120,7 +133,7 @@ final class Window
         @trusted @nogc
         void close() nothrow
         {
-            sfRenderWindow_close(this.handle);
+            glfwSetWindowShouldClose(this.handle, 1);
         }
 
         /++
@@ -129,7 +142,7 @@ final class Window
         @trusted @nogc
         void display() nothrow
         {
-            sfRenderWindow_display(this.handle);
+            glfwSwapBuffers(this.handle);
         }
 
         /++
@@ -137,10 +150,11 @@ final class Window
          +  The window's size.
          + ++/
         @property @trusted @nogc
-        Vector2u size() nothrow const
+        Vector2u size() nothrow 
         {
-            auto siz = sfRenderWindow_getSize(this.handle);
-            return Vector2u(siz.x, siz.y);
+            Vector2i siz;
+            glfwGetWindowSize(this.handle, &siz.vector[0], &siz.vector[1]);
+            return siz.asVector2!uint;
         }
 
         /++
@@ -152,7 +166,7 @@ final class Window
         @property @trusted @nogc
         void size(in Vector2u size_) nothrow
         {
-            sfRenderWindow_setSize(this.handle, sfVector2u(size_.x, size_.y));
+            glfwSetWindowSize(this.handle, size_.x, size_.y);
         }
 
         /++
@@ -178,7 +192,7 @@ final class Window
             import std.exception : assumeWontThrow;
 
             assumeWontThrow(tracef("[Setting Window title to '%s']", title_));
-            sfRenderWindow_setTitle(this.handle, title_.toStringz);
+            glfwSetWindowTitle(this.handle, title_.toStringz);
             this._title = title_;
         }
 
@@ -202,7 +216,8 @@ final class Window
         void vsync(bool vsync_) nothrow
         {
             this._usingVsync = vsync_;
-            sfRenderWindow_setVerticalSyncEnabled(this.handle, vsync_);
+            if(vsync_)
+                glfwSwapInterval(1);
         }
 
         /++
@@ -210,9 +225,9 @@ final class Window
          +  `true` if the window is open. `false` otherwise.
          + ++/
         @property @trusted @nogc
-        bool isOpen() nothrow const
+        bool isOpen() nothrow
         {
-            return (sfRenderWindow_isOpen(this.handle) == sfTrue);
+            return !glfwWindowShouldClose(this.handle);
         }
 
         /++

@@ -1,5 +1,4 @@
 ﻿module jengine.testing.t01;
-version(none):
 import  jengine.graphics.window,
         jengine.core.post, 
         jengine.core.maths;
@@ -9,19 +8,22 @@ void t01()
     // Unfortunatly, I can't really test Input.processEvents, since it'd require a human.
     // So I'll just have to assume it works properly
     auto window = new Window("Test 01", Vector2u(860, 720));
-    auto input  = window.input;
+    //auto input  = window.input;
     scope(exit) window.onUninit();
+
+    while(window.isOpen) {}
 
     // There's no point testing to make sure input.events works, since without Input.processEvents,
     // it functions just as a normal PostOffice
-    testMouseMoved(input);
-    testMouseButtons(input);
-    testTitleChange(window);
-    testSizeChange(window);
-    testVsyncChange(window);
-    testIsOpen(window);
+    //testMouseMoved(input);
+    //testMouseButtons(input);
+    //testTitleChange(window);
+    //testSizeChange(window);
+    //testVsyncChange(window);
+    //testIsOpen(window);
 }
 
+version(none):
 private void testMouseMoved(Input input)
 {
     sfEvent event;
