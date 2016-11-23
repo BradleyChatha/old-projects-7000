@@ -59,6 +59,24 @@ final class Window
                                             0);
             enforce(this._handle !is null, new WindowException("Failed to create window. Reason = %s", getSDLError()));
 
+            // Setup BGFX(This looks so ugly ~_~)
+            trace("[Initialising BGFX]");
+            SDL_SysWMinfo info;
+            SDL_VERSION(&info.version_);
+            enforce(SDL_GetWindowWMInfo(this.handle, &info), new WindowException("SDL_GetWindowWMInfo failed. Reason = %s", getSDLError()));
+
+            bgfx_platform_data_t data;
+            version(Windows)
+            {
+                data.ndt = null;
+                data.nwh = info.info.win.window;
+            }
+            else static assert(false, "Your platform is not supported. It should be easy enough to add support for this part, so please open an issue.");
+            bgfx_set_platform_data(&data);
+
+            enforce(bgfx_init(BGFX_RENDERER_TYPE_OPENGL, BGFX_PCI_ID_NONE),
+                    new Exception("Unable to initialise BGFX"));
+
             // Setup the other sub-systems.
             this.title      = name;
             this._input     = new Input(this);
@@ -76,7 +94,8 @@ final class Window
             trace("[Uninitialisaing Window]");
             if(this._handle !is null)
             {
-                trace("[Destroying Window handle]");
+                trace("[Destroying Window handle and shutting down BGFX]");
+                bgfx_shutdown();
                 SDL_DestroyWindow(this.handle);
                 this._handle = null;
             }

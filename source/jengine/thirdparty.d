@@ -12,14 +12,7 @@ void loadLibraries()
     import std.experimental.logger, std.exception;
 
     trace("[Loading BGFX]");
-    auto loadBgfx = !DerelictBgfx.isLoaded; // In case this function is called multiple times.
     DerelictBgfx.load();
-
-    if(loadBgfx)
-    {
-        enforce(bgfx_init(BGFX_RENDERER_TYPE_OPENGL, BGFX_PCI_ID_NONE),
-                new Exception("Unable to initialise BGFX"));
-    }
 
     trace("[Loading SDL2]");
     DerelictSDL2.load();
