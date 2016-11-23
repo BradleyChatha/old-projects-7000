@@ -76,7 +76,7 @@ final class Window
             //this._renderer  = new Renderer();
             //this._renderer.onInit(this);
 
-            this._input.subscribe(Input.Events.Closed, (a, b) { this._close = true; }); // No need to unsubscribe, since the office will be dispose of by then.
+            this._input.subscribe(SDL_QUIT, (a, b) { this._close = true; }); // No need to unsubscribe, since the office will be dispose of by then.
         }
 
         /++
@@ -261,8 +261,6 @@ final class Window
  + Description:  
  +  The Input class has an `alias this` to it's `PostOffice`, for ease of use 
  +  (e.g, instead of `input.events.subscribe` you'd be able to use `input.subscribe`).
- +
- +  Please see `Input.Events` to see documentation on the different events, as well as what types of `Mail` they post.
  + 
  +  A `Mouse` struct is provided via `Input.mouse`, which will keep the state of the mouse up to date.
  + 
@@ -272,49 +270,35 @@ final class Input : IPostBox
 {
     mixin(IPostBox.generateOnMail!Input);
 
+    /++
+     + The `Mail` posted whenever there is some kind of input event.
+     + ++/
+    alias EventMail = ValueMail!SDL_Event;
     alias events this;
 
     /++
-     + Contains the different types of mail that will be posted through `Input.events`.
+     + Contains many other types that are related to the mouse in some way.
      + ++/
-    enum Events : Mail.MailTypeT
+    struct Mouse
     {
-        /++
-         + This event is mailed whenever the mouse is moved.
-         +
-         + Mail_Type:
-         +  `ValueMail!Vector2f`
-         +
-         + Params:
-         +  value = The new position of the mouse, relative to the top left of the window.         
-         + ++/
-        MouseMoved = 0,
+        /// The position of the mouse, relative to the top left corner of the screen.
+        Vector2f position;
 
-        /++
-         + This event is mailed whenever the close button is pressed.
-         +
-         + Mail_Type:
-         +  `CommandMail`
-         + ++/
-        Closed,
+        /// `true` if the left mouse button is down. `false` otherwise.
+        bool     leftButtonDown;
 
-        /++
-         + This event is mailed whenever an event that hasn't been wrapped is made.
-         + 
-         + It is generally a better idea to report the event as an issue, so it can be wrapped,
-         + rather than relying on this.
-         +
-         + Mail_Type:
-         +  `ValuMail!SDL_Event`
-         + ++/
-        Unhandled
+        /// `true` if the right mouse button is down. `false` otherwise.
+        bool     rightButtonDown;
+
+        /// `true` if the middle mouse button is down. `false` otherwise.
+        bool     middleButtonDown;
     }
 
     private
     {
         PostOffice  _office;
         Window      _window;
-        Mouse.State _mouse;
+        Mouse       _mouse;
 
         this(Window window)
         {
@@ -327,10 +311,36 @@ final class Input : IPostBox
             this.subscribe(this);
         }
 
-        @MailBox(Input.Events.MouseMoved)
-        void onMouseMove(PostOffice, ValueMail!Vector2f pos)
+        @MailBox(SDL_MOUSEMOTION)
+        void onMouseMove(PostOffice, EventMail pos)
         {
-            this._mouse.position = pos.value;
+            this._mouse.position = Vector2f(pos.value.motion.x, pos.value.motion.y);
+        }
+
+        @MailBox(SDL_MOUSEBUTTONDOWN)
+        void onMouseButtonDown(PostOffice, EventMail mail)
+        {
+            switch(mail.value.button.button)
+            {
+                case SDL_BUTTON_LEFT:   this._mouse.leftButtonDown   = true; break;
+                case SDL_BUTTON_RIGHT:  this._mouse.rightButtonDown  = true; break;
+                case SDL_BUTTON_MIDDLE: this._mouse.middleButtonDown = true; break;
+
+                default: break;
+            }
+        }
+
+        @MailBox(SDL_MOUSEBUTTONUP)
+        void onMouseButtonUp(PostOffice, EventMail mail)
+        {
+            switch(mail.value.button.button)
+            {
+                case SDL_BUTTON_LEFT:   this._mouse.leftButtonDown   = false; break;
+                case SDL_BUTTON_RIGHT:  this._mouse.rightButtonDown  = false; break;
+                case SDL_BUTTON_MIDDLE: this._mouse.middleButtonDown = false; break;
+
+                default: break;
+            }
         }
     }
 
@@ -340,28 +350,15 @@ final class Input : IPostBox
          + Processes all pending window events.
          +
          + Description:
-         +  Please see `Input.Events` to see what kind of mail will be mailed
-         +  to `Input.events` (yea, confusing names, I know).
+         +  For every event that is processed, an `Input.EventMail` is mailed, where the type
+         +  is event type, e.g. SDL_MOUSEMOTION, SDL_QUIT, etc.
          + ++/
         void processEvents()
         {
             SDL_Event e;
             while(SDL_PollEvent(&e))
             {
-                switch(e.type)
-                {
-                    case SDL_MOUSEMOTION:
-                        this.mailValue(Input.Events.MouseMoved, Vector2f(e.motion.x, e.motion.y));
-                        break;
-
-                    case SDL_QUIT:
-                        this.mailCommand(Input.Events.Closed);
-                        break;
-
-                    default:
-                        this.mailValue(Input.Events.Unhandled, e);
-                        break;
-                }
+                this.mailValue(cast(Mail.MailTypeT)e.type, e);
             }
         }
 
@@ -370,7 +367,7 @@ final class Input : IPostBox
          +  This `PostOffice` is used
          + 
          +  e.g. To listen for if the mouse is moved, a call such as 
-         +  `window.input.events.subscribe(Input.Events.MouseMoved, &onMove)` should be made.
+         +  `window.input.events.subscribe(SDL_MOUSEMOTION, &onMove)` should be made.
          + 
          + Returns:
          +  A `PostOffice` that can be used to listen for mail triggered by a window event.
@@ -388,36 +385,12 @@ final class Input : IPostBox
 
         /++
          + Returns:
-         +  The current `Mouse.State` of the mouse.
+         +  The current state of the `Mouse`.
          + ++/
         @property @safe @nogc
-        Mouse.State mouse() nothrow pure const
+        Mouse mouse() nothrow pure const
         {
             return this._mouse;
-        }
-    }
-
-    /++
-     + Contains many other types that are related to the mouse in some way.
-     + ++/
-    struct Mouse
-    {
-        /++
-         + Contains the state of the mouse.
-         + ++/
-        struct State
-        {
-            /// The position of the mouse, relative to the top left corner of the screen.
-            Vector2f position;
-
-            /// `true` if the left mouse button is down. `false` otherwise.
-            bool     leftButtonDown;
-
-            /// `true` if the right mouse button is down. `false` otherwise.
-            bool     rightButtonDown;
-
-            /// `true` if the middle mouse button is down. `false` otherwise.
-            bool     middleButtonDown;
         }
     }
 }

@@ -15,41 +15,43 @@ void t01()
     // There's no point testing to make sure input.events works, since without Input.processEvents,
     // it functions just as a normal PostOffice
     testMouseMoved(input);
-    //testMouseButtons(input);
-    //testTitleChange(window);
-    //testSizeChange(window);
-    //testVsyncChange(window);
-    //testIsOpen(window);
+    testMouseButtons(input);
+    testTitleChange(window);
+    testSizeChange(window);
+    testVsyncChange(window);
 }
 
 private void testMouseMoved(Input input)
 {
-    input.mailValue(Input.Events.MouseMoved, Vector2f(200, 400));
+    SDL_Event event;
+    event.type     = SDL_MOUSEMOTION;
+    event.motion.x = 200;
+    event.motion.y = 400;
+    input.mailValue(SDL_MOUSEMOTION, event);
     assert(input.mouse.position == Vector2f(200, 400));
 }
 
-version(none):
 private void testMouseButtons(Input input)
 {
-    auto types = [sfMouseLeft, sfMouseRight, sfMouseMiddle];
+    auto types = [SDL_BUTTON_LEFT, SDL_BUTTON_RIGHT, SDL_BUTTON_MIDDLE];
 
-    sfEvent event;
+    SDL_Event event;
     void sendEvent()
     {
         foreach(type; types)
         {
-            event.mouseButton.button = type;
-            input.mailValue!sfEvent(cast(Mail.MailTypeT)event.type, event);
+            event.button.button = type;
+            input.mailValue(cast(Mail.MailTypeT)event.type, event);
         }
     }
 
-    event.type = sfEvtMouseButtonPressed;
+    event.type = SDL_MOUSEBUTTONDOWN;
     sendEvent();
     assert(input.mouse.leftButtonDown);
     assert(input.mouse.rightButtonDown);
     assert(input.mouse.middleButtonDown);
 
-    event.type = sfEvtMouseButtonReleased;
+    event.type = SDL_MOUSEBUTTONUP;
     sendEvent();
     assert(!input.mouse.leftButtonDown);
     assert(!input.mouse.rightButtonDown);
@@ -76,11 +78,4 @@ private void testVsyncChange(Window window)
     assert(window.vsync);
     window.vsync = false;
     assert(!window.vsync);
-}
-
-private void testIsOpen(Window window)
-{
-    assert(window.isOpen);
-    window.close();
-    assert(!window.isOpen);
 }
