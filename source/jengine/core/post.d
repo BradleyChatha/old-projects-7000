@@ -2,11 +2,10 @@
  + Contains code for a (witty named) event dispatcher.
  + ++/
 module jengine.core.post;
-version(none):
 private
 {
     import std.experimental.logger, std.experimental.allocator.mallocator, std.experimental.allocator;
-    import jengine.core.engine : IInitialisable, Engine;
+    import jengine.core.engine : IInitialisable;
 }
 
 /++
@@ -198,7 +197,7 @@ struct MailBox
  + 
  + It is essentially an event dispatcher, just with a fancy (stupid) name.
  + ++/
-final class PostOffice : IInitialisable!Engine
+final class PostOffice : IInitialisable!()
 {
     import jaster.containers;
 
@@ -228,22 +227,17 @@ final class PostOffice : IInitialisable!Engine
         DynamicArray!Subscriber _subscribers;
         DynamicArray!IPostBox   _postboxes;
         DynamicArray!EnumRange  _reserved;
-        Engine                  _engine;
+        bool                    _hasInit;
     }
 
     public
     {
         /++
          + Initialises the PostOffice.
-         + 
-         + Params:
-         +  engine = The `Engine` being used.
          + ++/
-        void onInit(Engine engine)
+        void onInit()
         {
-            trace("[Initialising a PostOffice]");
-            assert(engine !is null, "Attempted to initialise the PostOffice with a null Engine.");
-            this._engine = engine;
+            this._hasInit = true;
         }
 
         /++
@@ -252,7 +246,7 @@ final class PostOffice : IInitialisable!Engine
         void onUninit()
         {
             trace("[Uninitialising a PostOffice]");
-            this._engine             = null;
+            this._hasInit            = false;
             this._subscribers.length = 0;
             this._postboxes.length   = 0;
             this._reserved.length    = 0;
@@ -495,18 +489,7 @@ final class PostOffice : IInitialisable!Engine
         @property @safe @nogc
         bool hasInit() nothrow pure const
         {
-            return (this._engine !is null);
-        }
-
-        /++
-         + Returns:
-         +  The `Engine` that is being used by this office.
-         + ++/
-        @property @safe @nogc
-        Engine engine() nothrow pure
-        {
-            assert(this.hasInit, "The PostOffice isn't initialised.");
-            return this._engine;
+            return this._hasInit;
         }
     }
 }
@@ -537,7 +520,6 @@ unittest
     }
 
     // Normally you'd want to also do "office.onInit" and "office.onUninit"
-    // However, the post office doesn't actually require an instance of `Engine` to run... yet >:D
     auto office = new PostOffice();
     auto myC    = new C();
     office.reserveTypes!Command;
