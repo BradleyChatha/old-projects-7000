@@ -20,40 +20,19 @@ private
 final class Window
 {
     /++
-     + An enumeration of the different ways to style a window.
-     + ++/
-    enum Style
-    {
-        /++
-         + The window will have a close button.
-         + ++/
-        Close = 1 << 0
-    }
-
-    /++
-     + An alias to a `BitFlags` version of `Style`, used for added safety.
-     + ++/
-    alias StyleFlags = BitFlags!Style;
-
-    /++
      + An alias to the type used as the window handle.
      + ++/
-    alias Handle = GLFWwindow*;
+    alias Handle = SDL_Window*;
 
     private
     {
-        Handle      _handle;
-        string      _title;
-        bool        _usingVsync;
-        //Input       _input;
-        //Renderer    _renderer;
-
-        extern(C) static void onGlfwError(int code, const(char)* message) nothrow
-        {
-            import std.string    : fromStringz;
-            import std.exception : assumeWontThrow;
-            errorf("[GLFW has reported an error. Code = %s. Message = %s]", code, message.fromStringz).assumeWontThrow;
-        }
+        Handle         _handle;
+        string         _title;
+        bool           _usingVsync;
+        bool           _close;
+        Input          _input;
+        SDL_GLContext  _context;
+        //Renderer       _renderer;
     }
 
     public
@@ -67,36 +46,37 @@ final class Window
          + Params:
          +  name        = The name of the window.
          +  size        = The size of the window.
-         +  style       = The window's style.
          +  glVersion   = The version of OpenGL to use. X = Major, Y = Minor.
          + ++/
-        this(string name, in Vector2u size, in StyleFlags style = Style.Close, in Vector2u glVersion = Vector2u(4, 0))
+        this(string name, in Vector2u size, in Vector2u glVersion = Vector2u(4, 0))
         {
             import std.string : toStringz;
-
-            // Setup GLFW
-            enforce(glfwInit(), new WindowException("Unable to initialise GLFW."));
-            glfwSetErrorCallback(&onGlfwError);
-
             trace("[Creating Window]");
-            tracef("[Window Name = %s. Size = %s. Style = %s. GL = %s.]", name, size, style, glVersion);
+            tracef("[Window Name = %s. Size = %s. GL = %s.]", name, size, glVersion);
 
             // Setup the window
-            glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, glVersion.x);
-            glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, glVersion.y);
-            this._handle = glfwCreateWindow(size.x, size.y, name.toStringz, null, null);
-            enforce(this._handle !is null, new WindowException("Failed to create window."));
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, glVersion.x);
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, glVersion.y);
+            this._handle = SDL_CreateWindow(name.toStringz,
+                                            SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+                                            size.x,                 size.y,
+                                            SDL_WINDOW_OPENGL);
+            enforce(this._handle !is null, new WindowException("Failed to create window. Reason = %s", getSDLError()));
 
             // Setup OpenGL
-            glfwMakeContextCurrent(this.handle);
+            this._context = SDL_GL_CreateContext(this.handle);
+            enforce(this._context !is null, new WindowException("Unable to create OpenGL Context, Reason = %s", getSDLError()));
+
             auto vers = DerelictGL3.reload();
             tracef("[OpenGL version that was loaded = %s]", vers);
 
             // Setup the other sub-systems.
             this.title      = name;
-            //this._input     = new Input(this);
+            this._input     = new Input(this);
             //this._renderer  = new Renderer();
             //this._renderer.onInit(this);
+
+            this._input.subscribe(Input.Events.Closed, (a, b) { this._close = true; }); // No need to unsubscribe, since the office will be dispose of by then.
         }
 
         /++
@@ -108,17 +88,18 @@ final class Window
             if(this._handle !is null)
             {
                 trace("[Destroying Window handle]");
-                glfwDestroyWindow(this.handle);
+                SDL_DestroyWindow(this.handle);
+                SDL_GL_DeleteContext(this._context);
                 this._handle = null;
             }
 
-            /+
+
             if(this._input !is null)
             {
                 trace("[Destroying Window Input]");
                 this._input = null;
             }
-
+            /+
             if(this._renderer !is null && this._renderer.hasInit)
             {
                 trace("[Destroying Window Renderer]");
@@ -128,21 +109,12 @@ final class Window
         }
 
         /++
-         + Closes the window.
-         + ++/
-        @trusted @nogc
-        void close() nothrow
-        {
-            glfwSetWindowShouldClose(this.handle, 1);
-        }
-
-        /++
          + Displays any changes made to the window.
          + ++/
         @trusted @nogc
         void display() nothrow
         {
-            glfwSwapBuffers(this.handle);
+            SDL_GL_SwapWindow(this.handle);
         }
 
         /++
@@ -153,7 +125,7 @@ final class Window
         Vector2u size() nothrow 
         {
             Vector2i siz;
-            glfwGetWindowSize(this.handle, &siz.vector[0], &siz.vector[1]);
+            SDL_GetWindowSize(this.handle, &siz.vector[0], &siz.vector[1]);
             return siz.asVector2!uint;
         }
 
@@ -166,7 +138,7 @@ final class Window
         @property @trusted @nogc
         void size(in Vector2u size_) nothrow
         {
-            glfwSetWindowSize(this.handle, size_.x, size_.y);
+            SDL_SetWindowSize(this.handle, size_.x, size_.y);
         }
 
         /++
@@ -192,7 +164,7 @@ final class Window
             import std.exception : assumeWontThrow;
 
             assumeWontThrow(tracef("[Setting Window title to '%s']", title_));
-            glfwSetWindowTitle(this.handle, title_.toStringz);
+            SDL_SetWindowTitle(this.handle, title_.toStringz);
             this._title = title_;
         }
 
@@ -217,24 +189,23 @@ final class Window
         {
             this._usingVsync = vsync_;
             if(vsync_)
-                glfwSwapInterval(1);
+                SDL_GL_SetSwapInterval(1);
         }
 
         /++
          + Returns:
-         +  `true` if the window is open. `false` otherwise.
+         +  `true` if the window has been told to close. `false` otherwise.
          + ++/
         @property @trusted @nogc
-        bool isOpen() nothrow
+        bool shouldClose() nothrow
         {
-            return !glfwWindowShouldClose(this.handle);
+            return this._close;
         }
 
         /++
          + Returns:
          +  An instance of `Input` that is used to respond to any events the window recieves.
          + ++/
-        version(none)
         @property @trusted @nogc
         inout(Input) input() nothrow inout
         out(output)
@@ -290,43 +261,84 @@ final class Window
  + Description:  
  +  The Input class has an `alias this` to it's `PostOffice`, for ease of use 
  +  (e.g, instead of `input.events.subscribe` you'd be able to use `input.subscribe`).
+ +
+ +  Please see `Input.Events` to see documentation on the different events, as well as what types of `Mail` they post.
  + 
  +  A `Mouse` struct is provided via `Input.mouse`, which will keep the state of the mouse up to date.
  + 
  +  Basic usage includes using `input.subscribe(Input.Events.SomeEvent, &myHandler)` to subscribe to a specific window event.
  + ++/
-version(none)
 final class Input : IPostBox
 {
-    import jengine.core.post;
-
     mixin(IPostBox.generateOnMail!Input);
 
     alias events this;
 
     /++
-     + Contains the state of the mouse.
+     + Contains the different types of mail that will be posted through `Input.events`.
+     + ++/
+    enum Events : Mail.MailTypeT
+    {
+        /++
+         + This event is mailed whenever the mouse is moved.
+         +
+         + Mail_Type:
+         +  `ValueMail!Vector2f`
+         +
+         + Params:
+         +  value = The new position of the mouse, relative to the top left of the window.         
+         + ++/
+        MouseMoved = 0,
+
+        /++
+         + This event is mailed whenever the close button is pressed.
+         +
+         + Mail_Type:
+         +  `CommandMail`
+         + ++/
+        Closed,
+
+        /++
+         + This event is mailed whenever an event that hasn't been wrapped is made.
+         + 
+         + It is generally a better idea to report the event as an issue, so it can be wrapped,
+         + rather than relying on this.
+         +
+         + Mail_Type:
+         +  `ValuMail!SDL_Event`
+         + ++/
+        Unhandled
+    }
+
+    /++
+     + Contains many other types that are related to the mouse in some way.
      + ++/
     struct Mouse
     {
-        /// The position of the mouse, relative to the top left corner of the screen.
-        Vector2f position;
+        /++
+         + Contains the state of the mouse.
+         + ++/
+        struct State
+        {
+            /// The position of the mouse, relative to the top left corner of the screen.
+            Vector2f position;
 
-        /// `true` if the left mouse button is down. `false` otherwise.
-        bool     leftButtonDown;
+            /// `true` if the left mouse button is down. `false` otherwise.
+            bool     leftButtonDown;
 
-        /// `true` if the right mouse button is down. `false` otherwise.
-        bool     rightButtonDown;
+            /// `true` if the right mouse button is down. `false` otherwise.
+            bool     rightButtonDown;
 
-        /// `true` if the middle mouse button is down. `false` otherwise.
-        bool     middleButtonDown;
+            /// `true` if the middle mouse button is down. `false` otherwise.
+            bool     middleButtonDown;
+        }
     }
 
     private
     {
         PostOffice  _office;
         Window      _window;
-        Mouse       _mouse;
+        Mouse.State _mouse;
 
         this(Window window)
         {
@@ -338,36 +350,51 @@ final class Input : IPostBox
             
             this.subscribe(this);
         }
+
+        @MailBox(Input.Events.MouseMoved)
+        void onMouseMove(PostOffice, ValueMail!Vector2f pos)
+        {
+            this._mouse.position = pos.value;
+        }
     }
 
     public
     {
         /++
          + Processes all pending window events.
-         + 
+         +
          + Description:
-         +  Every window event will be mailed to the `Input.events` office, where the mail's type is the event's type,
-         +  and the mail itself is an `Input.MailT`. For example, when the mouse is moved, a `MailT` with the type
-         +  `sfEvtMouseMoved` is mailed.
+         +  Please see `Input.Events` to see what kind of mail will be mailed
+         +  to `Input.events` (yea, confusing names, I know).
          + ++/
         void processEvents()
         {
-            sfEvent e;
-            while(sfRenderWindow_pollEvent(this._window.handle, &e))
+            SDL_Event e;
+            while(SDL_PollEvent(&e))
             {
-                // Temporary measure. In the future I want to reuse a single/pool of message objects
-                // instead of constantly allocating them.
-                this.events.mailValue!sfEvent(cast(Mail.MailTypeT)e.type, e);
+                switch(e.type)
+                {
+                    case SDL_MOUSEMOTION:
+                        this.mailValue(Input.Events.MouseMoved, Vector2f(e.motion.x, e.motion.y));
+                        break;
+
+                    case SDL_QUIT:
+                        this.mailCommand(Input.Events.Closed);
+                        break;
+
+                    default:
+                        this.mailValue(Input.Events.Unhandled, e);
+                        break;
+                }
             }
         }
 
         /++
          + Description:
-         +  Whenever the window this class is attached to recieves an event, then an `Input.MailT` mail is posted,
-         +  where the mail's type is the same as the event's type.
+         +  This `PostOffice` is used
          + 
-         +  e.g. To listen for if the close button is pressed, a call such as 
-         +  `window.input.events.subscribe(sfClose, &onClose)` should be made.
+         +  e.g. To listen for if the mouse is moved, a call such as 
+         +  `window.input.events.subscribe(Input.Events.MouseMoved, &onMove)` should be made.
          + 
          + Returns:
          +  A `PostOffice` that can be used to listen for mail triggered by a window event.
@@ -385,10 +412,10 @@ final class Input : IPostBox
 
         /++
          + Returns:
-         +  The state of the `Mouse`.
+         +  The current `Mouse.State` of the mouse.
          + ++/
         @property @safe @nogc
-        Mouse mouse() nothrow pure const
+        Mouse.State mouse() nothrow pure const
         {
             return this._mouse;
         }

@@ -8,10 +8,13 @@ void t01()
     // Unfortunatly, I can't really test Input.processEvents, since it'd require a human.
     // So I'll just have to assume it works properly
     auto window = new Window("Test 01", Vector2u(860, 720));
-    //auto input  = window.input;
+    auto input  = window.input;
     scope(exit) window.onUninit();
 
-    while(window.isOpen) {}
+    while(!window.shouldClose)
+    {
+        window.input.processEvents();
+    }
 
     // There's no point testing to make sure input.events works, since without Input.processEvents,
     // it functions just as a normal PostOffice
@@ -23,7 +26,7 @@ void t01()
     //testIsOpen(window);
 }
 
-version(none):
+version(none)
 private void testMouseMoved(Input input)
 {
     sfEvent event;
@@ -35,6 +38,7 @@ private void testMouseMoved(Input input)
     assert(input.mouse.position == Vector2f(200, 400));
 }
 
+version(none):
 private void testMouseButtons(Input input)
 {
     auto types = [sfMouseLeft, sfMouseRight, sfMouseMiddle];
