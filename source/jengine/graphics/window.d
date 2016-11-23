@@ -91,7 +91,6 @@ final class Window
             if(this._handle !is null)
             {
                 trace("[Destroying Window handle]");
-                bgfx_shutdown();
                 SDL_DestroyWindow(this.handle);
                 this._handle = null;
             }

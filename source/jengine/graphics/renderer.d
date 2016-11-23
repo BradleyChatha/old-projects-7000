@@ -57,19 +57,19 @@ final class Renderer : IInitialisable!Window
         None,
 
         /// Enable MSAA x2
-        MSAAx2,
+        MSAAx2  = BGFX_RESET_MSAA_X2,
 
         /// Enable MSAA x4
-        MSAAx4,
+        MSAAx4  = BGFX_RESET_MSAA_X4,
 
         /// Enable MSAA x8
-        MSAAx8,
+        MSAAx8  = BGFX_RESET_MSAA_X8,
 
         /// Enable MSAA x16
-        MSAAx16,
+        MSAAx16 = BGFX_RESET_MSAA_X16,
 
         /// Enable VSync
-        VSync
+        VSync   = BGFX_RESET_VSYNC
     }
 
     /++
@@ -82,16 +82,51 @@ final class Renderer : IInitialisable!Window
 
         /// No rendering calls will be submitted to the GPU, making it easier to detect whether
         /// there is a CPU or GPU bottleneck.
-        skipDrawing = BGFX_DEBUG_IFH,
+        SkipDrawing = BGFX_DEBUG_IFH,
 
         /// Enables wireframe
-        wireframe   = BGFX_DEBUG_WIREFRAME,
+        Wireframe   = BGFX_DEBUG_WIREFRAME,
 
         /// Displays internal statistics (From BGFX)
-        statistics  = BGFX_DEBUG_STATS,
+        Statistics  = BGFX_DEBUG_STATS,
 
         /// Displays any debug text submitted via `Renderer.renderDebugText`
-        text        = BGFX_DEBUG_TEXT
+        Text        = BGFX_DEBUG_TEXT
+    }
+
+    /++
+     + Used in `Renderer.renderDebugText`.
+     + ++/
+    enum DebugColour : ubyte
+    {
+        ///
+        Black   = 0x0,
+
+        ///
+        Red     = 0x1,
+
+        ///
+        Green   = 0x2,
+
+        ///
+        Orange  = 0x3,
+
+        ///
+        Blue    = 0x4,
+
+        ///
+        Purple  = 0x5,
+
+        ///
+        Cyan    = 0x6,
+
+        ///
+        White   = 0x7,
+
+        ///
+        Gray    = 0x8,
+
+        // Can only have up to 0xF, because of how bgfx_dbg_text works
     }
 
     private
@@ -130,10 +165,10 @@ final class Renderer : IInitialisable!Window
             }
             else static assert(false, "Your platform is not supported. It should be easy enough to add support for this part, so please open an issue.");
             bgfx_set_platform_data(&data);
-            this.reset(window.size, ResetFlags.None);
-            
+
             enforce(bgfx_init(BGFX_RENDERER_TYPE_OPENGL, BGFX_PCI_ID_NONE),
                 new Exception("Unable to initialise BGFX"));
+            this.reset(window.size, ResetFlags.None);
 
             this._window = window;
         }
@@ -149,6 +184,40 @@ final class Renderer : IInitialisable!Window
         }
 
         /++
+         + Instructs the rendering thread to render all previously submitted render requests.
+         + ++/
+        @nogc
+        void renderFrame() nothrow
+        {
+            bgfx_frame();
+        }
+
+        /++
+         + Renders debug text to the screen if `DebugFlags.text` is set.
+         + 
+         + Params:
+         +  position = The position on screen to render the text.
+         +             Note that this the position is not in pixels but rather in rows.
+         +  colour   = The `DebugColour` to render the text with.
+         +  format   = Standard std.format formatting string.
+         +  args     = Standard std.format formatting args.
+         + ++/
+        void renderDebugText(Args...)(const Vector2u position, const DebugColour colour, const(char)[] format, Args args)
+        {
+            import std.format        : sformat;
+            import jaster.containers : DynamicArray;
+            DynamicArray!char buffer;
+            buffer.length = 512;
+            buffer.range.sformat(format, args);
+            buffer ~= '\0';
+
+            auto vect = position.asVector2!ushort;
+            bgfx_dbg_text_printf(vect.x, vect.y, 
+                                 cast(ubyte)((cast(ubyte)DebugColour.Gray << 4) | colour), 
+                                 buffer.range.ptr);
+        }
+
+        /++
          + Resets the renderer's graphics settings, and changes the back buffer's size.
          + 
          + Params:
@@ -159,6 +228,7 @@ final class Renderer : IInitialisable!Window
         void reset(Vector2u bufferSize, ResetFlags flags = ResetFlags.None) nothrow
         {
             bgfx_reset(bufferSize.x, bufferSize.y, flags);
+            this._resetFlags = flags;
         }
 
         /++

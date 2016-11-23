@@ -10,7 +10,7 @@ version(Engine_Tests)
     unittest
     {
         import std.experimental.logger, std.file, std.path, jengine.thirdparty, std.parallelism, std.experimental.allocator, std.experimental.allocator.mallocator;
-        import jengine.testing.t01, jengine.testing.t02, jengine.testing.t03;
+        import jengine.testing.t01, jengine.testing.t02, jengine.testing.t03, jengine.testing.alwayschanging;
         theAllocator = allocatorObject(Mallocator.instance);
 
         struct Test
@@ -21,6 +21,7 @@ version(Engine_Tests)
         auto tests = 
         [
             Test("Dummy Test",                              &dummyTest),
+            Test("Generic 'always changing' test",          &always_changing_test),
             Test("Window and Input test",                   &t01),
             //Test("Animation.create exceptions",             &t02),
             //Test("Basic test of Engine",                    &t03)
@@ -50,7 +51,7 @@ version(Engine_Tests)
         }
 
         // Then run the tests.
-        foreach(test; parallel(tests))
+        foreach(test; tests)
         {
             // I hope std.logger is thread-safe.
             infof("[Running Test '%s']", test.name);
