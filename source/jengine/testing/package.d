@@ -40,14 +40,14 @@ version(Engine_Tests)
             }
 
             infof("[Running tests in folder %s]", getcwd);
+        }
 
-            try
-                loadLibraries();
-            catch(Exception ex)
-            {
-                fatalf("[Unable to load Derelict. Aborting tests. Reason = %s]", ex.msg);
-                return;
-            }
+        try
+            loadLibraries();
+        catch(Exception ex)
+        {
+            fatalf("[Unable to load Derelict. Aborting tests. Reason = %s]", ex.msg);
+            return;
         }
 
         // Then run the tests.
