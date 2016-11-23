@@ -31,7 +31,7 @@ final class Window
         bool           _usingVsync;
         bool           _close;
         Input          _input;
-        //Renderer       _renderer;
+        Renderer       _renderer;
     }
 
     public
@@ -59,30 +59,11 @@ final class Window
                                             0);
             enforce(this._handle !is null, new WindowException("Failed to create window. Reason = %s", getSDLError()));
 
-            // Setup BGFX(This looks so ugly ~_~)
-            trace("[Initialising BGFX]");
-            SDL_SysWMinfo info;
-            SDL_VERSION(&info.version_);
-            enforce(SDL_GetWindowWMInfo(this.handle, &info), new WindowException("SDL_GetWindowWMInfo failed. Reason = %s", getSDLError()));
-
-            bgfx_platform_data_t data;
-            version(Windows)
-            {
-                data.ndt = null;
-                data.nwh = info.info.win.window;
-            }
-            else static assert(false, "Your platform is not supported. It should be easy enough to add support for this part, so please open an issue.");
-            bgfx_set_platform_data(&data);
-
-            enforce(bgfx_init(BGFX_RENDERER_TYPE_OPENGL, BGFX_PCI_ID_NONE),
-                    new Exception("Unable to initialise BGFX"));
-            bgfx_reset(size.x, size.y);
-
             // Setup the other sub-systems.
             this.title      = name;
             this._input     = new Input(this);
-            //this._renderer  = new Renderer();
-            //this._renderer.onInit(this);
+            this._renderer  = new Renderer();
+            this._renderer.onInit(this);
 
             this._input.subscribe(SDL_QUIT, (a, b) { this._close = true; }); // No need to unsubscribe, since the office will be dispose of by then.
         }
@@ -93,36 +74,27 @@ final class Window
         void onUninit()
         {
             trace("[Uninitialisaing Window]");
-            if(this._handle !is null)
-            {
-                trace("[Destroying Window handle and shutting down BGFX]");
-                bgfx_shutdown();
-                SDL_DestroyWindow(this.handle);
-                this._handle = null;
-            }
-
 
             if(this._input !is null)
             {
                 trace("[Destroying Window Input]");
                 this._input = null;
             }
-            /+
+
             if(this._renderer !is null && this._renderer.hasInit)
             {
                 trace("[Destroying Window Renderer]");
                 this._renderer.onUninit();
                 this._renderer = null;
-            }+/
-        }
+            }
 
-        /++
-         + Displays any changes made to the window.
-         + ++/
-        @trusted @nogc
-        void display() nothrow
-        {
-            SDL_GL_SwapWindow(this.handle);
+            if(this._handle !is null)
+            {
+                trace("[Destroying Window handle]");
+                bgfx_shutdown();
+                SDL_DestroyWindow(this.handle);
+                this._handle = null;
+            }
         }
 
         /++
@@ -189,15 +161,23 @@ final class Window
         /++
          + Sets whether the window is using vsync or not.
          + 
+         + Notes:
+         +  This will reset the `Renderer`'s back buffer to the window's size.
+         + 
          + Params:
          +  vsync_ = Should the window use Vsync?
          + ++/
         @property @trusted @nogc
         void vsync(bool vsync_) nothrow
         {
-            this._usingVsync = vsync_;
+            Renderer.ResetFlags flags = this._renderer.resetFlags;
+            this._usingVsync          = vsync_;
             if(vsync_)
-                SDL_GL_SetSwapInterval(1);
+                flags |= Renderer.ResetFlags.VSync;
+            else
+                flags &= ~Renderer.ResetFlags.VSync;
+
+            this._renderer.reset(this.size, flags);
         }
 
         /++
@@ -229,7 +209,6 @@ final class Window
          + Returns:
          +  The window's `Renderer`.
          + ++/
-        version(none)
         @property @safe @nogc
         inout(Renderer) renderer() nothrow pure inout
         out(output)
