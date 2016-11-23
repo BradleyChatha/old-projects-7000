@@ -310,30 +310,6 @@ final class Input : IPostBox
         Unhandled
     }
 
-    /++
-     + Contains many other types that are related to the mouse in some way.
-     + ++/
-    struct Mouse
-    {
-        /++
-         + Contains the state of the mouse.
-         + ++/
-        struct State
-        {
-            /// The position of the mouse, relative to the top left corner of the screen.
-            Vector2f position;
-
-            /// `true` if the left mouse button is down. `false` otherwise.
-            bool     leftButtonDown;
-
-            /// `true` if the right mouse button is down. `false` otherwise.
-            bool     rightButtonDown;
-
-            /// `true` if the middle mouse button is down. `false` otherwise.
-            bool     middleButtonDown;
-        }
-    }
-
     private
     {
         PostOffice  _office;
@@ -418,6 +394,30 @@ final class Input : IPostBox
         Mouse.State mouse() nothrow pure const
         {
             return this._mouse;
+        }
+    }
+
+    /++
+     + Contains many other types that are related to the mouse in some way.
+     + ++/
+    struct Mouse
+    {
+        /++
+         + Contains the state of the mouse.
+         + ++/
+        struct State
+        {
+            /// The position of the mouse, relative to the top left corner of the screen.
+            Vector2f position;
+
+            /// `true` if the left mouse button is down. `false` otherwise.
+            bool     leftButtonDown;
+
+            /// `true` if the right mouse button is down. `false` otherwise.
+            bool     rightButtonDown;
+
+            /// `true` if the middle mouse button is down. `false` otherwise.
+            bool     middleButtonDown;
         }
     }
 }

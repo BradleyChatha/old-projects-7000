@@ -1,7 +1,8 @@
 ﻿module jengine.testing.t01;
 import  jengine.graphics.window,
         jengine.core.post, 
-        jengine.core.maths;
+        jengine.core.maths,
+        jengine.thirdparty;
 
 void t01()
 {
@@ -11,14 +12,9 @@ void t01()
     auto input  = window.input;
     scope(exit) window.onUninit();
 
-    while(!window.shouldClose)
-    {
-        window.input.processEvents();
-    }
-
     // There's no point testing to make sure input.events works, since without Input.processEvents,
     // it functions just as a normal PostOffice
-    //testMouseMoved(input);
+    testMouseMoved(input);
     //testMouseButtons(input);
     //testTitleChange(window);
     //testSizeChange(window);
@@ -26,15 +22,9 @@ void t01()
     //testIsOpen(window);
 }
 
-version(none)
 private void testMouseMoved(Input input)
 {
-    sfEvent event;
-    event.type        = sfEvtMouseMoved;
-    event.mouseMove.x = 200;
-    event.mouseMove.y = 400;
-    input.mailValue!sfEvent(sfEvtMouseMoved, event);
-    
+    input.mailValue(Input.Events.MouseMoved, Vector2f(200, 400));
     assert(input.mouse.position == Vector2f(200, 400));
 }
 
