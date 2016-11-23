@@ -45,11 +45,10 @@ void checkColour(const Colour colour) nothrow pure
 
 private enum _debugFontBytes = cast(immutable(ubyte)[])import("debug_font/font.ttf");
 
-version(none):
-
 /++
  + Contains code that knows how to render things.
  + ++/
+ version(none)
 final class Renderer : IInitialisable!Window
 {
     /// The type returned by `Renderer.view`
@@ -263,6 +262,7 @@ final class Renderer : IInitialisable!Window
  + Please see http://www.sfml-dev.org/tutorials/2.4/graphics-shader.php for SFML-specific info
  + about shaders.
  ++/
+version(none)
 final class Shader : ICacheable
 {
     /++
@@ -482,6 +482,7 @@ final class Shader : ICacheable
 /++
  + Describes a sprite that can be drawn on screen.
  ++/
+ version(none):
 final class Sprite : ICacheable
 {
     /++

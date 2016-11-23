@@ -31,7 +31,6 @@ final class Window
         bool           _usingVsync;
         bool           _close;
         Input          _input;
-        SDL_GLContext  _context;
         //Renderer       _renderer;
     }
 
@@ -46,29 +45,19 @@ final class Window
          + Params:
          +  name        = The name of the window.
          +  size        = The size of the window.
-         +  glVersion   = The version of OpenGL to use. X = Major, Y = Minor.
          + ++/
-        this(string name, in Vector2u size, in Vector2u glVersion = Vector2u(4, 0))
+        this(string name, in Vector2u size)
         {
             import std.string : toStringz;
             trace("[Creating Window]");
-            tracef("[Window Name = %s. Size = %s. GL = %s.]", name, size, glVersion);
+            tracef("[Window Name = %s. Size = %s.]", name, size);
 
             // Setup the window
-            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, glVersion.x);
-            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, glVersion.y);
             this._handle = SDL_CreateWindow(name.toStringz,
                                             SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                                             size.x,                 size.y,
-                                            SDL_WINDOW_OPENGL);
+                                            0);
             enforce(this._handle !is null, new WindowException("Failed to create window. Reason = %s", getSDLError()));
-
-            // Setup OpenGL
-            this._context = SDL_GL_CreateContext(this.handle);
-            enforce(this._context !is null, new WindowException("Unable to create OpenGL Context, Reason = %s", getSDLError()));
-
-            auto vers = DerelictGL3.reload();
-            tracef("[OpenGL version that was loaded = %s]", vers);
 
             // Setup the other sub-systems.
             this.title      = name;
@@ -89,7 +78,6 @@ final class Window
             {
                 trace("[Destroying Window handle]");
                 SDL_DestroyWindow(this.handle);
-                SDL_GL_DeleteContext(this._context);
                 this._handle = null;
             }
 

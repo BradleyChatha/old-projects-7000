@@ -3,18 +3,23 @@ module jengine.thirdparty;
 
 public
 {
-    import derelict.opengl.gl, derelict.opengl.impl, derelict.opengl.types, derelict.sdl2.sdl;
+    import derelict.bgfx.bgfx, derelict.sdl2.sdl;
 }
-
-mixin glLoaders!(GLVersion.gl40);
 
 /// Loads all of the third-party libraries
 void loadLibraries()
 {
     import std.experimental.logger, std.exception;
 
-    trace("[Loading DerelictGL3]");
-    DerelictGL3.load();
+    trace("[Loading BGFX]");
+    auto loadBgfx = !DerelictBgfx.isLoaded; // In case this function is called multiple times.
+    DerelictBgfx.load();
+
+    if(loadBgfx)
+    {
+        enforce(bgfx_init(BGFX_RENDERER_TYPE_OPENGL, BGFX_PCI_ID_NONE),
+                new Exception("Unable to initialise BGFX"));
+    }
 
     trace("[Loading SDL2]");
     DerelictSDL2.load();
