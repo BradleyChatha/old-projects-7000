@@ -76,6 +76,7 @@ final class Window
 
             enforce(bgfx_init(BGFX_RENDERER_TYPE_OPENGL, BGFX_PCI_ID_NONE),
                     new Exception("Unable to initialise BGFX"));
+            bgfx_reset(size.x, size.y);
 
             // Setup the other sub-systems.
             this.title      = name;
