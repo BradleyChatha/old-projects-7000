@@ -36,6 +36,7 @@ interface ICacheable
  +      when it is destroyed.)
  +  $(P When the `Cache` is destroyed, anything that is cached is also destroyed.)
  + ++/
+version(none):
 final class Cache : IInitialisable!Engine
 {
     /++

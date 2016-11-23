@@ -2,6 +2,7 @@
 
 import jengine.graphics, jengine.core;
 
+@disable:
 void t02()
 {
     import std.exception;

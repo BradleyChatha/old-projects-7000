@@ -44,6 +44,7 @@ public
  +  You could specify that the 0th row of frames is for the Idle animation, the 1st row is for Moving, and the 2nd
  +  row is for Jumping. This is the main decision behind why the row being used must be changed manually.
  + ++/
+version(none)
 final class Animation : ICacheable
 {
     alias sprite this;

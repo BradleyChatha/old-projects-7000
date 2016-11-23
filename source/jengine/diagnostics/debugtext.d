@@ -18,6 +18,7 @@ private
  + 
  +  `DebugBox.onUpdate` should be called to render the box.
  + ++/
+version(none)
 final class DebugBox : IPostBox, IInitialisable!(Window, PostOffice)
 {
     mixin(IPostBox.generateOnMail!DebugBox);

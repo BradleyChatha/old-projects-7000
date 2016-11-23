@@ -11,7 +11,6 @@ private
     import std.traits  : isNumeric;
     import gl3n.linalg : Vector;
     import gl3n.util   : is_vector;
-    import sfml;
 }
 
 ///
@@ -34,10 +33,9 @@ alias isVector = is_vector; // I don't like the style of "is_vector"
  +
  + Params:
  +  T           = The numeric type that this rectangle stores.
- +  NativeType  = The native version of the rectangle, aka the type used by the underlying C library.
  ++/
-struct Rectangle(T, NativeType)
-if(isNumeric!T && (is(NativeType == sfIntRect) || is(NativeType == sfFloatRect)))
+struct Rectangle(T)
+if(isNumeric!T)
 {
     /// The vector type being used for this rectangle.
     alias VectorT = Vector!(T, 2);
@@ -83,6 +81,7 @@ if(isNumeric!T && (is(NativeType == sfIntRect) || is(NativeType == sfFloatRect))
          +  `true` if this rectangle and `other` intersect eachother.
          +  `false` otherwise.
          + ++/
+    version(none):
         @trusted @nogc
         bool intersects(const typeof(this) other) nothrow const
         {
@@ -134,6 +133,7 @@ if(isNumeric!T && (is(NativeType == sfIntRect) || is(NativeType == sfFloatRect))
          +  `true` if this rectangle contains `point`.
          +  `false` otherwise.
          + ++/
+        version(none)
         @trusted @nogc
         bool hasPoint(VectorT point) nothrow const
         {
@@ -165,57 +165,16 @@ if(isNumeric!T && (is(NativeType == sfIntRect) || is(NativeType == sfFloatRect))
             assert( rect.hasPoint(Vect(50, 50)));
             assert(!rect.hasPoint(Vect(-1, -1)));
         }
-
-        /++
-         + Converts a `NativeType` to the rectangle.
-         +
-         + Params:
-         +  rect = The `NativeType` to convert from.
-         +
-         + Returns:
-         +  `rect` as a `Rectangle`.
-         ++/
-        @property @safe @nogc
-        static typeof(this) fromNative(NativeType rect) nothrow pure
-        {
-            alias Type = typeof(this);
-            return Type(VectorT(rect.left, rect.top), VectorT(rect.width, rect.height));
-        }
-        ///
-        unittest
-        {
-            alias This = typeof(this);
-            enum rect  = NativeType(20, 30, 40, 50);
-            static assert(This.fromNative(rect) == This(20, 30, 40, 50));
-        }
-
-        /++
-         + Converts the rectangle into `NativeType`, useful for interacting with the underlying C library.
-         +
-         + Returns:
-         +  The rectangle in as a `NativeType`.
-         ++/
-        @property @safe @nogc
-        NativeType asNative() nothrow pure const
-        {
-            return NativeType(this.position.x, this.position.y, this.size.x, this.size.y);
-        }
-        ///
-        unittest
-        {
-            alias This = typeof(this);
-            static assert(This(20, 30, 40, 50).asNative == NativeType(20, 30, 40, 50));
-        }
     }
 }
 
 ///
-alias FloatRect = Rectangle!(float, sfFloatRect);
+alias FloatRect = Rectangle!float;
 
 ///
-alias IntRect = Rectangle!(int, sfIntRect);
+alias IntRect = Rectangle!int;
 
-private void _isRectangle(T, N)(Rectangle!(T, N)){}
+private void _isRectangle(T)(Rectangle!(T)){}
 
 /++
  + Determines if a type is an instansiation of `Rectangle`.
@@ -255,24 +214,4 @@ if(isVector!Vect && Vect.dimension == 2)
 unittest
 {
     static assert(Vector2f(32, 64).asVector2!int == Vector2i(32, 64));
-}
-
-/++
- + Like `asVector2` but converts `vect` into it's native version.
- + This function is intended for internal use only, hence the lacking documentation.
- + ++/
-public auto asNativeVector2(T, Vect)(Vect vect)
-if(isVector!Vect && Vect.dimension == 2)
-{
-    static if(is(T == float))       alias V = sfVector2f;
-    else static if(is(T == int))    alias V = sfVector2i;
-    else static if(is(T == uint))   alias V = sfVector2u;
-    else static assert(false, "No Native version for " ~ T.stringof);
-
-    return V(cast(T)vect.x, cast(T)vect.y);
-}
-///
-unittest
-{
-    static assert(Vector2f(32, 64).asNativeVector2!float == sfVector2f(32, 64));
 }

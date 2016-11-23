@@ -3,6 +3,7 @@
 /// Tests needing human interaction should be created as a sub-package or something.
 module jengine.testing;
 
+@disable:
 version(Engine_Tests)
 {
     ///

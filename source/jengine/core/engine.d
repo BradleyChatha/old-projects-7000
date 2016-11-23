@@ -18,6 +18,7 @@ public
 /++
  + The Engine class is where everything is put together, to make something that works.
  + ++/
+version(none)
 final class Engine : IPostBox
 {
     mixin(IPostBox.generateOnMail!Engine);
@@ -269,6 +270,7 @@ final class Engine : IPostBox
 /++
  + The base class for where the game logic is created.
  + ++/
+version(none)
 abstract class App : IInitialisable!Engine
 {
     public

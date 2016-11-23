@@ -11,7 +11,7 @@ private
     import jengine.core.maths : Vector2u, Vector2f;
     import jengine.graphics.renderer;
     import jengine.core.post;
-    import sfml;
+    import jengine.thirdparty;
 }
 
 /++
@@ -38,15 +38,21 @@ final class Window
     /++
      + An alias to the type used as the window handle.
      + ++/
-    alias Handle = sfRenderWindow*;
+    alias Handle = GLFWwindow*;
 
     private
     {
         Handle      _handle;
         string      _title;
         bool        _usingVsync;
-        Input       _input;
-        Renderer    _renderer;
+        //Input       _input;
+        //Renderer    _renderer;
+
+        extern(C) static void onGlfwError(int code, const(char)* message)
+        {
+            import std.string : fromStringz;
+            errorf("[GLFW has reported an error. Code = %s. Message = %s]", code, message.fromStringz);
+        }
     }
 
     public
@@ -65,6 +71,8 @@ final class Window
         this(string name, in Vector2u size, in StyleFlags style = Style.Close)
         {
             import std.string : toStringz;
+            enforce(glfwInit(), new WindowException("Unable to initialise GLFW."));
+            glfwSetErrorCallback(&onGlfwError);
 
             trace("[Creating Window]");
             this._handle = sfRenderWindow_create(sfVideoMode(size.x, size.y, 32),
@@ -74,8 +82,8 @@ final class Window
 
             enforce(this._handle !is null, new WindowException("Failed to create window."));
             this.title      = name;
-            this._input     = new Input(this);
-            this._renderer  = new Renderer();
+            //this._input     = new Input(this);
+            //this._renderer  = new Renderer();
             this._renderer.onInit(this);
         }
 
@@ -211,6 +219,7 @@ final class Window
          + Returns:
          +  An instance of `Input` that is used to respond to any events the window recieves.
          + ++/
+        version(none)
         @property @trusted @nogc
         inout(Input) input() nothrow inout
         out(output)
@@ -226,6 +235,7 @@ final class Window
          + Returns:
          +  The window's `Renderer`.
          + ++/
+        version(none)
         @property @safe @nogc
         inout(Renderer) renderer() nothrow pure inout
         out(output)
@@ -260,49 +270,23 @@ final class Window
 }
 
 /++
- + Converts `Window.StyleFlags` into flags used by the window library.
- + ++/
-@trusted @nogc
-private const(sfWindowStyle) toNativeStyle(in Window.StyleFlags flags) nothrow pure
-{
-    sfWindowStyle style;
-
-    with(Window.Style)
-    {
-        if(flags & Close) style |= sfClose;
-    }
-
-    return style;
-}
-///
-unittest
-{
-    enum Window.StyleFlags flags = Window.Style.Close;
-    static assert(toNativeStyle(flags) == sfClose);
-}
-
-/++
  + This class handles managing the input of a `Window`.
  + 
- + Description:
- +  A `PostOffice` is provided, which the Input class will mail a `Input.MailT` with the type of the mail being
- +  the same as the event (e.g. sfClose) anytime the `Window` it's attached to recieves an event. 
- +  
+ + Description:  
  +  The Input class has an `alias this` to it's `PostOffice`, for ease of use 
  +  (e.g, instead of `input.events.subscribe` you'd be able to use `input.subscribe`).
  + 
  +  A `Mouse` struct is provided via `Input.mouse`, which will keep the state of the mouse up to date.
  + 
- +  Basic usage includes using `input.subscribe(sfSomeEvent, &myHandler)` to subscribe to a specific window event.
+ +  Basic usage includes using `input.subscribe(Input.Events.SomeEvent, &myHandler)` to subscribe to a specific window event.
  + ++/
+version(none)
 final class Input : IPostBox
 {
     import jengine.core.post;
 
     mixin(IPostBox.generateOnMail!Input);
 
-    /// The message given when a window event is made. The mail's `Mail.Type` is the same as the event itself.
-    alias MailT = ValueMail!sfEvent;
     alias events this;
 
     /++
@@ -338,45 +322,6 @@ final class Input : IPostBox
             this._office = new PostOffice();
             
             this.subscribe(this);
-        }
-
-        @MailBox(sfEvtMouseMoved)
-        void onMouseMove(PostOffice, ValueMail!sfEvent event)
-        {
-            auto data = event.value;
-            assert(data.type == sfEvtMouseMoved);
-
-            this._mouse.position = Vector2f(data.mouseMove.x, data.mouseMove.y);
-        }
-
-        @MailBox(sfEvtMouseButtonPressed)
-        void onMousePress(PostOffice, ValueMail!sfEvent event)
-        {
-            auto data = event.value;
-            assert(data.type == sfEvtMouseButtonPressed);
-            
-            auto button = data.mouseButton;
-            if(button.button == sfMouseLeft)
-                this._mouse.leftButtonDown = true;
-            if(button.button == sfMouseRight)
-                this._mouse.rightButtonDown = true;
-            if(button.button == sfMouseMiddle)
-                this._mouse.middleButtonDown = true;
-        }
-
-        @MailBox(sfEvtMouseButtonReleased)
-        void onMouseRelease(PostOffice, ValueMail!sfEvent event)
-        {
-            auto data = event.value;
-            assert(data.type == sfEvtMouseButtonReleased);
-            
-            auto button = data.mouseButton;
-            if(button.button == sfMouseLeft)
-                this._mouse.leftButtonDown = false;
-            if(button.button == sfMouseRight)
-                this._mouse.rightButtonDown = false;
-            if(button.button == sfMouseMiddle)
-                this._mouse.middleButtonDown = false;
         }
     }
 

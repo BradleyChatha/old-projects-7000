@@ -2,7 +2,7 @@
  + Contains code for a (witty named) event dispatcher.
  + ++/
 module jengine.core.post;
-
+version(none):
 private
 {
     import std.experimental.logger, std.experimental.allocator.mallocator, std.experimental.allocator;

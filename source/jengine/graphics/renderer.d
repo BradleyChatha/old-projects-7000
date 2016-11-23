@@ -12,9 +12,9 @@ private
     import jengine.core.maths;
     import jengine.core.cache;
     import jengine.graphics.window;
+    import jengine.thirdparty;
 
     import jaster.smartptr;
-    import sfml;
     import gl3n.linalg : Vector;
 }
 
@@ -43,17 +43,9 @@ void checkColour(const Colour colour) nothrow pure
     assert(colour.a >= 0 && colour.a <= 255, "The Alpha value is out of bounds.");
 }
 
-@safe @nogc
-package sfColor asNativeColour(const Colour colour) nothrow
-{
-    colour.checkColour();
-    return sfColor(cast(ubyte)colour.r, 
-                   cast(ubyte)colour.g, 
-                   cast(ubyte)colour.b, 
-                   cast(ubyte)colour.a);
-}
-
 private enum _debugFontBytes = cast(immutable(ubyte)[])import("debug_font/font.ttf");
+
+version(none):
 
 /++
  + Contains code that knows how to render things.

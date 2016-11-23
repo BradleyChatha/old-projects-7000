@@ -2,7 +2,7 @@
  + Contains code that a game might use to manage game states.
  + ++/
 module jengine.gameplay.gamestate;
-
+version(none):
 private
 {
     import std.experimental.logger, std.experimental.allocator;

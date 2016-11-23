@@ -6,6 +6,7 @@ import jengine.core.engine,
        jengine.core.maths,
        jengine.graphics.window;
 
+version(none):
 class T03 : App
 {
     private

@@ -1,9 +1,8 @@
 ﻿module jengine.testing.t01;
-
+version(none):
 import  jengine.graphics.window,
         jengine.core.post, 
-        jengine.core.maths,
-        sfml;
+        jengine.core.maths;
 
 void t01()
 {
