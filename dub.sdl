@@ -17,3 +17,7 @@ dependency "jlib" version="*"
 configuration "engine_tests" {
 	versions "Engine_Tests"
 }
+
+// Win x86
+copyFiles "deps/win/x86/*.dll" platform="windows-x86"
+copyFiles "deps/win/tools/" platform="windows"
