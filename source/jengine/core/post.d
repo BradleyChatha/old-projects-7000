@@ -220,6 +220,7 @@ final class PostOffice : IInitialisable!()
 
         struct EnumRange
         {
+            string         enumName;
             Mail.MailTypeT min;
             Mail.MailTypeT max;
         }
@@ -420,12 +421,15 @@ final class PostOffice : IInitialisable!()
          +  other `enum`s that are planned to be used with this office.
          + 
          +  It is basically a way to enforce no conflicts between different enums of `Mail` types.
+         + 
+         +  If `E` has been passed to this function already, then this function simply returns.
          + ++/
         @trusted
         void reserveTypes(E)()
         if(is(E == enum))
         {
-            import std.traits : EnumMembers;
+            import std.traits    : EnumMembers, fullyQualifiedName;
+            import std.algorithm : canFind;
             enum members = EnumMembers!E;
             static assert(is(typeof(members[0]) : Mail.MailTypeT), "The members of "~E.stringof~" are not implicitly convertable to "~Mail.MailTypeT.stringof);
 
@@ -438,7 +442,13 @@ final class PostOffice : IInitialisable!()
                                   "The members of " ~ E.stringof ~ " are not formatted correctly. Offender = " ~ member.stringof);
             }
 
-            auto range = EnumRange(E.min, E.max);
+            // First, see if the enum has already been reserved.
+            auto name = fullyQualifiedName!E;
+            if(this._reserved.range.canFind!((r) => r.enumName == name))
+                return;
+
+            // Otherwise, make sure its members are non-reserved.
+            auto range = EnumRange(name, E.min, E.max);
             foreach(reserved; this._reserved)
             {
                 bool fail = false;
@@ -479,6 +489,7 @@ final class PostOffice : IInitialisable!()
             office.reserveTypes!A; // Fine, no conflicts
             office.reserveTypes!B; // Fine, no conflicts
             //office.reserveTypes!C; // Not fine, conflicts with B
+            office.reserveTypes!A; // Fine, A has been reserved already
         }
 
         /++
