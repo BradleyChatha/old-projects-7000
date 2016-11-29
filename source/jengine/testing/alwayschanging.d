@@ -14,8 +14,10 @@ void always_changing_test()
     window.renderer.reset(window.size, Renderer.ResetFlags.VSync);
     window.renderer.debugFlags = Renderer.DebugFlags.Text;
 
+
+
     // Uncomment to run test properly
-    //while(!window.shouldClose)
+    while(!window.shouldClose)
     {
         window.input.processEvents;
         window.renderer.renderDebugText(Vector2u(0), Renderer.DebugColour.Green, "This is some example text!");

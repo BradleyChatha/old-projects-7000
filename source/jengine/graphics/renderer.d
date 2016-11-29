@@ -6,7 +6,7 @@ module jengine.graphics.renderer;
 private
 {
     import std.experimental.allocator.mallocator, std.experimental.logger, std.experimental.allocator;
-    import std.exception : enforce;
+    import std.exception;
 
     import jengine.core.engine;
     import jengine.core.maths;
@@ -388,4 +388,107 @@ struct Vertex
     {
         return Colour(this.rgba.r, this.rgba.g, this.rgba.b, this.rgba.a);
     }
+}
+
+/++
+ + Contains a shader program.
+ + ++/
+final class Shader
+{
+    /// An alias to the type used as the Shader's handle.
+    alias Handle = bgfx_shader_handle_t;
+
+    private
+    {
+        Handle _handle;
+    }
+
+    public
+    {
+        ~this()
+        {
+            if(this._handle !is null)
+                bgfx_destroy_shader(this.handle);
+        }
+
+        /++
+         + Creates a new `Shader` using the given shader code.
+         + 
+         + Notes:
+         +  Shader files must first be compiled using the `shaderc` tool, and then passed into this function.
+         + 
+         +  `theAllocator` is used to allocate the returned object, so it is advised to use `Shader.dispose` to dispose
+         +  of the shader properly.
+         + 
+         + Params:
+         +  vertex      = The code for the vertex shader.
+         +  fragment    = The code for the fragment shader.
+         + 
+         + Returns:
+         +  A newly made `Shader`.
+         + ++/
+        static Shader create(const(char)[] vertex, const(char)[] fragment)
+        {
+            auto shader = theAllocator.make!Shader;
+            scope(failure) theAllocator.dispose(shader);
+
+            auto vert = bgfx_create_shader(bgfx_copy(vertex.ptr, vertex.length));
+            auto frag = bgfx_create_shader(bgfx_copy(vertex.ptr, vertex.length));
+            scope(exit)
+            {
+                if(vert !is null) bgfx_destroy_shader(vert);
+                if(frag !is null) bgfx_destroy_shader(frag);
+            }
+            enforce(vert !is null, new GraphicsException("The vertex shader could not be created."));
+            enforce(frag !is null, new GraphicsException("The fragment shader could not be created."));
+
+            shader._handle = bgfx_create_program(vert, frag);
+            enforce(shader._handle !is null, new GraphicsException("The shader program could not be created."));
+
+            return shader;
+        }
+
+        /++
+         + Disposes of the given `Shader`.
+         + 
+         + Notes:
+         +  Only use this function for `Shader`s allocated with `theShader`.
+         + 
+         + Params:
+         +  shader = The `Shader` to dispose of.
+         +           If it is `null`, this function does nothing.
+         +           The shader is set to `null` afterwards.
+         + ++/
+        static void dispose(ref Shader shader)
+        {
+            if(shader !is null)
+            {
+                theAllocator.dispose(shader);
+                shader = null;
+            }
+        }
+
+        /++
+         + Returns:
+         +  The `Handle` being used by this `Shader`.
+         + ++/
+        @property @safe @nogc
+        Handle handle() nothrow const
+        out(hand)
+        {
+            assert(hand !is null, "Attempted to use a null shader handle.");
+        }
+        body
+        {
+            return this._handle;
+        }
+    }
+}
+
+/++
+ + Thrown whenever something with a graphical class goes wrong.
+ + ++/
+class GraphicsException : Exception
+{
+    mixin basicExceptionCtors;
 }
