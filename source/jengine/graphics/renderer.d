@@ -44,6 +44,61 @@ void checkColour(const Colour colour) nothrow pure
 }
 
 /++
+ + Encodes a `Colour` into a uint representation.
+ + 
+ + Assertions:
+ +  `col` must pass `checkColour`.
+ + 
+ + Params:
+ +  col = The `Colour` to encode.
+ + 
+ + Returns:
+ +  A uint in the form of `0xRRGGBBAA`
+ + ++/
+@safe @nogc
+uint toRGBA8(const Colour col) nothrow pure
+{
+    col.checkColour();
+    return (col.r << 24 |
+            col.g << 16 |
+            col.b << 8  |
+            col.a);
+}
+///
+unittest
+{
+    static assert(Colour(0xAB, 0xCD, 0xEF, 0xFF).toRGBA8 == 0xABCDEFFF);
+}
+
+/++
+ + Converts an encoded rgba number into a `Colour`.
+ + 
+ + Params:
+ +  rgba = The number to convert.
+ + 
+ + Returns:
+ +  `rgba` decoded into a `Colour`.
+ + ++/
+@safe @nogc
+Colour fromRGBA8(uint rgba) nothrow pure
+out(col)
+{
+    col.checkColour();
+}
+body
+{
+    return Colour((rgba & 0xFF000000) >> 24,
+                  (rgba & 0x00FF0000) >> 16,
+                  (rgba & 0x0000FF00) >> 8,
+                  rgba & 0xFF);
+}
+///
+unittest
+{
+    static assert((0xABCDEFFF).fromRGBA8 == Colour(0xAB, 0xCD, 0xEF, 0xFF));
+}
+
+/++
  + 
  + ++/
 final class Renderer : IInitialisable!Window
@@ -170,6 +225,7 @@ final class Renderer : IInitialisable!Window
                 new Exception("Unable to initialise BGFX"));
             this.reset(window.size, ResetFlags.None);
 
+            Vertex.createDeclaration();
             this._window = window;
         }
         
@@ -273,5 +329,63 @@ final class Renderer : IInitialisable!Window
         {
             return (this._window !is null);
         }
+    }
+}
+
+/++
+ + Describes a vertex.
+ + ++/
+struct Vertex
+{
+    private static
+    {
+        bgfx_vertex_decl_t _decl;
+        void createDeclaration()
+        {
+            bgfx_vertex_decl_begin(&Vertex._decl);
+            scope(exit) bgfx_vertex_decl_end(&Vertex._decl);
+
+            bgfx_vertex_decl_add(&Vertex._decl, BGFX_ATTRIB_POSITION, 2, BGFX_ATTRIB_TYPE_FLOAT); // a_position
+            bgfx_vertex_decl_add(&Vertex._decl, BGFX_ATTRIB_COLOR0,   4, BGFX_ATTRIB_TYPE_UINT8); // a_color
+        }
+    }
+
+    /// The vertex's position.
+    Vector2f          position;
+
+    /// The vertex's colour.
+    /// This type isn't `Colour` since it's a Vector!(uint, 4) (Setting Colour to use ubyte makes it unpractical to use)
+    Vector!(ubyte, 4) rgba;
+
+    ///
+    this(Vector2f pos, Colour col = Colour(0, 0, 0, 255))
+    {
+        this.position = pos;
+        this.colour   = col;
+    }
+
+    /++
+     + Sets the vertex's colour from a `Colour`.
+     + 
+     + Params:
+     +  col = The colour to give the vertex.
+     + ++/
+    @property @safe @nogc
+    void colour(const Colour col) nothrow pure
+    {
+        this.rgba = typeof(rgba)(cast(ubyte)col.r, 
+                                 cast(ubyte)col.g, 
+                                 cast(ubyte)col.b, 
+                                 cast(ubyte)col.a);
+    }
+
+    /++
+     + Returns:
+     +  `Vertex.rgba` as a `Colour`.
+     + ++/
+    @property @safe @nogc
+    Colour colour() nothrow const
+    {
+        return Colour(this.rgba.r, this.rgba.g, this.rgba.b, this.rgba.a);
     }
 }
