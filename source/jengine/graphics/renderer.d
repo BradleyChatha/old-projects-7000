@@ -396,19 +396,19 @@ struct Vertex
 final class Shader
 {
     /// An alias to the type used as the Shader's handle.
-    alias Handle = bgfx_shader_handle_t;
+    alias Handle = bgfx_program_handle_t;
 
     private
     {
-        Handle _handle;
+        Handle _handle = Handle(ushort.max);
     }
 
     public
     {
         ~this()
         {
-            if(this._handle !is null)
-                bgfx_destroy_shader(this.handle);
+            if(this._handle.idx != ushort.max)
+                bgfx_destroy_program(this.handle);
         }
 
         /++
@@ -436,14 +436,14 @@ final class Shader
             auto frag = bgfx_create_shader(bgfx_copy(vertex.ptr, vertex.length));
             scope(exit)
             {
-                if(vert !is null) bgfx_destroy_shader(vert);
-                if(frag !is null) bgfx_destroy_shader(frag);
+                if(vert.idx != ushort.max) bgfx_destroy_shader(vert);
+                if(frag.idx != ushort.max) bgfx_destroy_shader(frag);
             }
-            enforce(vert !is null, new GraphicsException("The vertex shader could not be created."));
-            enforce(frag !is null, new GraphicsException("The fragment shader could not be created."));
+            enforce(vert.idx != ushort.max, new GraphicsException("The vertex shader could not be created."));
+            enforce(frag.idx != ushort.max, new GraphicsException("The fragment shader could not be created."));
 
             shader._handle = bgfx_create_program(vert, frag);
-            enforce(shader._handle !is null, new GraphicsException("The shader program could not be created."));
+            enforce(shader._handle.idx != ushort.max, new GraphicsException("The shader program could not be created."));
 
             return shader;
         }
@@ -476,7 +476,7 @@ final class Shader
         Handle handle() nothrow const
         out(hand)
         {
-            assert(hand !is null, "Attempted to use a null shader handle.");
+            assert(hand.idx != ushort.max, "Attempted to use a null shader handle.");
         }
         body
         {
