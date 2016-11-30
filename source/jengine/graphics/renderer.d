@@ -412,7 +412,7 @@ final class Shader
         }
 
         /++
-         + Creates a new `Shader` using the given shader code.
+         + Creates a new `Shader` using the given shader binaries from memory.
          + 
          + Notes:
          +  Shader files must first be compiled using the `shaderc` tool, and then passed into this function.
@@ -420,30 +420,33 @@ final class Shader
          +  `theAllocator` is used to allocate the returned object, so it is advised to use `Shader.dispose` to dispose
          +  of the shader properly.
          + 
+         + Exceptions:
+         +  `GraphicsException` if either one of the shaders coulod not be created, or if the program could not be created.
+         + 
          + Params:
-         +  vertex      = The code for the vertex shader.
-         +  fragment    = The code for the fragment shader.
+         +  vertex      = The binary for the vertex shader.
+         +  fragment    = The binary for the fragment shader.
          + 
          + Returns:
          +  A newly made `Shader`.
          + ++/
-        static Shader create(const(char)[] vertex, const(char)[] fragment)
+        static Shader fromMemory(const(ubyte)[] vertex, const(ubyte)[] fragment)
         {
             auto shader = theAllocator.make!Shader;
             scope(failure) theAllocator.dispose(shader);
 
             auto vert = bgfx_create_shader(bgfx_copy(vertex.ptr, vertex.length));
-            auto frag = bgfx_create_shader(bgfx_copy(vertex.ptr, vertex.length));
-            scope(exit)
-            {
-                if(vert.idx != ushort.max) bgfx_destroy_shader(vert);
-                if(frag.idx != ushort.max) bgfx_destroy_shader(frag);
-            }
-            enforce(vert.idx != ushort.max, new GraphicsException("The vertex shader could not be created."));
-            enforce(frag.idx != ushort.max, new GraphicsException("The fragment shader could not be created."));
+            //auto frag = bgfx_create_shader(bgfx_copy(vertex.ptr, vertex.length));
+            //scope(exit)
+            //{
+            //    if(vert.idx != ushort.max) bgfx_destroy_shader(vert);
+            //    if(frag.idx != ushort.max) bgfx_destroy_shader(frag);
+            //}
+            //enforce(vert.idx != ushort.max, new GraphicsException("The vertex shader could not be created."));
+            //enforce(frag.idx != ushort.max, new GraphicsException("The fragment shader could not be created."));
 
-            shader._handle = bgfx_create_program(vert, frag);
-            enforce(shader._handle.idx != ushort.max, new GraphicsException("The shader program could not be created."));
+            //shader._handle = bgfx_create_program(vert, frag);
+            //enforce(shader._handle.idx != ushort.max, new GraphicsException("The shader program could not be created."));
 
             return shader;
         }
