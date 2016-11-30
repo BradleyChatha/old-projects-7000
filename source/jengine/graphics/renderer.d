@@ -221,8 +221,8 @@ final class Renderer : IInitialisable!Window
             else static assert(false, "Your platform is not supported. It should be easy enough to add support for this part, so please open an issue.");
             bgfx_set_platform_data(&data);
 
-            enforce(bgfx_init(BGFX_RENDERER_TYPE_OPENGL, BGFX_PCI_ID_NONE),
-                new Exception("Unable to initialise BGFX"));
+            enforce(bgfx_init(BGFX_RENDERER_TYPE_COUNT, BGFX_PCI_ID_NONE),
+                    new Exception("Unable to initialise BGFX"));
             this.reset(window.size, ResetFlags.None);
 
             Vertex.createDeclaration();
@@ -435,18 +435,18 @@ final class Shader
             auto shader = theAllocator.make!Shader;
             scope(failure) theAllocator.dispose(shader);
 
-            auto vert = bgfx_create_shader(bgfx_copy(vertex.ptr, vertex.length));
-            //auto frag = bgfx_create_shader(bgfx_copy(vertex.ptr, vertex.length));
-            //scope(exit)
-            //{
-            //    if(vert.idx != ushort.max) bgfx_destroy_shader(vert);
-            //    if(frag.idx != ushort.max) bgfx_destroy_shader(frag);
-            //}
-            //enforce(vert.idx != ushort.max, new GraphicsException("The vertex shader could not be created."));
-            //enforce(frag.idx != ushort.max, new GraphicsException("The fragment shader could not be created."));
+            auto vert = bgfx_create_shader(bgfx_make_ref(vertex.ptr, vertex.length));
+            auto frag = bgfx_create_shader(bgfx_copy(vertex.ptr, vertex.length));
+            scope(exit)
+            {
+                if(vert.idx != ushort.max) bgfx_destroy_shader(vert);
+                if(frag.idx != ushort.max) bgfx_destroy_shader(frag);
+            }
+            enforce(vert.idx != ushort.max, new GraphicsException("The vertex shader could not be created."));
+            enforce(frag.idx != ushort.max, new GraphicsException("The fragment shader could not be created."));
 
-            //shader._handle = bgfx_create_program(vert, frag);
-            //enforce(shader._handle.idx != ushort.max, new GraphicsException("The shader program could not be created."));
+            shader._handle = bgfx_create_program(vert, frag);
+            enforce(shader._handle.idx != ushort.max, new GraphicsException("The shader program could not be created."));
 
             return shader;
         }

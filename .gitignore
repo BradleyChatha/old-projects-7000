@@ -5,6 +5,7 @@ docs.json
 
 *.o
 *.obj
+*.lst
 
 __test__*__
 __dummy.html

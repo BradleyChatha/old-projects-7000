@@ -15,8 +15,8 @@ void always_changing_test()
     window.renderer.debugFlags = Renderer.DebugFlags.Text;
 
     import std.file : read;
-    auto shader = Shader.fromMemory(cast(ubyte[])read("assets/shaders/fs/basic_vs.vs.glsl"), 
-                                    cast(ubyte[])read("assets/shaders/fs/basic_fs.fs.glsl"));
+    auto shader = Shader.fromMemory(cast(ubyte[])read("assets/shaders/shaders/basic_vs.vs.dx11"), 
+                                    cast(ubyte[])read("assets/shaders/shaders/basic_fs.fs.dx11"));
 
     // Uncomment to run test properly
     while(!window.shouldClose)
