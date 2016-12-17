@@ -1,0 +1,14 @@
+﻿<Properties StartupItem="dub.sdl">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Default" PreferredExecutionTarget="debug" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="source\app.d">
+    <Files>
+      <File FileName="source\app.d" Line="60" Column="38" />
+      <File FileName="C:\Users\Sealab\AppData\Roaming\dub\packages\dscord-0.0.9\dscord\src\dscord\util\storage.d" Line="6" Column="32" />
+      <File FileName="source\plugins\test.d" Line="21" Column="25" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>
