@@ -97,6 +97,16 @@ class MemePlugin : Plugin
                     }
 
                     auto name = evt.args[1];
+
+                    // Anti-Jack code, kuku
+                    if(name == "seiyuu" && evt.msg.author.id != 208582321425612801)
+                    {
+                        seal.deleter.queue(evt.msg.reply("Nice try, but only <@208582321425612801> can delete 'seiyuu'"),
+                                           15.seconds);
+                        return;
+                    }
+
+                    // See if it actually exists first.
                     if(super.storage.has(name))
                     {
                         super.storage.obj.remove(name);
@@ -157,8 +167,9 @@ class FunAPIPlugin : Plugin
             options.useConfig = true;
 
             auto table = new MessageTable();
-            table.setHeader (["Command",    "Description",                  "Example"]);
-            table.add       (["cat [gif]",  "Get a random cat image/gif.",  "!cat, or !cat gif"]);
+            table.setHeader (["Command",            "Description",                          "Example"]);
+            table.add       (["cat [gif]",          "Get a random cat image/gif.",          "!cat, or !cat gif"]);
+            table.add       (["numfact [number]",   "Get a random fact about a number.",    "!numfact 69, or !numfact"]);
 
             this.help = table.toSendableString;
             super(options);
@@ -206,6 +217,26 @@ class FunAPIPlugin : Plugin
                     auto url      = matchFirst(contents, reg)[1];
 
                     e.msg.reply(url);
+                });
+        }
+
+        @Command("numfact")
+        void onNumFact(CommandEvent e)
+        {
+            super.sealBot.deleter.queue(e.msg, 15.seconds, false, false);
+
+            auto reqURL  = "http://numbersapi.com/";
+                 reqURL ~= (e.args.length == 0) ? "random" : e.args[0];
+
+            requestHTTP(reqURL,
+                (scope HTTPClientRequest req)
+                {
+                    req.method = HTTPMethod.GET;
+                },
+                (scope HTTPClientResponse res)
+                {                    
+                    auto contents = res.bodyReader.readAllUTF8();                    
+                    e.msg.reply(contents);
                 });
         }
 
