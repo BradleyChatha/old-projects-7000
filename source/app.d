@@ -15,5 +15,6 @@ void main()
     seal.loadPlugin(new MemePlugin());
     seal.loadPlugin(new FunAPIPlugin());
     seal.loadPlugin(new HelpPlugin());
+    seal.loadPlugin(new CountPlugin());
     runEventLoop();
 }

@@ -102,12 +102,16 @@ class HelpPlugin : Plugin
         @Command("help")
         void onHelp(CommandEvent e)
         {
+            int count = 0;
             super.sealBot.deleter.queue(e.msg, 1.seconds, false, false);
             foreach(plugin, info; this.helpInfo)
             {
-                auto msg = format("**Commands for plugin %s**\n%s", plugin.name, info);
-                super.sealBot.deleter.queue(e.msg.reply(msg),
-                                            2.minutes);
+                count += 1;
+                auto msg  = format("**Commands for plugin %s**\n%s", plugin.name, info);
+                auto sent = e.msg.reply(msg);
+
+                if(count == this.helpInfo.length)
+                    super.sealBot.deleter.queue(sent, 2.minutes);
             }
         }
     }

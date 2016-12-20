@@ -1,10 +1,11 @@
 ﻿<Properties StartupItem="dub.sdl">
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Default" PreferredExecutionTarget="debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="source\app.d">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Default" PreferredExecutionTarget="release" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="source\bot\core\bot.d">
     <Files>
-      <File FileName="source\app.d" Line="60" Column="38" />
-      <File FileName="C:\Users\Sealab\AppData\Roaming\dub\packages\dscord-0.0.9\dscord\src\dscord\util\storage.d" Line="6" Column="32" />
-      <File FileName="source\plugins\test.d" Line="21" Column="25" />
+      <File FileName="source\bot\core\autodeleter.d" Line="1" Column="1" />
+      <File FileName="source\bot\plugins\fun.d" Line="444" Column="28" />
+      <File FileName="source\app.d" Line="21" Column="1" />
+      <File FileName="source\bot\core\bot.d" Line="113" Column="28" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
