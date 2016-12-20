@@ -277,6 +277,25 @@ class FunAPIPlugin : Plugin
                 });
         }
 
+        @Command("chuck")
+        void onChuckNorris(CommandEvent e)
+        {
+            auto url = "https://api.chucknorris.io/jokes/random";
+            requestHTTP(url,
+                (scope HTTPClientRequest req)
+                {
+                    req.method = HTTPMethod.GET;
+                },
+                (scope HTTPClientResponse res)
+                {                    
+                    auto contents = res.bodyReader.readAllUTF8();
+                    auto json     = contents.parseJson();
+                    auto fact     = json["value"].get!string;
+
+                    e.msg.reply(fact);
+                });
+        }
+
         override string name()
         {
             return "FunAPIs";
