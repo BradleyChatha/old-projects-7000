@@ -42,13 +42,15 @@ namespace Pong
                 if (Right.CheckCollisionWithBall() || Left.CheckCollisionWithBall() || CheckOnBottom() || CheckOnTop())
                 {
                     Direction = -Direction;
-                    Angle = DirectionChooser.Next(-90, 90);
+                    Angle = DirectionChooser.Next(-1, 1);
                 }
 
                 if (Angle >= 0)
-                    BallShape.Position = new Vector2f(BallShape.Position.X + Direction, BallShape.Position.Y - 1);
+                    BallShape.Position = new Vector2f(BallShape.Position.X + Direction, BallShape.Position.Y - 2);
                 else
-                    BallShape.Position = new Vector2f(BallShape.Position.X + Direction, BallShape.Position.Y + 1);
+                    BallShape.Position = new Vector2f(BallShape.Position.X + Direction, BallShape.Position.Y + 2);
+
+               
 
                 ///Win Conditions
                 ///AI Wins
@@ -102,7 +104,7 @@ namespace Pong
         }
 
         private static float Direction;
-        private static readonly float Speed = 10.0f;
+        private static readonly float Speed = 15.0f;
         private static Random DirectionChooser;
         private static float Angle;
         private static CircleShape BallShape;

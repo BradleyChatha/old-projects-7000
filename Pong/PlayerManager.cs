@@ -14,12 +14,12 @@ namespace Pong
         {
             if (Keyboard.IsKeyPressed(Keyboard.Key.W) && !this.Pad.CheckOnTop())
             {
-                this.Pad.Move(-5);
+                this.Pad.Move(-7);
 
             }
             else if (Keyboard.IsKeyPressed(Keyboard.Key.S) && !this.Pad.CheckOnBottom())
             {
-                this.Pad.Move(5);
+                this.Pad.Move(7);
             }
         }
 

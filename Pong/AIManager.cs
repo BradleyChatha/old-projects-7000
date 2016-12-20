@@ -18,11 +18,11 @@ namespace Pong
         {
             if(Ball.Position.Y > this.Pad.Position.Y && !this.Paddle.CheckOnBottom())
             {
-                this.Pad.Move(5);
+                this.Pad.Move(7);
             }
-            else if(Ball.Position.Y < this.Pad.Size.Y && !this.Paddle.CheckOnTop())
+            else if(Ball.Position.Y < this.Pad.Position.Y && !this.Paddle.CheckOnTop())
             {
-                this.Pad.Move(-5);
+                this.Pad.Move(-7);
             }
         }
 
