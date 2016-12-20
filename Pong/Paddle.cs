@@ -65,18 +65,9 @@ namespace Pong
 
         public bool CheckCollisionWithBall()
         {
-            if (this.Side == ScreenSide.Left)
-            {
-                if (Ball.Position.X + (Ball.Radius * 2) <= (this.PaddleShape.Position.X + this.PaddleShape.Size.X + 5) && Ball.Position.Y >= this.PaddleShape.Position.Y && Ball.Position.Y <= (this.PaddleShape.Position.Y + this.PaddleShape.Size.Y))
-                    return true;
-                return false;
-            }
-            else
-            {
-                if (Ball.Position.X >= (this.PaddleShape.Position.X - this.PaddleShape.Size.X - 5) && Ball.Position.Y >= this.PaddleShape.Position.Y && Ball.Position.Y <= (this.PaddleShape.Position.Y + this.PaddleShape.Size.Y))
-                    return true;
-                return false;
-            }
+            IntRect Box = new IntRect((Vector2i)this.PaddleShape.Position, (Vector2i)this.PaddleShape.Size);
+
+            return Box.Intersects(Ball.Box);
         }
 
         public Vector2f Position

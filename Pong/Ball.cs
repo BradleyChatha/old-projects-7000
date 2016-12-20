@@ -20,6 +20,7 @@ namespace Pong
                 OutlineThickness = 5,
                 Position = new Vector2f(400, 100)
             };
+
             Random R = new Random();
             DirectionChooser = new Random();
 
@@ -93,6 +94,11 @@ namespace Pong
         public static float Radius
         {
             get { return BallShape.Radius; }
+        }
+
+        public static IntRect Box
+        {
+            get { return new IntRect((Vector2i)BallShape.Position, new Vector2i((int)BallShape.Radius * 2, (int)BallShape.Radius * 2)); }
         }
 
         private static float Direction;
