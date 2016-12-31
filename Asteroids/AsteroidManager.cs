@@ -47,6 +47,15 @@ namespace Asteroids
 
             for (int i = 0; i < Asteroids.Count; i++)
             {
+                if (Asteroids[i] == null)
+                    continue;
+
+                if(!Asteroids[i].IsAlive)
+                {
+                    Asteroids[i] = null;
+                    continue;
+                }
+
                 Asteroids[i].Update(Plr);
             }
         }
@@ -55,6 +64,9 @@ namespace Asteroids
         {
             for(int i = 0; i < Asteroids.Count; i++)
             {
+                if (Asteroids[i] == null)
+                    continue;
+
                 Asteroids[i].Draw(Wnd);
             }
         }
