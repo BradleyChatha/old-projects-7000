@@ -32,6 +32,13 @@ namespace Asteroids
                 CharacterSize = 32
             };
 
+            this.LivesText = new Text("", this.ScoreFont)
+            {
+                Position = new Vector2f(30, 63),
+                Color = Color.White,
+                CharacterSize = 32
+            };
+
             this.Score = 0;
             this.Lives = 3;
             this.IsPlayerAlive = true;
@@ -40,10 +47,7 @@ namespace Asteroids
         public void Update()
         {
             if(this.Lives <= 0)
-            {
                 this.IsPlayerAlive = false;
-                return;
-            }
 
             if(Keyboard.IsKeyPressed(Keyboard.Key.A))
             {
@@ -81,6 +85,7 @@ namespace Asteroids
             }
 
             this.ScoreText.DisplayedString = this.Score.ToString();
+            this.LivesText.DisplayedString = $"Lives: {this.Lives}";
         }
 
         public void Draw(RenderWindow Wnd)
@@ -96,6 +101,7 @@ namespace Asteroids
             }
 
             Wnd.Draw(this.ScoreText);
+            Wnd.Draw(this.LivesText);
         }
 
         private Vector2f GetTip()
@@ -177,5 +183,6 @@ namespace Asteroids
         private bool HasAlreadyFired;
         private Font ScoreFont;
         private Text ScoreText;
+        private Text LivesText;
     }
 }
