@@ -23,6 +23,14 @@ namespace Asteroids
 
             this.RotationSpeed = 4;
             this.HasAlreadyFired = false;
+
+            this.ScoreFont = new Font("assets\\LiberationMono-Regular.ttf");
+            this.ScoreText = new Text("", this.ScoreFont)
+            {
+                Position = new Vector2f(30, 30),
+                Color = Color.White,
+                CharacterSize = 32
+            };
         }
 
         public void Update()
@@ -61,6 +69,8 @@ namespace Asteroids
 
                 this.Bullets[i].Update();
             }
+
+            this.ScoreText.DisplayedString = this.Score.ToString();
         }
 
         public void Draw(RenderWindow Wnd)
@@ -74,6 +84,8 @@ namespace Asteroids
 
                 this.Bullets[i].Draw(Wnd);
             }
+
+            Wnd.Draw(this.ScoreText);
         }
 
         private Vector2f GetTip()
@@ -105,6 +117,11 @@ namespace Asteroids
             this.Bullets.Add(new Projectile(Point, this.Ship.Rotation));
         }
 
+        public void AddPoints()
+        {
+            this.Score += 10;
+        }
+
         public List<Projectile> Bullets
         {
             get;
@@ -115,5 +132,8 @@ namespace Asteroids
         private Sprite Ship;
         private Texture ShipTexture;
         private bool HasAlreadyFired;
+        private Font ScoreFont;
+        private Text ScoreText;
+        private int Score;
     }
 }

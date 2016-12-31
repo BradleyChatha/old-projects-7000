@@ -62,6 +62,7 @@ namespace Asteroids
                 {
                     Plr.Bullets[i].Die();
                     this.IsAlive = false;
+                    Plr.AddPoints();
                 }
             }
         }
