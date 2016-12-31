@@ -22,6 +22,7 @@ namespace Asteroids
 
             this.MovementSpeed = 2.8f;
             this.IsAlive = true;
+            this.NeedsReset = false;
         }
 
         public void Draw(RenderWindow Wnd)
@@ -50,13 +51,15 @@ namespace Asteroids
             this.AsteroidSprite.Rotation = Angle;
             #endregion
 
-            for(int i = 0; i < Plr.Bullets.Count; i++)
+            IntRect Rect = new IntRect((int)this.AsteroidSprite.Position.X, (int)this.AsteroidSprite.Position.Y, (int)this.AsteroidSprite.Texture.Size.X, (int)this.AsteroidSprite.Texture.Size.Y);
+
+            for (int i = 0; i < Plr.Bullets.Count; i++)
             {
                 if (Plr.Bullets[i] == null)
                     continue;
 
                 Projectile Bullet = Plr.Bullets[i];
-                IntRect Rect = new IntRect((int)this.AsteroidSprite.Position.X, (int)this.AsteroidSprite.Position.Y, (int)this.AsteroidSprite.Texture.Size.X, (int)this.AsteroidSprite.Texture.Size.Y);
+                
 
                 if(Rect.Intersects(Bullet.Rect))
                 {
@@ -65,9 +68,21 @@ namespace Asteroids
                     Plr.AddPoints();
                 }
             }
+
+            if(Rect.Intersects(Plr.Rect))
+            {
+                Plr.Reset();
+                this.NeedsReset = true;
+            }
         }
 
         public bool IsAlive
+        {
+            get;
+            private set;
+        }
+
+        public bool NeedsReset
         {
             get;
             private set;

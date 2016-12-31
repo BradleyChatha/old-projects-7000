@@ -20,7 +20,16 @@ namespace Asteroids
 
             Player Plr = new Player();
             AsteroidManager.Init();
-            
+
+            Font EndGameFont = new Font("Assets\\LiberationMono-Regular.ttf");
+
+            Text EndGameText = new Text("Game Over", EndGameFont)
+            {
+                Color = Color.Red,
+                Position = new Vector2f(100, 100),
+                CharacterSize = 72
+            };
+
             Console.WriteLine("---- Controls ----");
             Console.WriteLine("A - Rotate Left");
             Console.WriteLine("D - Rotate Right");
@@ -31,10 +40,19 @@ namespace Asteroids
             {
                 Wnd.DispatchEvents();
 
-                AsteroidManager.Update(Plr);
-                Plr.Update();
-                    
                 Wnd.Clear(Color.Black);
+
+                if (Plr.IsPlayerAlive)
+                {
+                    AsteroidManager.Update(Plr);
+                    Plr.Update();
+                }
+                else
+                {
+                    EndGameText.DisplayedString = $"Game Over, you scored {Plr.Score}";
+                    Wnd.Draw(EndGameText);
+                }  
+
                 AsteroidManager.Draw(Wnd);
                 Plr.Draw(Wnd);
                 Wnd.Display();

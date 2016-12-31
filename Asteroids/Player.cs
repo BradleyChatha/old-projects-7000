@@ -31,10 +31,20 @@ namespace Asteroids
                 Color = Color.White,
                 CharacterSize = 32
             };
+
+            this.Score = 0;
+            this.Lives = 3;
+            this.IsPlayerAlive = true;
         }
 
         public void Update()
         {
+            if(this.Lives <= 0)
+            {
+                this.IsPlayerAlive = false;
+                return;
+            }
+
             if(Keyboard.IsKeyPressed(Keyboard.Key.A))
             {
                 this.Ship.Rotation -= this.RotationSpeed;
@@ -122,7 +132,40 @@ namespace Asteroids
             this.Score += 10;
         }
 
+        public void Reset()
+        {
+            this.Lives -= 1;
+            this.Ship.Rotation = 0;
+            this.Bullets = new List<Projectile>();
+        }
+
+        public IntRect Rect
+        {
+            get
+            {
+                return new IntRect((int)this.Ship.Position.X, (int)this.Ship.Position.Y, (int)this.ShipTexture.Size.X, (int)this.ShipTexture.Size.Y);
+            }
+        }
+
         public List<Projectile> Bullets
+        {
+            get;
+            private set;
+        }
+
+        public bool IsPlayerAlive
+        {
+            get;
+            private set;
+        }
+
+        public byte Lives
+        {
+            get;
+            private set;
+        }
+
+        public int Score
         {
             get;
             private set;
@@ -134,6 +177,5 @@ namespace Asteroids
         private bool HasAlreadyFired;
         private Font ScoreFont;
         private Text ScoreText;
-        private int Score;
     }
 }

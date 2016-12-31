@@ -20,12 +20,12 @@ namespace Asteroids
         {
             Random Rand = new Random();
 
-            if (Counter % 15 == 0)
+            if (Counter % 90 == 0)
             {
                 bool Skip = false;
 
-                float X = (float)Rand.Next(0, 1280);
-                float Y = (float)Rand.Next(0, 720);
+                float X = (float)Rand.Next(-30, 1290);
+                float Y = (float)Rand.Next(-150, 0);
 
                 for (int i = 0; i < Asteroids.Count; i++)
                 {
@@ -57,6 +57,11 @@ namespace Asteroids
                 }
 
                 Asteroids[i].Update(Plr);
+
+                if(Asteroids[i].NeedsReset)
+                {
+                    Asteroids = new List<Asteroid>();
+                }
             }
         }
 
