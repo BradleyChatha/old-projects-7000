@@ -412,7 +412,7 @@ class CountPlugin : Plugin
                     break;
 
                 default:
-                    if(e.args.length < 2)
+                    if(e.args.length < 1)
                     {
                         showHelp();
                         return;
