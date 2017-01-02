@@ -319,7 +319,7 @@ class CountPlugin : Plugin
             table.add       (["count create <name>",        "Create a new counter.",                "!count create dutched"]);
             table.add       (["count remove <name>",        "Remove a counter.",                    "!count remove dutched"]);
             table.add       (["count list",                 "Lists all of the counters.",           "!count list"]);
-            table.add       (["count <name>",               "Display a counter."                    "!count dutched"]);
+            table.add       (["count <name>",               "Display a counter.",                   "!count dutched"]);
             table.add       (["count <name> <+1 or -1>",    "Bump up or down a counter.",           "!count dutched +1"]);
             
             this.help = table.toSendableString;
