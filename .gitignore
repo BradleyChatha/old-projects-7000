@@ -7,3 +7,5 @@ __dummy.html
 bin/
 dub.selections.json
 dub.userprefs
+/opus.lib
+/sodium.lib
