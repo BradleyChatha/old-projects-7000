@@ -16,6 +16,6 @@ void main()
     seal.loadPlugin(new FunAPIPlugin());
     seal.loadPlugin(new HelpPlugin());
     seal.loadPlugin(new CountPlugin());
-    seal.loadPlugin(new MusicBot());
+    //seal.loadPlugin(new MusicBot());
     runEventLoop();
 }

@@ -153,10 +153,13 @@ class MusicBot : Plugin
             else
             {
                 logf("Downloading and caching video: %s", id);
-                auto audio = YoutubeDL.download(url);
-                audio.save(path);
 
-                return audio;
+                import std.process : spawnShell;
+                spawnShell("youtube-dl -v -r 3.0M -f bestaudio -o - " ~ url ~ 
+                           " | ffmpeg -i pipe:0 -f s16le -ar 48000 -ac 2 pipe:1 -vol 100" ~
+                           " | dcad --output " ~ path);
+
+                return new DCAFile(File(path, "r"));
             }
         }
     }
