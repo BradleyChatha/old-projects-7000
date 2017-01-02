@@ -5,7 +5,7 @@ import dscord.core;
 void main()
 {
     import bot.core.bot;
-    import bot.plugins.test, bot.plugins.fun;
+    import bot.plugins.test, bot.plugins.fun, bot.plugins.music;
 
     auto seal = new SealBot();
     scope(exit) seal.unload();
@@ -16,5 +16,6 @@ void main()
     seal.loadPlugin(new FunAPIPlugin());
     seal.loadPlugin(new HelpPlugin());
     seal.loadPlugin(new CountPlugin());
+    seal.loadPlugin(new MusicBot());
     runEventLoop();
 }
