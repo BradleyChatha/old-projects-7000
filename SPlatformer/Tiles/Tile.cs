@@ -21,15 +21,19 @@ namespace SPlatformer
         public readonly static int TileSize = (TileHeight * TileHeight);
     }
 
-    public class Tile
+    public abstract class Tile
     {
-        public Tile(TileID ID, )
+        public Tile()
+        {
+        }
+
+        public Tile(string TexturePath)
         {
             this.TileTexture = new Texture(TexturePath);
             this.TileSprite = new Sprite(this.TileTexture);
         }
 
-        public uint ID
+        public TileID ID
         {
             get;
             protected set;
@@ -50,9 +54,7 @@ namespace SPlatformer
             return new Vector2f(WorldPosition.X * TileInfo.TileHeight, WorldPosition.Y * TileInfo.TileHeight);
         }
 
-        public void Update(float dt)
-        {
-        }
+        public abstract void Update(float dt);
 
         protected Texture TileTexture;
         protected Sprite TileSprite;

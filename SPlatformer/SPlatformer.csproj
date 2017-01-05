@@ -81,7 +81,8 @@
     <Compile Include="Level.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Tile.cs" />
+    <Compile Include="Tiles\Platform.cs" />
+    <Compile Include="Tiles\Tile.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

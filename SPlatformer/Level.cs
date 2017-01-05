@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SFML.System;
+using SFML.Graphics;
 
 namespace SPlatformer
 {
@@ -32,6 +34,15 @@ namespace SPlatformer
             }
 
             this.LevelTiles = new List<Tile>();
+            this.ProcessMap();
+        }
+
+        public void Draw(RenderWindow Wnd)
+        {
+            foreach(Tile T in this.LevelTiles)
+            {
+                T.Draw(Wnd);
+            }
         }
 
         /// <summary>
@@ -55,20 +66,38 @@ namespace SPlatformer
 
                 for(int i = 0; i < Line.Length; i++)
                 {
-                    if (Line[i] != ' ')
-                        CurrentComponent += Line[i];
-                    else
+                    if(Line[i] == ' ')
                     {
                         LineComponents[CurrentIndex] = CurrentComponent;
                         CurrentIndex++;
+                        CurrentComponent = "";
                     }
+                    else
+                        CurrentComponent += Line[i];
+
+                    Console.WriteLine(CurrentComponent);
                 }
+
+                LineComponents[CurrentIndex] = CurrentComponent;
 
                 TileID ID = (TileID)int.Parse(LineComponents[0]);
                 float XPosition = float.Parse(LineComponents[1]);
                 float YPosition = float.Parse(LineComponents[2]);
 
-                LevelTiles.Add();
+                Tile T;
+
+                switch(ID)
+                {
+                    case TileID.Platform:
+                        T = new Platform();
+                        T.SetPositionByCell(new Vector2f(XPosition, YPosition));
+                    break;
+
+                    default:
+                        throw new LevelException($"Unkown Tile ID {ID}");
+                }   
+                                             
+                LevelTiles.Add(T);
             }
         }
 
