@@ -46,12 +46,17 @@ namespace SPlatformer
 
         public void SetPositionByCell(Vector2f Cell)
         {
-            this.TileSprite.Position = new Vector2f(Cell.X * TileInfo.TileHeight, Cell.Y * TileInfo.TileHeight);
+            this.TileSprite.Position = this.FromCellToWorldPosition(Cell);
         }
 
         public Vector2f FromWorldPositionToCell(Vector2f WorldPosition)
         {
-            return new Vector2f(WorldPosition.X * TileInfo.TileHeight, WorldPosition.Y * TileInfo.TileHeight);
+            return new Vector2f(WorldPosition.X / TileInfo.TileHeight, WorldPosition.Y / TileInfo.TileHeight);
+        }
+
+        public Vector2f FromCellToWorldPosition(Vector2f Cell)
+        {
+            return new Vector2f(Cell.X * TileInfo.TileHeight, Cell.Y * TileInfo.TileHeight);
         }
 
         public abstract void Update(float dt);
