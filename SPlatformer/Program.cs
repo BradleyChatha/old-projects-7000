@@ -15,9 +15,9 @@ namespace SPlatformer
         {
             RenderWindow Wnd = new RenderWindow(new VideoMode(1280, 720, 32), "SPlatformer");
             Wnd.Closed += (object sender, EventArgs e) => { Wnd.Close(); };
-
             FPSCounter.Init();
-
+            Controller.InDepthExceptions = true;
+            
             Level Lvl = new Level("Map.txt");
                     
             while(Wnd.IsOpen)

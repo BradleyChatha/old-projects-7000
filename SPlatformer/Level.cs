@@ -60,29 +60,24 @@ namespace SPlatformer
 
             foreach(string Line in this.MapContents)
             {
-                int CurrentIndex = 0;
-                string[] LineComponents = new string[3];
-                string CurrentComponent = "";
+                string[] LineComponents = Line.Split(' ');
+                TileID ID = TileID.TotalTiles;
+                float XPosition = 0;
+                float YPosition = 0;
 
-                for(int i = 0; i < Line.Length; i++)
+                try
                 {
-                    if(Line[i] == ' ')
-                    {
-                        LineComponents[CurrentIndex] = CurrentComponent;
-                        CurrentIndex++;
-                        CurrentComponent = "";
-                    }
-                    else
-                        CurrentComponent += Line[i];
-
-                    Console.WriteLine(CurrentComponent);
+                    ID = (TileID)int.Parse(LineComponents[0]);
+                    XPosition = float.Parse(LineComponents[1]);
+                    YPosition = float.Parse(LineComponents[2]);
                 }
-
-                LineComponents[CurrentIndex] = CurrentComponent;
-
-                TileID ID = (TileID)int.Parse(LineComponents[0]);
-                float XPosition = float.Parse(LineComponents[1]);
-                float YPosition = float.Parse(LineComponents[2]);
+                catch(Exception e)
+                {
+                    if (Controller.InDepthExceptions)
+                        throw new LevelException($"{e.Message} Failed to read level map.");
+                    else
+                        throw new LevelException("Failed to read in the level map.");
+                }
 
                 Tile T;
 
