@@ -44,15 +44,7 @@ namespace SPlatformer
                 T.Draw(Wnd);
             }
         }
-
-        /// <summary>
-        /// The 'downward' pull on the player, in this world.
-        /// </summary>
-        public float Gravity
-        {
-            get { return 9.8f;  }
-        }
-
+        
         private void ProcessMap()
         {
             if (this.MapContents.Length == 0)
