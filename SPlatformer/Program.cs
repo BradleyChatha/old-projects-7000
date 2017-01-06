@@ -17,15 +17,19 @@ namespace SPlatformer
             Wnd.Closed += (object sender, EventArgs e) => { Wnd.Close(); };
             FPSCounter.Init();
             Controller.InDepthExceptions = true;
-            
+
+            Player Plr = new Player();
             Level Lvl = new Level("Map.txt");
                     
             while(Wnd.IsOpen)
             {
                 Wnd.DispatchEvents();
+                Plr.Update(FPSCounter.DeltaTimeS);
+                
                 Wnd.Clear(Color.White);
-
+                                
                 Lvl.Draw(Wnd);
+                Plr.Draw(Wnd);
 
                 Wnd.Display();
                 FPSCounter.Update();
