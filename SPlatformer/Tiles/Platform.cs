@@ -12,10 +12,5 @@ namespace SPlatformer
         {
             this.ID = TileID.Platform;
         }
-
-        public override void Update(float dt)
-        {
-           
-        }
     }
 }

@@ -31,6 +31,7 @@ namespace SPlatformer
         {
             this.TileTexture = new Texture(TexturePath);
             this.TileSprite = new Sprite(this.TileTexture);
+            this.CanCollide = true;
         }
 
         public TileID ID
@@ -59,8 +60,21 @@ namespace SPlatformer
             return new Vector2f(Cell.X * TileInfo.TileHeight, Cell.Y * TileInfo.TileHeight);
         }
 
-        public abstract void Update(float dt);
+        public void Update(float dt, Player Plr)
+        {
+        }
 
+        public Vector2i Cell
+        {
+            get { return new Vector2i((int)Math.Floor(this.TileSprite.Position.X / this.TileTexture.Size.X), (int)Math.Floor(this.TileSprite.Position.Y / this.TileTexture.Size.Y)); }
+        }
+
+        public FloatRect Rect
+        {
+            get { return new FloatRect(this.TileSprite.Position.X, this.TileSprite.Position.Y, this.TileTexture.Size.X, this.TileTexture.Size.Y); }
+        }
+        
+        protected bool CanCollide;
         protected Texture TileTexture;
         protected Sprite TileSprite;
     }

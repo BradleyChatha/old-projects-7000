@@ -45,6 +45,23 @@ namespace SPlatformer
             }
         }
         
+        public void Update(float dt, Player Plr)
+        {
+            for (int i = 0; i < this.LevelTiles.Count; i++)
+                this.LevelTiles[i].Update(dt, Plr);
+        }
+
+        public Tile GetTileByCell(Vector2i Cell)
+        {
+            foreach(Tile T in this.LevelTiles)
+            {
+                if (T.Cell == Cell)
+                    return T;
+            }
+
+            return null;
+        }
+
         private void ProcessMap()
         {
             if (this.MapContents.Length == 0)
@@ -86,7 +103,7 @@ namespace SPlatformer
                                              
                 LevelTiles.Add(T);
             }
-        }
+        } 
 
         private string[] MapContents;
         private List<Tile> LevelTiles;
