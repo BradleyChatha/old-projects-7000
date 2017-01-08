@@ -11,6 +11,7 @@ namespace SPlatformer
     public enum TileID
     {
         Platform = 0,
+        SpawnPoint,
 
         TotalTiles
     }
@@ -39,7 +40,7 @@ namespace SPlatformer
             get;
             protected set;
         }
-    
+
         public void Draw(RenderWindow Wnd)
         {
             Wnd.Draw(this.TileSprite);
@@ -73,8 +74,13 @@ namespace SPlatformer
         {
             get { return new FloatRect(this.TileSprite.Position.X, this.TileSprite.Position.Y, this.TileTexture.Size.X, this.TileTexture.Size.Y); }
         }
-        
-        protected bool CanCollide;
+
+        public bool CanCollide
+        {
+            get;
+            protected set;
+        }
+
         protected Texture TileTexture;
         protected Sprite TileSprite;
     }

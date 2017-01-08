@@ -19,7 +19,7 @@ namespace SPlatformer
 
     public class Level
     {
-        public Level(string Map)
+        public Level(string Map, Player Plr)
         {
             try
             {
@@ -34,7 +34,7 @@ namespace SPlatformer
             }
 
             this.LevelTiles = new List<Tile>();
-            this.ProcessMap();
+            this.ProcessMap(Plr);
         }
 
         public void Draw(RenderWindow Wnd)
@@ -62,7 +62,7 @@ namespace SPlatformer
             return null;
         }
 
-        private void ProcessMap()
+        private void ProcessMap(Player Plr)
         {
             if (this.MapContents.Length == 0)
                 throw new LevelException("Failed to load map. Map is empty");
@@ -99,6 +99,12 @@ namespace SPlatformer
                     case TileID.Platform:
                         T = new Platform();
                         T.SetPositionByCell(new Vector2f(XPosition, YPosition));
+                        break;
+
+                    case TileID.SpawnPoint:
+                        T = new PlayerSpawn();
+                        T.SetPositionByCell(new Vector2f(XPosition, YPosition));
+                        Plr.SetPosition(new Vector2f(XPosition * 32, YPosition * 32));
                         break;
 
                     default:

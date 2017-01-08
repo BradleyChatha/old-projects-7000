@@ -19,7 +19,7 @@ namespace SPlatformer
             Controller.InDepthExceptions = true;
 
             Player Plr = new Player();
-            Level Lvl = new Level("Map.txt");
+            Level Lvl = new Level("Map.txt", Plr);
                     
             while(Wnd.IsOpen)
             {

@@ -48,6 +48,11 @@ namespace SPlatformer
                 this.PlayerSprite.Position = new Vector2f(this.PlayerSprite.Position.X - (this.MovementSpeed * dt), this.PlayerSprite.Position.Y);
         }
 
+        public void SetPosition(Vector2f Position)
+        {
+            this.PlayerSprite.Position = Position;
+        }
+
         public void Draw(RenderWindow Wnd)
         {
             Wnd.Draw(this.PlayerSprite);
@@ -122,20 +127,18 @@ namespace SPlatformer
 
             ///Left Collision
             this.CheckCollision(Lvl.GetTileByCell(new Vector2i(this.Cell.X, this.Cell.Y)), Direction.Left);
-
-            //OldPlayerPosition = this.PlayerSprite.Position;
-            //this.PlayerSprite.Position = new Vector2f(this.PlayerSprite.Position.X - 2, this.PlayerSprite.Position.Y);
-
+            
             if (!this.IsCollisionDetected[Direction.Down])
                 this.CheckCollision(Lvl.GetTileByCell(new Vector2i(this.Cell.X - 1, this.Cell.Y + 1)), Direction.Left);
-
-            //this.PlayerSprite.Position = OldPlayerPosition;
         }
 
         private void CheckCollision(Tile T, Direction Dir)
         {
             if (T == null)
                 return;
+            else if (!T.CanCollide)
+                return;
+
 
             FloatRect Rect = new FloatRect();
 
@@ -157,10 +160,7 @@ namespace SPlatformer
                     Rect = new FloatRect(new Vector2f(this.PlayerSprite.Position.X, this.PlayerSprite.Position.Y), new Vector2f(-2, this.PlayerTexture.Size.Y));
                     break;
             }
-
-            if (Dir == Direction.Left)
-                Console.WriteLine($"Tile Rect = {T.Rect} | Tile Cell = {T.Cell} | Rect = {Rect}");
-
+            
             if (Rect.Intersects(T.Rect))
                 this.IsCollisionDetected[Dir] = true;
         }
