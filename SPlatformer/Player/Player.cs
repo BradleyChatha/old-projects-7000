@@ -123,13 +123,13 @@ namespace SPlatformer
             ///Left Collision
             this.CheckCollision(Lvl.GetTileByCell(new Vector2i(this.Cell.X, this.Cell.Y)), Direction.Left);
 
-            OldPlayerPosition = this.PlayerSprite.Position;
-            this.PlayerSprite.Position = new Vector2f(this.PlayerSprite.Position.X + 2, this.PlayerSprite.Position.Y);
+            //OldPlayerPosition = this.PlayerSprite.Position;
+            //this.PlayerSprite.Position = new Vector2f(this.PlayerSprite.Position.X - 2, this.PlayerSprite.Position.Y);
 
             if (!this.IsCollisionDetected[Direction.Down])
                 this.CheckCollision(Lvl.GetTileByCell(new Vector2i(this.Cell.X - 1, this.Cell.Y + 1)), Direction.Left);
 
-            this.PlayerSprite.Position = OldPlayerPosition;
+            //this.PlayerSprite.Position = OldPlayerPosition;
         }
 
         private void CheckCollision(Tile T, Direction Dir)
@@ -154,11 +154,7 @@ namespace SPlatformer
                     break;
 
                 case Direction.Left:
-                    // For some reason, when the player goes ,.. Hang on
-                    // We have to look forward in time again, but for both checks.
-                    // Because by the time the player touches the tile, they will be in the same cell as it, so Cell.x - 1 would return null.
-                    // Put another tile to the right of it
-                    Rect = new FloatRect(new Vector2f(this.PlayerSprite.Position.X, this.PlayerSprite.Position.Y), new Vector2f(2, this.PlayerTexture.Size.Y));
+                    Rect = new FloatRect(new Vector2f(this.PlayerSprite.Position.X, this.PlayerSprite.Position.Y), new Vector2f(-2, this.PlayerTexture.Size.Y));
                     break;
             }
 
