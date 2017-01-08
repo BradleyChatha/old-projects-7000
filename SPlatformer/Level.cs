@@ -99,7 +99,7 @@ namespace SPlatformer
                     case TileID.Platform:
                         T = new Platform();
                         T.SetPositionByCell(new Vector2f(XPosition, YPosition));
-                    break;
+                        break;
 
                     default:
                         throw new LevelException($"Unkown Tile ID {ID}");
@@ -110,6 +110,6 @@ namespace SPlatformer
         } 
 
         private string[] MapContents;
-        private List<Tile> LevelTiles;
+        public List<Tile> LevelTiles; // Temporarily public
     }
 }

@@ -31,17 +31,12 @@ namespace SPlatformer
 
             this.IsCollisionDetected = new Dictionary<Direction, bool>();
 
-            this.IsCollisionDetected[Direction.Up] = false;
-            this.IsCollisionDetected[Direction.Down] = false;
-            this.IsCollisionDetected[Direction.Left] = false;
-            this.IsCollisionDetected[Direction.Right] = false;
+            this.ResetCollision();
         }
 
         public void Update(float dt, Level Lvl)
         {
-            this.UpdateDownCollision(Lvl);
-            this.UpdateUpCollision(Lvl);
-            this.UpdateRightCollision(Lvl);
+            this.UpdateCollision(Lvl);
             this.EnactGravity(dt);
 
             if (this.PlayerSprite.Position.Y > 720)
@@ -49,7 +44,7 @@ namespace SPlatformer
 
             if(Keyboard.IsKeyPressed(Keyboard.Key.D) && !this.IsCollisionDetected[Direction.Right])
                 this.PlayerSprite.Position = new Vector2f(this.PlayerSprite.Position.X + (this.MovementSpeed * dt), this.PlayerSprite.Position.Y);
-            if (Keyboard.IsKeyPressed(Keyboard.Key.A))
+            if (Keyboard.IsKeyPressed(Keyboard.Key.A) && !this.IsCollisionDetected[Direction.Left])
                 this.PlayerSprite.Position = new Vector2f(this.PlayerSprite.Position.X - (this.MovementSpeed * dt), this.PlayerSprite.Position.Y);
         }
 
@@ -81,6 +76,14 @@ namespace SPlatformer
             get { return new Vector2i((int)Math.Floor(this.PlayerSprite.Position.X / this.PlayerTexture.Size.X), (int)Math.Floor(this.PlayerSprite.Position.Y / this.PlayerTexture.Size.Y)); }
         }
 
+        private void ResetCollision()
+        {
+            this.IsCollisionDetected[Direction.Up] = false;
+            this.IsCollisionDetected[Direction.Down] = false;
+            this.IsCollisionDetected[Direction.Left] = false;
+            this.IsCollisionDetected[Direction.Right] = false;
+        }
+
         private void EnactGravity(float dt)
         {
             if (!this.IsCollisionDetected[Direction.Down])
@@ -94,81 +97,76 @@ namespace SPlatformer
             }
         }
 
-        private void UpdateDownCollision(Level Lvl)
+        private void UpdateCollision(Level Lvl)
         {
-            ///Top of tile, bottom of player
-            FloatRect BottomOfPlayer = new FloatRect(new Vector2f(this.PlayerSprite.Position.X, this.PlayerSprite.Position.Y + this.PlayerTexture.Size.Y), new Vector2f(this.PlayerTexture.Size.X, 2));
-            Tile T = Lvl.GetTileByCell(new Vector2i(this.Cell.X, this.Cell.Y + 1));
+            this.ResetCollision();
 
-            if (T == null)
-            {                
-                this.IsCollisionDetected[Direction.Down] = false;
-                goto CollisionBottomCheckRightSide;
-            }
+            ///Down Collision
+            this.CheckCollision(Lvl.GetTileByCell(new Vector2i(this.Cell.X, this.Cell.Y + 1)), Direction.Down);
+            this.CheckCollision(Lvl.GetTileByCell(new Vector2i(this.Cell.X + 1, this.Cell.Y + 1)), Direction.Down);
 
-            if (BottomOfPlayer.Intersects(T.Rect))
-                this.IsCollisionDetected[Direction.Down] = true;
+            ///Up Collision
+            this.CheckCollision(Lvl.GetTileByCell(new Vector2i(this.Cell.X, this.Cell.Y - 1)), Direction.Up);
+            this.CheckCollision(Lvl.GetTileByCell(new Vector2i(this.Cell.X + 1, this.Cell.Y - 1)), Direction.Up);
 
-            CollisionBottomCheckRightSide:
+            ///Right Collision
+            this.CheckCollision(Lvl.GetTileByCell(new Vector2i(this.Cell.X + 1, this.Cell.Y)), Direction.Right);
 
-            T = Lvl.GetTileByCell(new Vector2i(this.Cell.X + 1, this.Cell.Y + 1));
+            Vector2f OldPlayerPosition = this.PlayerSprite.Position;
+            this.PlayerSprite.Position = new Vector2f(this.PlayerSprite.Position.X + 2, this.PlayerSprite.Position.Y);
 
-            if (T == null)
-            {
-                return;
-            }
+            if (!this.IsCollisionDetected[Direction.Down])
+                this.CheckCollision(Lvl.GetTileByCell(new Vector2i(this.Cell.X + 1, this.Cell.Y + 1)), Direction.Right);
 
-            if (BottomOfPlayer.Intersects(T.Rect))
-                this.IsCollisionDetected[Direction.Down] = true;
+            this.PlayerSprite.Position = OldPlayerPosition;
+
+            ///Left Collision
+            this.CheckCollision(Lvl.GetTileByCell(new Vector2i(this.Cell.X, this.Cell.Y)), Direction.Left);
+
+            OldPlayerPosition = this.PlayerSprite.Position;
+            this.PlayerSprite.Position = new Vector2f(this.PlayerSprite.Position.X + 2, this.PlayerSprite.Position.Y);
+
+            if (!this.IsCollisionDetected[Direction.Down])
+                this.CheckCollision(Lvl.GetTileByCell(new Vector2i(this.Cell.X - 1, this.Cell.Y + 1)), Direction.Left);
+
+            this.PlayerSprite.Position = OldPlayerPosition;
         }
 
-        private void UpdateUpCollision(Level Lvl)
+        private void CheckCollision(Tile T, Direction Dir)
         {
-            FloatRect TopOfPlayer = new FloatRect(new Vector2f(this.PlayerSprite.Position.X, this.PlayerSprite.Position.Y), new Vector2f(this.PlayerTexture.Size.X, 2));
-            Tile T = Lvl.GetTileByCell(new Vector2i(this.Cell.X, this.Cell.Y - 1));
-
-            if(T == null)
-            {
-                this.IsCollisionDetected[Direction.Up] = false;
-                goto CollisionTopCheckRightSide;
-            }
-
-            if (TopOfPlayer.Intersects(T.Rect))
-                this.IsCollisionDetected[Direction.Up] = true;
-
-            CollisionTopCheckRightSide:
-            T = Lvl.GetTileByCell(new Vector2i(this.Cell.X + 1, this.Cell.Y - 1));
-
             if (T == null)
                 return;
 
-            if (TopOfPlayer.Intersects(T.Rect))
-                this.IsCollisionDetected[Direction.Up] = true;
-        }
+            FloatRect Rect = new FloatRect();
 
-        private void UpdateRightCollision(Level Lvl)
-        {
-            FloatRect RightOfPlayer = new FloatRect(new Vector2f(this.PlayerSprite.Position.X + this.PlayerTexture.Size.X, this.PlayerSprite.Position.Y), new Vector2f(2, this.PlayerTexture.Size.Y));
-            Tile T = Lvl.GetTileByCell(new Vector2i(this.Cell.X + 1, this.Cell.Y));
-
-            if (T == null)
+            switch(Dir)
             {
-                this.IsCollisionDetected[Direction.Right] = false;
-                goto ColliisionRightCheckBottom;
+                case Direction.Down:
+                    Rect = new FloatRect(new Vector2f(this.PlayerSprite.Position.X, this.PlayerSprite.Position.Y + this.PlayerTexture.Size.Y), new Vector2f(this.PlayerTexture.Size.X, -2));
+                    break;
+
+                case Direction.Up:
+                    Rect = new FloatRect(new Vector2f(this.PlayerSprite.Position.X, this.PlayerSprite.Position.Y), new Vector2f(this.PlayerTexture.Size.X, 2));
+                    break;
+
+                case Direction.Right:
+                    Rect = new FloatRect(new Vector2f(this.PlayerSprite.Position.X + this.PlayerTexture.Size.X, this.PlayerSprite.Position.Y), new Vector2f(-2, this.PlayerTexture.Size.Y));
+                    break;
+
+                case Direction.Left:
+                    // For some reason, when the player goes ,.. Hang on
+                    // We have to look forward in time again, but for both checks.
+                    // Because by the time the player touches the tile, they will be in the same cell as it, so Cell.x - 1 would return null.
+                    // Put another tile to the right of it
+                    Rect = new FloatRect(new Vector2f(this.PlayerSprite.Position.X, this.PlayerSprite.Position.Y), new Vector2f(2, this.PlayerTexture.Size.Y));
+                    break;
             }
 
-            if (RightOfPlayer.Intersects(T.Rect))
-                this.IsCollisionDetected[Direction.Right] = true;
+            if (Dir == Direction.Left)
+                Console.WriteLine($"Tile Rect = {T.Rect} | Tile Cell = {T.Cell} | Rect = {Rect}");
 
-            ColliisionRightCheckBottom:
-
-            T = Lvl.GetTileByCell(new Vector2i(this.Cell.X + 1, this.Cell.Y + 1));
-                        
-            if (T == null)
-                return;
-
-            if (RightOfPlayer.Intersects(T.Rect))
-                this.IsCollisionDetected[Direction.Right] = true;
+            if (Rect.Intersects(T.Rect))
+                this.IsCollisionDetected[Dir] = true;
         }
 
         private Dictionary<Direction, bool> IsCollisionDetected;
