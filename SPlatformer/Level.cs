@@ -75,7 +75,7 @@ namespace SPlatformer
                 float YPosition = 0;
 
                 ///Ignore comments
-                if (LineComponents[0].Contains("#"))
+                if (LineComponents[0].Contains("#") || Line == "")
                     continue;
 
                 try
