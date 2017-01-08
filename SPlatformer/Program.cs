@@ -27,7 +27,7 @@ namespace SPlatformer
                 Lvl.Update(FPSCounter.DeltaTimeS, Plr);
                 Plr.Update(FPSCounter.DeltaTimeS, Lvl);
 
-                Wnd.Clear(Color.White);
+                Wnd.Clear(Color.Magenta);
                                 
                 Lvl.Draw(Wnd);
                 Plr.Draw(Wnd);

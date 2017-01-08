@@ -39,13 +39,15 @@ namespace SPlatformer
 
         public void Update(float dt, Level Lvl)
         {
-            this.UpdateCollision(Lvl);
+            this.UpdateDownCollision(Lvl);
+            this.UpdateUpCollision(Lvl);
+            this.UpdateRightCollision(Lvl);
             this.EnactGravity(dt);
 
             if (this.PlayerSprite.Position.Y > 720)
                 this.PlayerSprite.Position = new Vector2f(this.PlayerSprite.Position.X, -this.PlayerTexture.Size.Y);
 
-            if(Keyboard.IsKeyPressed(Keyboard.Key.D))
+            if(Keyboard.IsKeyPressed(Keyboard.Key.D) && !this.IsCollisionDetected[Direction.Right])
                 this.PlayerSprite.Position = new Vector2f(this.PlayerSprite.Position.X + (this.MovementSpeed * dt), this.PlayerSprite.Position.Y);
             if (Keyboard.IsKeyPressed(Keyboard.Key.A))
                 this.PlayerSprite.Position = new Vector2f(this.PlayerSprite.Position.X - (this.MovementSpeed * dt), this.PlayerSprite.Position.Y);
@@ -92,12 +94,10 @@ namespace SPlatformer
             }
         }
 
-        private void UpdateCollision(Level Lvl)
+        private void UpdateDownCollision(Level Lvl)
         {
-            #region Bottom Of Player
-
             ///Top of tile, bottom of player
-            FloatRect BottomOfPlayer = new FloatRect(new Vector2f(this.PlayerSprite.Position.X, this.PlayerSprite.Position.Y + this.PlayerTexture.Size.Y), new Vector2f(this.PlayerTexture.Size.X, 1));
+            FloatRect BottomOfPlayer = new FloatRect(new Vector2f(this.PlayerSprite.Position.X, this.PlayerSprite.Position.Y + this.PlayerTexture.Size.Y), new Vector2f(this.PlayerTexture.Size.X, 2));
             Tile T = Lvl.GetTileByCell(new Vector2i(this.Cell.X, this.Cell.Y + 1));
 
             if (T == null)
@@ -109,7 +109,7 @@ namespace SPlatformer
             if (BottomOfPlayer.Intersects(T.Rect))
                 this.IsCollisionDetected[Direction.Down] = true;
 
-CollisionBottomCheckRightSide:
+            CollisionBottomCheckRightSide:
 
             T = Lvl.GetTileByCell(new Vector2i(this.Cell.X + 1, this.Cell.Y + 1));
 
@@ -120,8 +120,55 @@ CollisionBottomCheckRightSide:
 
             if (BottomOfPlayer.Intersects(T.Rect))
                 this.IsCollisionDetected[Direction.Down] = true;
+        }
 
-            #endregion
+        private void UpdateUpCollision(Level Lvl)
+        {
+            FloatRect TopOfPlayer = new FloatRect(new Vector2f(this.PlayerSprite.Position.X, this.PlayerSprite.Position.Y), new Vector2f(this.PlayerTexture.Size.X, 2));
+            Tile T = Lvl.GetTileByCell(new Vector2i(this.Cell.X, this.Cell.Y - 1));
+
+            if(T == null)
+            {
+                this.IsCollisionDetected[Direction.Up] = false;
+                goto CollisionTopCheckRightSide;
+            }
+
+            if (TopOfPlayer.Intersects(T.Rect))
+                this.IsCollisionDetected[Direction.Up] = true;
+
+            CollisionTopCheckRightSide:
+            T = Lvl.GetTileByCell(new Vector2i(this.Cell.X + 1, this.Cell.Y - 1));
+
+            if (T == null)
+                return;
+
+            if (TopOfPlayer.Intersects(T.Rect))
+                this.IsCollisionDetected[Direction.Up] = true;
+        }
+
+        private void UpdateRightCollision(Level Lvl)
+        {
+            FloatRect RightOfPlayer = new FloatRect(new Vector2f(this.PlayerSprite.Position.X + this.PlayerTexture.Size.X, this.PlayerSprite.Position.Y), new Vector2f(2, this.PlayerTexture.Size.Y));
+            Tile T = Lvl.GetTileByCell(new Vector2i(this.Cell.X + 1, this.Cell.Y));
+
+            if (T == null)
+            {
+                this.IsCollisionDetected[Direction.Right] = false;
+                goto ColliisionRightCheckBottom;
+            }
+
+            if (RightOfPlayer.Intersects(T.Rect))
+                this.IsCollisionDetected[Direction.Right] = true;
+
+            ColliisionRightCheckBottom:
+
+            T = Lvl.GetTileByCell(new Vector2i(this.Cell.X + 1, this.Cell.Y + 1));
+                        
+            if (T == null)
+                return;
+
+            if (RightOfPlayer.Intersects(T.Rect))
+                this.IsCollisionDetected[Direction.Right] = true;
         }
 
         private Dictionary<Direction, bool> IsCollisionDetected;

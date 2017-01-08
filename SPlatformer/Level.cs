@@ -74,6 +74,10 @@ namespace SPlatformer
                 float XPosition = 0;
                 float YPosition = 0;
 
+                ///Ignore comments
+                if (LineComponents[0].Contains("#"))
+                    continue;
+
                 try
                 {
                     ID = (TileID)int.Parse(LineComponents[0]);
