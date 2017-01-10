@@ -12,6 +12,7 @@ namespace SPlatformer
     {
         Platform = 0,
         SpawnPoint,
+        EndPoint,
 
         TotalTiles
     }
@@ -61,7 +62,7 @@ namespace SPlatformer
             return new Vector2f(Cell.X * TileInfo.TileHeight, Cell.Y * TileInfo.TileHeight);
         }
 
-        public void Update(float dt, Player Plr)
+        public virtual void Update(float dt, Player Plr)
         {
         }
 

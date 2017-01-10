@@ -81,6 +81,14 @@ namespace SPlatformer
             get { return new Vector2i((int)Math.Floor(this.PlayerSprite.Position.X / this.PlayerTexture.Size.X), (int)Math.Floor(this.PlayerSprite.Position.Y / this.PlayerTexture.Size.Y)); }
         }
 
+        public bool IsCollidingWith(Tile T)
+        {
+            if (this.LastTileToBeCollidedWith == T)
+                return true;
+            else
+                return false;
+        }
+
         private void ResetCollision()
         {
             this.IsCollisionDetected[Direction.Up] = false;
@@ -145,7 +153,7 @@ namespace SPlatformer
             switch(Dir)
             {
                 case Direction.Down:
-                    Rect = new FloatRect(new Vector2f(this.PlayerSprite.Position.X, this.PlayerSprite.Position.Y + this.PlayerTexture.Size.Y), new Vector2f(this.PlayerTexture.Size.X, -2));
+                    Rect = new FloatRect(new Vector2f(this.PlayerSprite.Position.X, this.PlayerSprite.Position.Y + this.PlayerTexture.Size.Y), new Vector2f(this.PlayerTexture.Size.X, 3));
                     break;
 
                 case Direction.Up:
@@ -160,11 +168,15 @@ namespace SPlatformer
                     Rect = new FloatRect(new Vector2f(this.PlayerSprite.Position.X, this.PlayerSprite.Position.Y), new Vector2f(-2, this.PlayerTexture.Size.Y));
                     break;
             }
-            
-            if (Rect.Intersects(T.Rect))
-                this.IsCollisionDetected[Dir] = true;
-        }
 
+            if (Rect.Intersects(T.Rect))
+            {
+                this.IsCollisionDetected[Dir] = true;
+                this.LastTileToBeCollidedWith = T;
+            }
+        }
+        
+        private Tile LastTileToBeCollidedWith;
         private Dictionary<Direction, bool> IsCollisionDetected;
         private float Gravity = 300f;
         private float MovementSpeed;

@@ -19,18 +19,21 @@ namespace SPlatformer
 
     public class Level
     {
-        public Level(string Map, Player Plr)
+        public Level(Player Plr)
         {
             try
             {
-                this.MapContents = File.ReadAllLines(Map);
+                this.MapList = File.ReadAllLines("Maps.List");
+                this.CurrentMapName = this.MapList[0];
+                this.MapList = this.MapList.Where(val => val != this.CurrentMapName).ToArray();
+                this.MapContents = File.ReadAllLines(this.CurrentMapName);
             }
             catch(Exception e)
             {
                 if (Controller.InDepthExceptions)
                     throw new LevelException($"{e.Message} Failed to load map.");
                 else
-                    throw new LevelException($"Failed to load in {Map}");
+                    throw new LevelException($"Failed to load in {this.CurrentMapName}");
             }
 
             this.LevelTiles = new List<Tile>();
@@ -107,14 +110,36 @@ namespace SPlatformer
                         Plr.SetPosition(new Vector2f(XPosition * 32, YPosition * 32));
                         break;
 
+                    case TileID.EndPoint:
+                        T = new EndPoint(this.LoadNextMap);                        
+                        T.SetPositionByCell(new Vector2f(XPosition, YPosition));
+                        break;
+
                     default:
                         throw new LevelException($"Unkown Tile ID {ID}");
                 }   
                                              
                 LevelTiles.Add(T);
             }
-        } 
+        }
 
+        private void LoadNextMap(Player Plr)
+        {
+            if (this.MapList.Length >= 1)
+            {
+                this.CurrentMapName = this.MapList[0];
+                this.MapList = this.MapList.Where(val => val != this.CurrentMapName).ToArray();
+                this.MapContents = File.ReadAllLines(this.CurrentMapName);
+
+                this.LevelTiles = new List<Tile>();
+                this.ProcessMap(Plr);
+            }
+            else
+                Console.WriteLine("Completed game");
+        }
+
+        private string CurrentMapName;
+        private string[] MapList;
         private string[] MapContents;
         public List<Tile> LevelTiles; // Temporarily public
     }
