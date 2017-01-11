@@ -42,10 +42,13 @@ namespace SPlatformer
             if (this.PlayerSprite.Position.Y > 720)
                 this.PlayerSprite.Position = new Vector2f(this.PlayerSprite.Position.X, -this.PlayerTexture.Size.Y);
 
-            if(Keyboard.IsKeyPressed(Keyboard.Key.D) && !this.IsCollisionDetected[Direction.Right])
+            if (Keyboard.IsKeyPressed(Keyboard.Key.D) && !this.IsCollisionDetected[Direction.Right])
                 this.PlayerSprite.Position = new Vector2f(this.PlayerSprite.Position.X + (this.MovementSpeed * dt), this.PlayerSprite.Position.Y);
             if (Keyboard.IsKeyPressed(Keyboard.Key.A) && !this.IsCollisionDetected[Direction.Left])
                 this.PlayerSprite.Position = new Vector2f(this.PlayerSprite.Position.X - (this.MovementSpeed * dt), this.PlayerSprite.Position.Y);
+
+            if (Keyboard.IsKeyPressed(Keyboard.Key.Space) && !this.IsJumping)
+                this.Jump(dt);
         }
 
         public void SetPosition(Vector2f Position)
@@ -87,6 +90,21 @@ namespace SPlatformer
                 return true;
             else
                 return false;
+        }
+
+        private void Jump(float dt)
+        {
+            float JumpLengthPerFrame = 8 * dt;
+            float HeightPerFrame = 3 * dt;
+            Vector2f PositionBeforeJump = this.PlayerSprite.Position;
+
+            this.PlayerSprite.Position = new Vector2f(this.PlayerSprite.Position.X + JumpLengthPerFrame, this.PlayerSprite.Position.Y + HeightPerFrame);
+
+            if (this.IsCollisionDetected[Direction.Up])
+                this.PlayerSprite.Position = new Vector2f(this.PlayerSprite.Position.X, PositionBeforeJump.Y);
+
+            if (this.IsCollisionDetected[Direction.Right] || this.IsCollisionDetected[Direction.Right])
+                this.PlayerSprite.Position = new Vector2f(this.PlayerSprite.Position.X, PositionBeforeJump.Y);
         }
 
         private void ResetCollision()
@@ -175,7 +193,8 @@ namespace SPlatformer
                 this.LastTileToBeCollidedWith = T;
             }
         }
-        
+
+        private bool IsJumping;
         private Tile LastTileToBeCollidedWith;
         private Dictionary<Direction, bool> IsCollisionDetected;
         private float Gravity = 300f;
