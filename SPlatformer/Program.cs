@@ -24,8 +24,8 @@ namespace SPlatformer
             while(Wnd.IsOpen)
             {
                 Wnd.DispatchEvents();
-                Lvl.Update(FPSCounter.DeltaTimeS, Plr);
-                Plr.Update(FPSCounter.DeltaTimeS, Lvl);
+                Lvl.Update(FPSCounter.DeltaTime, Plr);
+                Plr.Update(FPSCounter.DeltaTime, Lvl);
 
                 Wnd.Clear(Color.Magenta);
                                 

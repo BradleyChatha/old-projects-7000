@@ -7,10 +7,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Collections;
 
 namespace SPlatformer
 {
-    public enum Direction
+    public enum PlayerCollisionDirection
     {
         Up = 0,
         Down,
@@ -29,7 +30,10 @@ namespace SPlatformer
             this.PlayerSprite = new Sprite(this.PlayerTexture);
             this.PlayerSprite.Position = new Vector2f(32, 15);
 
-            this.IsCollisionDetected = new Dictionary<Direction, bool>();
+            this.IsCollisionDetected = new Dictionary<PlayerCollisionDirection, bool>();
+
+            this.JumpTimer = new Clock();
+            this.IsGravityEnabled = true;
 
             this.ResetCollision();
         }
@@ -42,13 +46,17 @@ namespace SPlatformer
             if (this.PlayerSprite.Position.Y > 720)
                 this.PlayerSprite.Position = new Vector2f(this.PlayerSprite.Position.X, -this.PlayerTexture.Size.Y);
 
-            if (Keyboard.IsKeyPressed(Keyboard.Key.D) && !this.IsCollisionDetected[Direction.Right])
+            if (Keyboard.IsKeyPressed(Keyboard.Key.D) && !this.IsCollisionDetected[PlayerCollisionDirection.Right])
                 this.PlayerSprite.Position = new Vector2f(this.PlayerSprite.Position.X + (this.MovementSpeed * dt), this.PlayerSprite.Position.Y);
-            if (Keyboard.IsKeyPressed(Keyboard.Key.A) && !this.IsCollisionDetected[Direction.Left])
+
+            if (Keyboard.IsKeyPressed(Keyboard.Key.A) && !this.IsCollisionDetected[PlayerCollisionDirection.Left])
                 this.PlayerSprite.Position = new Vector2f(this.PlayerSprite.Position.X - (this.MovementSpeed * dt), this.PlayerSprite.Position.Y);
 
-            if (Keyboard.IsKeyPressed(Keyboard.Key.Space) && !this.IsJumping)
+            if (Keyboard.IsKeyPressed(Keyboard.Key.Space) && !this.IsCollisionDetected[PlayerCollisionDirection.Up] && this.IsGravityEnabled)
                 this.Jump(dt);
+            
+            if(this.JumpTimer.ElapsedTime.AsSeconds() > 1.5f && !this.IsGravityEnabled)
+                this.IsGravityEnabled = true;
         }
 
         public void SetPosition(Vector2f Position)
@@ -94,38 +102,33 @@ namespace SPlatformer
 
         private void Jump(float dt)
         {
-            float JumpLengthPerFrame = 8 * dt;
-            float HeightPerFrame = 3 * dt;
-            Vector2f PositionBeforeJump = this.PlayerSprite.Position;
-
-            this.PlayerSprite.Position = new Vector2f(this.PlayerSprite.Position.X + JumpLengthPerFrame, this.PlayerSprite.Position.Y - HeightPerFrame);
-
-            if (this.IsCollisionDetected[Direction.Up])
-                this.PlayerSprite.Position = new Vector2f(this.PlayerSprite.Position.X, PositionBeforeJump.Y);
-
-            if (this.IsCollisionDetected[Direction.Right] || this.IsCollisionDetected[Direction.Right])
-                this.PlayerSprite.Position = new Vector2f(this.PlayerSprite.Position.X, PositionBeforeJump.Y);
+            this.JumpTimer.Restart();
+            this.IsGravityEnabled = false;
         }
 
         private void ResetCollision()
         {
-            this.IsCollisionDetected[Direction.Up] = false;
-            this.IsCollisionDetected[Direction.Down] = false;
-            this.IsCollisionDetected[Direction.Left] = false;
-            this.IsCollisionDetected[Direction.Right] = false;
+            this.IsCollisionDetected[PlayerCollisionDirection.Up] = false;
+            this.IsCollisionDetected[PlayerCollisionDirection.Down] = false;
+            this.IsCollisionDetected[PlayerCollisionDirection.Left] = false;
+            this.IsCollisionDetected[PlayerCollisionDirection.Right] = false;
         }
 
         private void EnactGravity(float dt)
         {
-            if (!this.IsCollisionDetected[Direction.Down])
+            if (!this.IsCollisionDetected[PlayerCollisionDirection.Down] && this.IsGravityEnabled)
             {
-                ///First Gravity goes down so we need a constant down direction, use a normalised unit vector.
+                ///First Gravity goes down so we need a constant down direction, use a normalised unit vector.                 
                 Vector2f Down = Vector.Normalise(new Vector2f(0, 1));
 
-                ///Now we want to calculate acceleration.
+                ///Now we want to calculate acceleration.                 
                 float YPosition = (float)(Math.Cos((double)Down.Y) * this.Gravity) * dt;
                 this.PlayerSprite.Position = new Vector2f(this.PlayerSprite.Position.X, this.PlayerSprite.Position.Y + YPosition);
             }
+            else if (!this.IsGravityEnabled && !this.IsCollisionDetected[PlayerCollisionDirection.Up])
+                this.PlayerSprite.Position = new Vector2f(this.PlayerSprite.Position.X, this.PlayerSprite.Position.Y - (175f * dt));
+            else
+                this.IsGravityEnabled = true;
         }
 
         private void UpdateCollision(Level Lvl)
@@ -133,32 +136,35 @@ namespace SPlatformer
             this.ResetCollision();
 
             ///Down Collision
-            this.CheckCollision(Lvl.GetTileByCell(new Vector2i(this.Cell.X, this.Cell.Y + 1)), Direction.Down);
-            this.CheckCollision(Lvl.GetTileByCell(new Vector2i(this.Cell.X + 1, this.Cell.Y + 1)), Direction.Down);
+            this.CheckCollision(Lvl.GetTileByCell(new Vector2i(this.Cell.X, this.Cell.Y + 1)), PlayerCollisionDirection.Down);
+            this.CheckCollision(Lvl.GetTileByCell(new Vector2i(this.Cell.X + 1, this.Cell.Y + 1)), PlayerCollisionDirection.Down);
 
             ///Up Collision
-            this.CheckCollision(Lvl.GetTileByCell(new Vector2i(this.Cell.X, this.Cell.Y - 1)), Direction.Up);
-            this.CheckCollision(Lvl.GetTileByCell(new Vector2i(this.Cell.X + 1, this.Cell.Y - 1)), Direction.Up);
+            this.CheckCollision(Lvl.GetTileByCell(new Vector2i(this.Cell.X, this.Cell.Y - 1)), PlayerCollisionDirection.Up);
+            this.CheckCollision(Lvl.GetTileByCell(new Vector2i(this.Cell.X + 1, this.Cell.Y - 1)), PlayerCollisionDirection.Up);
+
+            if (this.PlayerSprite.Position.Y < 0)
+                this.IsCollisionDetected[PlayerCollisionDirection.Up] = true;
 
             ///Right Collision
-            this.CheckCollision(Lvl.GetTileByCell(new Vector2i(this.Cell.X + 1, this.Cell.Y)), Direction.Right);
+            this.CheckCollision(Lvl.GetTileByCell(new Vector2i(this.Cell.X + 1, this.Cell.Y)), PlayerCollisionDirection.Right);
 
             Vector2f OldPlayerPosition = this.PlayerSprite.Position;
             this.PlayerSprite.Position = new Vector2f(this.PlayerSprite.Position.X + 2, this.PlayerSprite.Position.Y);
 
-            if (!this.IsCollisionDetected[Direction.Down])
-                this.CheckCollision(Lvl.GetTileByCell(new Vector2i(this.Cell.X + 1, this.Cell.Y + 1)), Direction.Right);
+            if (!this.IsCollisionDetected[PlayerCollisionDirection.Down])
+                this.CheckCollision(Lvl.GetTileByCell(new Vector2i(this.Cell.X + 1, this.Cell.Y + 1)), PlayerCollisionDirection.Right);
 
             this.PlayerSprite.Position = OldPlayerPosition;
 
             ///Left Collision
-            this.CheckCollision(Lvl.GetTileByCell(new Vector2i(this.Cell.X, this.Cell.Y)), Direction.Left);
+            this.CheckCollision(Lvl.GetTileByCell(new Vector2i(this.Cell.X, this.Cell.Y)), PlayerCollisionDirection.Left);
             
-            if (!this.IsCollisionDetected[Direction.Down])
-                this.CheckCollision(Lvl.GetTileByCell(new Vector2i(this.Cell.X - 1, this.Cell.Y + 1)), Direction.Left);
+            if (!this.IsCollisionDetected[PlayerCollisionDirection.Down])
+                this.CheckCollision(Lvl.GetTileByCell(new Vector2i(this.Cell.X - 1, this.Cell.Y + 1)), PlayerCollisionDirection.Left);
         }
 
-        private void CheckCollision(Tile T, Direction Dir)
+        private void CheckCollision(Tile T, PlayerCollisionDirection Dir)
         {
             if (T == null)
                 return;
@@ -170,19 +176,19 @@ namespace SPlatformer
 
             switch(Dir)
             {
-                case Direction.Down:
+                case PlayerCollisionDirection.Down:
                     Rect = new FloatRect(new Vector2f(this.PlayerSprite.Position.X, this.PlayerSprite.Position.Y + this.PlayerTexture.Size.Y), new Vector2f(this.PlayerTexture.Size.X, 3));
                     break;
 
-                case Direction.Up:
+                case PlayerCollisionDirection.Up:
                     Rect = new FloatRect(new Vector2f(this.PlayerSprite.Position.X, this.PlayerSprite.Position.Y), new Vector2f(this.PlayerTexture.Size.X, 2));
                     break;
 
-                case Direction.Right:
+                case PlayerCollisionDirection.Right:
                     Rect = new FloatRect(new Vector2f(this.PlayerSprite.Position.X + this.PlayerTexture.Size.X, this.PlayerSprite.Position.Y), new Vector2f(-2, this.PlayerTexture.Size.Y));
                     break;
 
-                case Direction.Left:
+                case PlayerCollisionDirection.Left:
                     Rect = new FloatRect(new Vector2f(this.PlayerSprite.Position.X, this.PlayerSprite.Position.Y), new Vector2f(-2, this.PlayerTexture.Size.Y));
                     break;
             }
@@ -194,13 +200,14 @@ namespace SPlatformer
             }
         }
 
-        private bool IsJumping;
+        private Clock JumpTimer;
         private Tile LastTileToBeCollidedWith;
-        private Dictionary<Direction, bool> IsCollisionDetected;
+        private Dictionary<PlayerCollisionDirection, bool> IsCollisionDetected;
         private float Gravity = 300f;
         private float MovementSpeed;
         private float JumpForce;
         private Texture PlayerTexture;
         private Sprite PlayerSprite;
+        private bool IsGravityEnabled;
     }
 }
