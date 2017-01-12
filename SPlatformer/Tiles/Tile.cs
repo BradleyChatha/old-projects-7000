@@ -13,6 +13,7 @@ namespace SPlatformer
         Platform = 0,
         SpawnPoint,
         EndPoint,
+        Spikes,
 
         TotalTiles
     }

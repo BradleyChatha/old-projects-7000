@@ -115,12 +115,22 @@ namespace SPlatformer
                         T.SetPositionByCell(new Vector2f(XPosition, YPosition));
                         break;
 
+                    case TileID.Spikes:
+                        T = new Spikes(this.Reset);
+                        T.SetPositionByCell(new Vector2f(XPosition, YPosition));
+                        break;
+
                     default:
                         throw new LevelException($"Unkown Tile ID {ID}");
                 }   
                                              
                 LevelTiles.Add(T);
             }
+        }
+
+        private void Reset(Player Plr)
+        {
+            this.ProcessMap(Plr);
         }
 
         private void LoadNextMap(Player Plr)

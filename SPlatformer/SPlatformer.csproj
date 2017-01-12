@@ -85,6 +85,7 @@
     <Compile Include="Tiles\EndPoint.cs" />
     <Compile Include="Tiles\Platform.cs" />
     <Compile Include="Tiles\PlayerSpawn.cs" />
+    <Compile Include="Tiles\Spikes.cs" />
     <Compile Include="Tiles\Tile.cs" />
   </ItemGroup>
   <ItemGroup>

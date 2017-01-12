@@ -98,7 +98,7 @@ namespace SPlatformer
             float HeightPerFrame = 3 * dt;
             Vector2f PositionBeforeJump = this.PlayerSprite.Position;
 
-            this.PlayerSprite.Position = new Vector2f(this.PlayerSprite.Position.X + JumpLengthPerFrame, this.PlayerSprite.Position.Y + HeightPerFrame);
+            this.PlayerSprite.Position = new Vector2f(this.PlayerSprite.Position.X + JumpLengthPerFrame, this.PlayerSprite.Position.Y - HeightPerFrame);
 
             if (this.IsCollisionDetected[Direction.Up])
                 this.PlayerSprite.Position = new Vector2f(this.PlayerSprite.Position.X, PositionBeforeJump.Y);
