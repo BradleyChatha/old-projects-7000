@@ -24,7 +24,8 @@ class TestPlugin : Plugin
             import bot.core.bot;
             auto seal = cast(SealBot)this.bot;
 
-            seal.deleter.queue(event.msg.channel.sendMessage("This message should delete after 2 seconds."), 2.seconds);
+            import dscord.api.routes, vibe.d;
+            this.client.api.requestJSON(Route(HTTPMethod.PATCH, "/guilds/%s/members/%s")(event.msg.guild.id, event.msg.author.id), Json(["roles": Json([Json("208617280987201536")])]));
         }
     }
 }

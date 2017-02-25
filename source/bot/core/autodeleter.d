@@ -83,6 +83,9 @@ class AutoMessageDeleter
          + ++/
         void queue(Message msg, Duration life, bool enforceDelete = false, bool editWithLife = true)
         {
+            return;
+        version(none)
+            {
             import std.exception : enforce;
             enforce(msg !is null,  "Attempted to queue up a null message for removal.");
 
@@ -105,6 +108,7 @@ class AutoMessageDeleter
 
             if(this._cleaner == Timer.init)
                 this._cleaner = setTimer(5.seconds, &doClean, true);
+            }
         }
     }
 }
