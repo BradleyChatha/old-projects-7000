@@ -1,0 +1,8 @@
+#Files
+*.exe
+*.obj
+*.pdb
+*.exe.config
+
+#Folders
+/Bullet Hell/obj

@@ -1,0 +1,7 @@
+<Entity Name = "Test Entity">
+    <Entity-Texture>Assets\\Test.png</Entity-Texture>
+    <Entity-Health>100</Entity-Health>
+    <Entity-Bullet>Assets\\TestBullets.png</Entity-Bullet>
+    <Entity-Fire-Rate>3</Entity-Fire-Rate>
+    <Entity-Fire-Position></Entity-Fire-Position>
+</Entity>
