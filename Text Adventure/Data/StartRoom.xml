@@ -1,0 +1,8 @@
+<Room>
+	<Description>There are alot of boobs in here.</Description>
+	
+	<Direction Compass = "North">Room 1.xml</Direction>
+	<Direction Compass = "East">Dead end</Direction>
+	<Direction Compass = "South">Dead end</Direction>
+	<Direction Compass = "West">Dead end</Direction>
+</Room>
