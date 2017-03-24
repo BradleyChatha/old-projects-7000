@@ -23,7 +23,7 @@ class Character:
 		self.Intelligence = 5
 		self.Will = 5
 
-		self.PlayerWeapon = Weapon()
+		self.PlayerWeapon = ShortSword()
 
 		print(self)
 

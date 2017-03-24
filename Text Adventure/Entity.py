@@ -51,10 +51,11 @@ class Entity:
 		if self.CurrentHealth <= 0:
 			print("self.Die(Player)")
 			self.Die(Player)
+			return None
+		return self
 
 	def Die(self, Player):
-		print(Player)
-		Player.EXP += self.EXPValue
+		Player.Exp += self.EXPValue
 		print(Player.Name, " has gained ", self.EXPValue, "EXP")
 
 class Slime(Entity):
@@ -65,4 +66,3 @@ class Slime(Entity):
 		self.Weapon = SlimeAttack()
 		self.Description = "A small neon-blue translucent gel like blob appears. Two large, round, eyes stare blankly at you."
 		self.EXPValue = randint(15, 30)
-

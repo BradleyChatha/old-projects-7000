@@ -40,7 +40,7 @@ class Room:
  
 	def Update(self, Player):
 		if self.Enemy != None:
-			self.Enemy.Update(Player)
+			self.Enemy = self.Enemy.Update(Player)
 
  	#Attempts to load another room.
  	#Returns the next room that the player is in, if the requested direction contains an exit/entrance.
