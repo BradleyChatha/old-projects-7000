@@ -14,7 +14,7 @@ class Entity:
 		self.MaxHealth = 10 + (PlayerInfo.MaxHealth + PlayerInfo.Level)
 		self.CurrentHealth = self.MaxHealth
 
-		self.ItemTable = [SlimeGoo()]
+		self.ItemTable = [SlimeGoo(), None]
 
 	def __str__(self):
 		return self.Description + "\n" + self.Name + " Health: " + str(self.CurrentHealth) + "/" + str(self.MaxHealth)

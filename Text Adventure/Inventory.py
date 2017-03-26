@@ -23,10 +23,11 @@ class Inventory:
 
 			print("1) Use")
 			print("2) Destroy")
-			print("3) Exit")
+			print("3) Item Description")
+			print("4) Exit")
 			Useage = input("Enter Useage >> ")
 
-			if Useage == "3":
+			if Useage == "4":
 				return
 
 			while True:
@@ -45,7 +46,9 @@ class Inventory:
 			elif Useage == "2":
 				self.Contents[Selected] = None
 				break
-
+			elif Useage == "3":
+				print(self.Contents[Selected].ItemDescription)
+				break
 
 	def CheckIsNotInventoryFull(self):
 		for i in range(0, len(self.Contents)):
