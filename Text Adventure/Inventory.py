@@ -8,48 +8,53 @@ class Inventory:
 		for i in range(0, self.InvetorySpace):
 			self.Contents.append(None)
 
-	def Update(self, Command, Item = None):
-		if Command == "Add":
-			if self.CheckIsNotInventoryFull():
-				if Item:
-					pass #Add item here
-				else:
-					print("Please enter an item to add")
-					return
-			else:
-				print("Inventory full")
+	def AddToInventory(self, Item):
+		(NotFull, Index) = self.CheckIsNotInventoryFull()
+
+		if NotFull:
+			self.Contents[Index] = Item
+		else:
+			print("Inventory is full")
+
+	def AccessInventory(self, Player, Room):
+		while True:
+			self.PrintInventoryContents()
+			Selected = None
+
+			print("1) Use")
+			print("2) Destroy")
+			print("3) Exit")
+			Useage = input("Enter Useage >> ")
+
+			if Useage == "3":
 				return
-		elif Command == "View":
+
 			while True:
-				self.PrintInventoryContents()
-				Selected = None
-				while True:
-					Selected = int(input("Enter Item >> "))
+				Selected = int(input("Enter Item >> "))
+				
+				if Selected < 0 or Selected > len(self.Contents) or self.Contents[Selected] == None:
+					print("Please enter a valid number")
+					continue
+				else:
+					break
 
-					if Selected > 0 or Selected < len(self.Contents):
-						print("Please enter a valid number")
-						continue
-					else:
-						break
+			if Useage == "1":
+				self.Contents[Selected].OnUse(Player, Room)
+				self.Contents[Selected] = None
+				break
+			elif Useage == "2":
+				self.Contents[Selected] = None
+				break
 
-				print("1) Use")
-				print("2) Destroy")
-				print("3) Exit")
-				Useage = input("Enter Useage >> ")
-
-				if Useage == "1":
-					pass
-				elif Useage == "2":
-					pass
-				elif Useage == "3":
-					return
 
 	def CheckIsNotInventoryFull(self):
 		for i in range(0, len(self.Contents)):
-			if i == None:
+			if self.Contents[i] == None:
 				return (True, i)
-
 
 	def PrintInventoryContents(self):
 		for i in range(0, len(self.Contents)):
-			print(i, "-", self.Contents[i])
+			if self.Contents[i] != None:		
+				print(i, "-", self.Contents[i].ItemName)
+			else:
+				print(i, "- Empty slot")

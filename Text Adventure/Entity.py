@@ -1,6 +1,7 @@
 from Weapon import *
 from Character import *
 from random import *
+from Item import *
 
 #Describes anything which is a non-friendly NPC
 class Entity:
@@ -13,7 +14,7 @@ class Entity:
 		self.MaxHealth = 10 + (PlayerInfo.MaxHealth + PlayerInfo.Level)
 		self.CurrentHealth = self.MaxHealth
 
-		print(self.Weapon)
+		self.ItemTable = [SlimeGoo()]
 
 	def __str__(self):
 		return self.Description + "\n" + self.Name + " Health: " + str(self.CurrentHealth) + "/" + str(self.MaxHealth)
@@ -47,16 +48,23 @@ class Entity:
 		else:
 			print("Nothing to attack")
 
-	def Update(self, Player):
+	def Update(self, Player, Room):
 		if self.CurrentHealth <= 0:
-			print("self.Die(Player)")
-			self.Die(Player)
+			self.Die(Player, Room)
 			return None
 		return self
 
-	def Die(self, Player):
+	def Die(self, Player, Room):
 		Player.Exp += self.EXPValue
+		Room.DroppedItem = self.DropLoot()
+
 		print(Player.Name, " has gained ", self.EXPValue, "EXP")
+
+		if Room.DroppedItem != None:
+			print(self.Name, " dropped ", Room.DroppedItem.ItemName)
+
+	def DropLoot(self):
+		return choice(self.ItemTable)
 
 class Slime(Entity):
 	def __init__(self, Player):

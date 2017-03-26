@@ -85,6 +85,15 @@ class Character:
 	def Attack(self):
 		return self.PlayerWeapon.Attack(self.Strength)
 
+	def Heal(self, Amount : int):
+		self.CurrentHealth += Amount
+
+		if self.CurrentHealth > self.MaxHealth:
+			self.CurrentHealth = self.MaxHealth
+
+		print(self.Name, " has healed for ", Amount)
+		print(self.Name, " now has ", str(self.CurrentHealth) + "/" + str(self.MaxHealth))
+
 	def Die(self):
 		print("You have died.")
 		exit()

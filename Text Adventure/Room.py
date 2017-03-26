@@ -12,6 +12,8 @@ class Room:
 
 		self.Enemy = choice([Slime(Player), None])
 
+		self.DroppedItem = None
+
 		self.ProcessRoom()
 
 	def __str__(self) -> str:
@@ -40,7 +42,7 @@ class Room:
  
 	def Update(self, Player):
 		if self.Enemy != None:
-			self.Enemy = self.Enemy.Update(Player)
+			self.Enemy = self.Enemy.Update(Player, self)
 
  	#Attempts to load another room.
  	#Returns the next room that the player is in, if the requested direction contains an exit/entrance.
@@ -48,7 +50,7 @@ class Room:
 	def LoadNextRoom(self, Direction : str, Player):
 		if Direction in self.AttachedRooms:
 			if self.AttachedRooms[Direction].endswith(".xml"):
-				return Room(self.AttachedRooms[Direction], Player)
+				self.__init__(self.AttachedRooms[Direction], Player)
 			else:
 				print(self.AttachedRooms[Direction])
-				return self
+				

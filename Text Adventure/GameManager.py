@@ -7,26 +7,14 @@ class Game:
 		self.IsGameRunning = True
 		self.Room = Room("StartRoom.xml", Player)
 		self.Directions = ["North", "East", "South", "West"]
+		self.Handler = CommandHandler()
 
 	#Contains the main logic for the game
 	def Run(self):
 		while self.IsGameRunning:
+			self.Handler.Update(self.PlayerRef, self.Room)
+
 			self.Room.Update(self.PlayerRef)
-
-			Cmd = Command.Input()
-
-			if self.DirectionsContains(Cmd["Command"][0]):
-				self.Room = self.Room.LoadNextRoom(Cmd["Command"][0], self.PlayerRef)
-
-			elif Cmd["Command"][0] == "Attack":
-				if self.Room.Enemy != None and self.Room.Enemy.CurrentHealth > 0:
-					self.Room.Enemy.TakeDamage(self.PlayerRef.Attack())
-					self.Room.Enemy.Attack(self.PlayerRef)
-				elif self.Room.Enemy == None or self.Room.Enemy.CurrentHealth <= 0:
-					print("There is nothing to attack, the room is empty.")
-
-			elif Cmd["Command"][0] == "Player" or Cmd["Command"][0] == "Self":
-				print(self.PlayerRef)
 
 	#Checkis the command which is passed to it (Cmd) is a direction.
 	#See self.Direction for those values.
