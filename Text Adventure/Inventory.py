@@ -17,6 +17,10 @@ class Inventory:
 			print("Inventory is full")
 
 	def AccessInventory(self, Player, Room):
+		if self.CheckInventoryIsEmpty():
+			print("Inventory is empty")
+			return
+
 		while True:
 			self.PrintInventoryContents()
 			Selected = None
@@ -33,7 +37,7 @@ class Inventory:
 			while True:
 				Selected = int(input("Enter Item >> "))
 				
-				if Selected < 0 or Selected > len(self.Contents) or self.Contents[Selected] == None:
+				if Selected < 0 or Selected > len(self.Contents):
 					print("Please enter a valid number")
 					continue
 				else:
@@ -54,6 +58,12 @@ class Inventory:
 		for i in range(0, len(self.Contents)):
 			if self.Contents[i] == None:
 				return (True, i)
+
+	def CheckInventoryIsEmpty(self) -> bool:
+		for i in self.Contents:
+			if i != None:
+				return False
+		return True
 
 	def PrintInventoryContents(self):
 		for i in range(0, len(self.Contents)):
