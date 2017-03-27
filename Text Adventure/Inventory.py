@@ -1,4 +1,5 @@
 from Item import *
+from Helper import *
 
 class Inventory:
 	def __init__(self):
@@ -29,14 +30,26 @@ class Inventory:
 			print("2) Destroy")
 			print("3) Item Description")
 			print("4) Exit")
-			Useage = input("Enter Useage >> ")
+
+			while True:
+				Useage = input("Enter Useage >> ")
+
+				if Useage < "1" or Useage > "4":
+					print("Please enter a valid number")
+				else:
+					break
 
 			if Useage == "4":
 				return
 
 			while True:
-				Selected = int(input("Enter Item >> "))
+				Selected = input("Enter Item >> ")
 				
+				if not String.IsNumerical(Selected):
+					print("Please enter a valid number")
+					continue
+
+				Selected = int(Selected)
 				if Selected < 0 or Selected > len(self.Contents):
 					print("Please enter a valid number")
 					continue

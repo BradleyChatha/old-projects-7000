@@ -2,6 +2,7 @@ from random import *
 from Weapon import *
 from sys import *
 from Inventory import *
+from Entity import *
 
 class Character:
 	def __init__(self, Name : str):
@@ -12,6 +13,7 @@ class Character:
 		self.NeededExp = self.CalculateEXP()
 
 		self.Bag = Inventory()
+		self.Bag.AddToInventory(SlimeGoo())
 
 		self.MaxHealth = 35
 		self.CurrentHealth = self.MaxHealth

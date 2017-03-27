@@ -14,7 +14,7 @@ class Entity:
 		self.MaxHealth = 10 + (PlayerInfo.MaxHealth + PlayerInfo.Level)
 		self.CurrentHealth = self.MaxHealth
 
-		self.ItemTable = [SlimeGoo(), None]
+		self.ItemTable = [None]
 
 	def __str__(self):
 		return self.Description + "\n" + self.Name + " Health: " + str(self.CurrentHealth) + "/" + str(self.MaxHealth)
@@ -74,3 +74,4 @@ class Slime(Entity):
 		self.Weapon = SlimeAttack()
 		self.Description = "A small neon-blue translucent gel like blob appears. Two large, round, eyes stare blankly at you."
 		self.EXPValue = randint(15, 30)
+		self.ItemTable = [SlimeGoo(), None]

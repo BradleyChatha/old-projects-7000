@@ -1,3 +1,5 @@
+from random import *
+
 class Item:
 	def __init__(self):
 		self.ItemName = ""
@@ -20,4 +22,4 @@ class SlimeGoo(Item):
 		self.SaleValue = 5
 
 	def OnUse(self, Player = None, Enemy = None):
-		Player.Heal(3)
+		Player.Heal(randint(1, 3))
