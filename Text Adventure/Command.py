@@ -57,20 +57,20 @@ class CommandHandler:
 	def __init__(self):
 		self.Commands = \
 		{
-			"North" : Command("North", "Move north", MoveNorth),
-			"South" : Command("South", "Move south", MoveSouth),
-			"East" : Command("East", "Move east", MoveEast),
-			"West" : Command("West", "Move west", MoveWest),
+			"north" : Command("North", "Move north", MoveNorth),
+			"south" : Command("South", "Move south", MoveSouth),
+			"east" : Command("East", "Move east", MoveEast),
+			"west" : Command("West", "Move west", MoveWest),
 
-			"Attack" : Command("Attack", "Attack the enemy in the room", Attack),
-			"Self" : Command("Self", "Prints the player information", Self),
+			"attack" : Command("Attack", "Attack the enemy in the room", Attack),
+			"self" : Command("Self", "Prints the player information", Self),
 
-			"Pickup" : Command("Pickup", "Picks up an item", PickUpItem),
-			"Bag" : Command("Bag", "Looks in your inventory", AccessInventory)
+			"pickup" : Command("Pickup", "Picks up an item", PickUpItem),
+			"bag" : Command("Bag", "Looks in your inventory", AccessInventory)
 		}
 
 	def Update(self, Player, Room):
-		Cmd = input(">> ")
+		Cmd = input(">> ").lower()
 
 		if Cmd in self.Commands:
 			self.Commands[Cmd].Action(Player, Room)
