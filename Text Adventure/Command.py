@@ -74,5 +74,8 @@ class CommandHandler:
 
 		if Cmd in self.Commands:
 			self.Commands[Cmd].Action(Player, Room)
+		elif Cmd == "help":
+			for Element in self.Commands:
+				print(self.Commands[Element].Command, "-", self.Commands[Element].Description)
 		else:
 			print("Invalid command")
