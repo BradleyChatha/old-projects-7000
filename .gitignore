@@ -1,0 +1,11 @@
+#Files
+*.exe
+*.obj
+*.bak
+
+dub.selections.json
+
+#Folders
+/.vs/
+/.dub/
+/.vscode/
