@@ -3,6 +3,7 @@ module VirtualMachine.ProgramRunner;
 import std.stdio;
 import std.bitmanip;
 import std.format;
+import std.exception;
 import VirtualMachine.Machine;
 import VirtualMachine.Program;
 
@@ -28,6 +29,19 @@ enum ProgramInstructions
     JUMP
 }
 
+enum ProgramVariableUseage
+{
+    ///Getting for calcualtions and for outputting, etc...
+    Access = 0,
+    ///Assigning the variable some data, either over writing or initalising. 
+    Assignment
+}
+
+class ProgramRunnerException : Exception
+{
+    mixin basicExceptionCtors;
+}
+
 void RunProgram(Machine Mach)
 {
     Program Prog = Mach.Prog;
@@ -48,6 +62,10 @@ void RunProgram(Machine Mach)
         else if(CurrentInstruction == ProgramInstructions.STDOUT)
         {
             RawValueToStdout(Mach);
+        }
+        else if(CurrentInstruction == ProgramInstructions.VARIABLE)
+        {
+
         }
     }
 }
@@ -77,4 +95,6 @@ void RawValueToStdout(Machine Mach)
         int Value = bigEndianToNative!int(cast(ubyte[4])Mach.ReadBytes(4)[0..4]);
         write(Value);
     }
+    else 
+        throw new ProgramRunnerException("Unkown type being streamed to stdout."); 
 }
