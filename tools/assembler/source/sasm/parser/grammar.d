@@ -15,9 +15,11 @@ Sasm:
     Code <- (Label / Mneumonic)*
 
     # Mneumonics
-    Mneumonic <- Mne_Print
+    Mneumonic <- Mne_Print /
+                 Mne_Nop
 
     Mne_Print < :'print' Value
+    Mne_Nop   < 'nop'
 
     # Data Values
     Value  <- String /

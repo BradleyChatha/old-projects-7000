@@ -109,6 +109,7 @@ class NodeMneumonic : Node
 {
     enum Instruction
     {
+        Nop   = 0x00,
         Print = 0x01
     }
 
@@ -316,7 +317,8 @@ private NodeMneumonic.Instruction nameToOpcode(string name)
         {
             _opcodeStrings = 
             [
-                "Sasm.Mne_Print": Print
+                "Sasm.Mne_Print": Print,
+                "Sasm.Mne_Nop":   Nop
             ];
         }
     }
