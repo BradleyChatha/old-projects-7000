@@ -18,7 +18,7 @@ final class Machine
 
     public ubyte[] ReadBytes(size_t Amount, bool InceremetCounter = true)
     {
-        enforce(this.ProgramCounter + Amount < this.Prog.Body.Body.length, "Cannot read data which is larger than the length of the program body.");
+        enforce(this.ProgramCounter + Amount <= this.Prog.Body.Body.length, "Cannot read data which is larger than the length of the program body.");
 
         ubyte[] Return;
         Return = this.Prog.Body.Body[this.ProgramCounter..this.ProgramCounter + Amount];

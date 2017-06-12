@@ -56,16 +56,12 @@ void RunProgram(Machine Mach)
         else if(CurrentInstruction == ProgramInstructions.JUMP)
         {
             uint Location = bigEndianToNative!int(cast(ubyte[4])Mach.ReadBytes(4)[0..4]);
-            writeln(Location);
+            //writeln(Location);
             Mach.ProgramCounter = Location;
         }
         else if(CurrentInstruction == ProgramInstructions.STDOUT)
         {
             RawValueToStdout(Mach);
-        }
-        else if(CurrentInstruction == ProgramInstructions.VARIABLE)
-        {
-            
         }
         else
         {
@@ -101,4 +97,9 @@ void RawValueToStdout(Machine Mach)
     }
     else 
         throw new ProgramRunnerException("Unkown type being streamed to stdout."); 
+}
+
+void AccessVariable(uint ID)
+{
+    
 }
