@@ -174,7 +174,7 @@ class Compiler
                         throw new Exception(name); // TODO
 
                     // Special case: Jump doesn't expect this
-                    if(isJumpCommand)
+                    if(!isJumpCommand)
                         this.write(0x03);
 
                     this.writeBE!int(ptr.offset);
