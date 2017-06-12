@@ -80,7 +80,7 @@ class Compiler
 
             // Write the size of the pointer table (INCORRECT)
             auto current = this._index;
-            uint size    = (current - this._functionTableLengthPointer) - int.sizeof;
+            uint size    = cast(uint)(current - this._functionTableLengthPointer) - int.sizeof;
             assert(size <= current, "overflow");
 
             this._pointerTableLength = size;
@@ -95,7 +95,7 @@ class Compiler
 
             // Write the size of the function table (DOESN'T EVEN GET WRITTEN (in the right place))
             auto current = this._index;
-            uint size    = (current - (this._functionTableLengthPointer + int.sizeof + this._pointerTableLength));
+            uint size    = cast(uint)(current - (this._functionTableLengthPointer + int.sizeof + this._pointerTableLength));
             assert(size <= current, "overflow/incorrect maths");
 
             this._index  = this._functionTableLengthPointer;
@@ -177,7 +177,7 @@ class Compiler
 
         void write(const ubyte[] value)
         {
-            auto end = this._index + value.length;
+            auto end = cast(uint)(this._index + value.length);
 
             if(this._binary.length < end)
                 this._binary.length = end;
