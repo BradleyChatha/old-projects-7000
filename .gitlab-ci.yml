@@ -1,0 +1,13 @@
+before_script:
+    - curl -fsS https://dlang.org/install.sh | bash -s dmd
+    - source ~/dlang/dmd-2.074.1/activate
+    - dmd --version
+    - dub --version
+
+stages:
+    - test
+    
+dub_test:
+    stage: test
+    script:
+        - dub test
