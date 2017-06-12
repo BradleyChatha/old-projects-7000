@@ -252,12 +252,56 @@ private NodeValue parseValue(ParseTree tree)
 
     switch(tree.name)
     {
-        case "Sasm.String": return new NodeValue(match);
+        case "Sasm.String": return new NodeValue(match.escapeString);
         case "Sasm.Int32":  return new NodeValue(match.to!int);
 
         default:
             throw new Exception(tree.name);
     }
+}
+
+private string escapeString(string s)
+{
+    import std.exception : assumeUnique;
+
+    char[] buffer;
+
+    bool escape = false;
+    foreach(char c; s)
+    {
+        if(c == '\\')
+        {
+            if(escape)
+            {
+                buffer ~= '\\';
+                escape = false;
+                continue;
+            }
+            else
+            {
+                escape = true;
+                continue;
+            }
+        }
+
+        if(escape)
+        {
+            escape = false;
+
+            switch(c)
+            {
+                case 'n': buffer ~= '\n'; break;
+                case 'r': buffer ~= '\r'; break;
+                case '"': buffer ~= '"';  break;
+
+                default: throw new Exception([c]);
+            }
+        }
+        else
+            buffer ~= c;
+    }
+
+    return buffer.assumeUnique;
 }
 
 // "Mne_Print": Instruction.Print, etc.

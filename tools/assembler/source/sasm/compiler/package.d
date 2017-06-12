@@ -58,6 +58,7 @@ class Compiler
             this.writeHeader();
             this.writePointerTable();
             this.writeFunctionTable();
+            this.writeBody();
         }
 
         void writeHeader()
@@ -90,8 +91,6 @@ class Compiler
         void writeFunctionTable()
         {
             // Write the function table itself
-            foreach(child; this._code.opcodes)
-                this.writeOpcode(child);
 
             // Write the size of the function table (DOESN'T EVEN GET WRITTEN (in the right place))
             auto current = this._index;
@@ -101,6 +100,12 @@ class Compiler
             this._index  = this._functionTableLengthPointer;
             this.writeBE!int(size);
             this._index  = current;
+        }
+
+        void writeBody()
+        {
+            foreach(child; this._code.opcodes)
+                this.writeOpcode(child);
         }
 
         void writeOpcode(NodeMneumonic node)
