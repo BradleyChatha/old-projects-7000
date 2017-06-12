@@ -12,7 +12,7 @@ SasmUncommented:
 // The main grammar
 mixin(grammar(`
 Sasm:
-    Code < (Label / Mneumonic)+
+    Code < (Label / Mneumonic / Variable)+
 
     # Mneumonics
     Mneumonic < Mne_Print /
@@ -22,6 +22,9 @@ Sasm:
     Mne_Print < :'print' Value
     Mne_Jump  < :'jump' Val_Label
     Mne_Nop   < 'nop'
+
+    # Variable declaration
+    Variable < :'declare' identifier Value
 
     # Data Values
     Value  <- String   /
@@ -139,6 +142,8 @@ unittest
     import sasm.parser.ast;
 
     auto tree = parseSasm(`
+        declare Six int32 6
+
         .Main:
             print string "Hello\nWorld!"
             print int32  2013

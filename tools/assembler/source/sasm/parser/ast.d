@@ -17,7 +17,8 @@ abstract class Node
         Value_Label,
 
         Mneumonic,
-        Code
+        Code,
+        Declaration
     }
 
     private
@@ -168,7 +169,8 @@ class NodeCode : Node
 {
     public
     {
-        NodeMneumonic[] opcodes;
+        NodeMneumonic[]   opcodes;
+        NodeDeclaration[] variables;
     }
 
     public
@@ -184,9 +186,45 @@ class NodeCode : Node
             import std.algorithm : each;
 
             writer.write("[Code]");
+
+            writer.write("[Variables]");
+            writer.entab();
+            this.variables.each!(v => v.writeDebugString(writer));
+            writer.detab();
+
             writer.write("[Mneumonics]");
             writer.entab();
             this.opcodes.each!(o => o.writeDebugString(writer));
+            writer.detab();
+        }
+    }
+}
+
+///
+class NodeDeclaration : Node
+{
+    public
+    {
+        string    name;
+        NodeValue value;
+    }
+
+    public
+    {
+        ///
+        this(string name, NodeValue value = null)
+        {
+            this.name  = name;
+            this.value = value;
+            super(Node.Type.Declaration);
+        }
+
+        ///
+        override void writeDebugString(TabWriter writer)
+        {
+            writer.write("[Declaration] <Name:" ~ this.name ~ ">");
+            writer.entab();
+            this.value.writeDebugString(writer);
             writer.detab();
         }
     }
@@ -213,8 +251,9 @@ NodeCode treeToAst(ParseTree tree)
     {
         switch(child.name)
         {
-            case "Sasm.Label":      child.parseLabel(info);                     break;
-            case "Sasm.Mneumonic":  code.opcodes ~= child.parseMneumonic(info); break;
+            case "Sasm.Label":      child.parseLabel(info);                         break;
+            case "Sasm.Mneumonic":  code.opcodes    ~= child.parseMneumonic(info);  break;
+            case "Sasm.Variable":   code.variables  ~= child.parseDeclaration();    break;
 
             default:
                 throw new Exception(format("Invalid tree name: '%s'", child.name));
@@ -251,6 +290,20 @@ private NodeMneumonic parseMneumonic(ParseTree tree, ref ParseInfo info)
         code.operands ~= child.parseValue();
 
     return code;
+}
+
+private NodeDeclaration parseDeclaration(ParseTree tree)
+{
+    tree.enforceTreeName("Sasm.Variable");
+    assert(tree.children.length == 1);
+
+    auto name = tree.matches[0];
+    tree      = tree.children[0];
+    tree.enforceTreeName("Sasm.Value");
+
+    auto value = tree.parseValue();
+
+    return new NodeDeclaration(name, value);
 }
 
 private NodeValue parseValue(ParseTree tree)

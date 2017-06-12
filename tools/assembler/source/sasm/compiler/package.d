@@ -10,14 +10,22 @@ class Compiler
         struct Label
         {
             string name;
-            uint   offset;
+            uint   offset; // Relative to the body
+        }
+
+        struct Variable
+        {
+            string      name;
+            uint        offset; // Relative to the pointer table
+            Node.Type   type;   // Value_Float, Value_String, etc.
         }
 
         NodeCode _code;
         ubyte[]  _binary;
         uint     _index;
 
-        Label[string] _labels;
+        Label[string]       _labels;
+        Variable[string]    _variables;
 
         uint _pointerTableLengthPointer;
         uint   _pointerTableLength;
@@ -76,9 +84,15 @@ class Compiler
         void writePointerTable()
         {
             // Write the pointer table itself
-            // TODO
+            foreach(variable; this._code.variables)
+            {
+                auto info = Variable(variable.name, (this._index - ((int.sizeof * 2) + "SVM".length)), variable.value.type);
+                this._variables[info.name] = info;
 
-            // Write the size of the pointer table (INCORRECT)
+                this.writeValue(variable.value);
+            }
+
+            // Write the size of the pointer table
             auto current = this._index;
             uint size    = cast(uint)((current - this._functionTableLengthPointer) - int.sizeof);
             assert(size <= current, "overflow");
@@ -93,7 +107,7 @@ class Compiler
         {
             // Write the function table itself
 
-            // Write the size of the function table (DOESN'T EVEN GET WRITTEN (in the right place))
+            // Write the size of the function table
             auto current = this._index;
             uint size    = cast(uint)(current - (this._functionTableLengthPointer + int.sizeof + this._pointerTableLength));
             assert(size <= current, "overflow/incorrect maths");
@@ -127,44 +141,47 @@ class Compiler
 
             // Write the operands.
             foreach(operand; node.operands)
+                this.writeValue(operand, operand.type == NodeMneumonic.Instruction.Jump);
+        }
+
+        void writeValue(NodeValue value, bool isJumpCommand = false)
+        {
+            switch(value.type) with(Node.Type)
             {
-                switch(operand.type) with(Node.Type)
-                {
-                    case Value_I32: 
+                case Value_I32: 
+                    this.write(0x03);
+                    this.writeBE!int(value.value!int);
+                    break;
+
+                case Value_String:
+                    auto str = value.value!string;
+
+                    this.write(0x05);
+                    this.write(cast(ubyte)str.length); // TODO: Size check.
+                    this.write(cast(immutable(ubyte[]))str);
+                    break;
+
+                case Value_Float32:
+                    this.write(0x04);
+                    this.writeBE!float(value.value!float);
+                    break;
+
+                case Value_Label:
+                    auto name = value.value!string;
+                    auto ptr  = (name in this._labels);
+
+                    if(ptr is null)
+                        throw new Exception(name); // TODO
+
+                    // Special case: Jump doesn't expect this
+                    if(isJumpCommand)
                         this.write(0x03);
-                        this.writeBE!int(operand.value!int);
-                        break;
 
-                    case Value_String:
-                        auto str = operand.value!string;
+                    this.writeBE!int(ptr.offset);
+                    break;
 
-                        this.write(0x05);
-                        this.write(cast(ubyte)str.length); // TODO: Size check.
-                        this.write(cast(immutable(ubyte[]))str);
-                        break;
-
-                    case Value_Float32:
-                        this.write(0x04);
-                        this.writeBE!float(operand.value!float);
-                        break;
-
-                    case Value_Label:
-                        auto name = operand.value!string;
-                        auto ptr  = (name in this._labels);
-
-                        if(ptr is null)
-                            throw new Exception(name); // TODO
-
-                        // Special case: Jump doesn't expect this
-                        if(node.opcode != NodeMneumonic.Instruction.Jump)
-                            this.write(0x03);
-
-                        this.writeBE!int(ptr.offset);
-                        break;
-
-                    default:
-                        throw new Exception("TODO");
-                }
+                default:
+                    throw new Exception("TODO");
             }
         }
 
