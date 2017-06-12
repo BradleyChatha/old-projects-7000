@@ -65,7 +65,11 @@ void RunProgram(Machine Mach)
         }
         else if(CurrentInstruction == ProgramInstructions.VARIABLE)
         {
-
+            
+        }
+        else
+        {
+            throw new ProgramRunnerException(format("Unknown program instruction: '0x%X'", cast(ubyte)CurrentInstruction));
         }
     }
 }
