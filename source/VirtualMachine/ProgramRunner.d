@@ -62,9 +62,15 @@ void RunProgram(Machine Mach)
         {
             RawValueToStdout(Mach);
         }
+        else if(CurrentInstruction == ProgramInstructions.VARIABLE)
+        {
+
+
+            CurrentInstruction = cast(ProgramInstructions)Prog.Body.Body[Mach.ProgramCounter];
+        }
         else
         {
-            throw new ProgramRunnerException(format("Unknown program instruction: '0x%X'", cast(ubyte)CurrentInstruction));
+            throw new ProgramRunnerException(format("Unknown program instruction: '0x%X' at location 0x%X.", cast(ubyte)CurrentInstruction, Mach.ProgramCounter));
         }
     }
 }
@@ -83,35 +89,89 @@ void RawValueToStdout(Machine Mach)
         Mach.ProgramCounter += 1;
         write(GetInt(Mach));
     }
+    else if(CurrentInstruction == ProgramInstructions.VARIABLE)
+    {
+        Mach.ProgramCounter += 1;
+        uint Location = bigEndianToNative!int(cast(ubyte[4])Mach.ReadBytes(4)[0..4]);
+        ubyte[] Data = AccessVariable(Mach, Location);
+    
+        CurrentInstruction = cast(ProgramInstructions)Mach.Prog.Header.PointerTable[Location];
+
+        if(CurrentInstruction == ProgramInstructions.STRING)
+        {
+            string Str = "";
+
+            for(int i = 0; i < Data.length; i++)
+            {
+                Str ~= cast(char)Data[i];
+            }
+
+            write(Str);
+        }
+        else if(CurrentInstruction == ProgramInstructions.INTEGER)
+        {
+            
+        }
+    }
     else 
         throw new ProgramRunnerException("Unkown type being streamed to stdout."); 
 }
 
-string GetString(Machine Mach)
+string GetString(Machine Mach, bool IncrementCounter = true)
 {
     ubyte StrLength = Mach.Prog.Body.Body[Mach.ProgramCounter];
-    Mach.ProgramCounter += 1;
+   
+    if(IncrementCounter)
+        Mach.ProgramCounter += 1;
+    
     string Str = "";
 
     for(int i = 0; i < StrLength; i++)
     {
         Str ~= cast(char)Mach.Prog.Body.Body[Mach.ProgramCounter];
-        Mach.ProgramCounter += 1;
+        
+        if(IncrementCounter)
+            Mach.ProgramCounter += 1;
     }
 
     return Str;
 }
 
-int GetInt(Machine Mach)
+int GetInt(Machine Mach, bool IncrementCounter = true)
 {
-    return bigEndianToNative!int(cast(ubyte[4])Mach.ReadBytes(4)[0..4]);
+    return bigEndianToNative!int(cast(ubyte[4])Mach.ReadBytes(4, IncrementCounter)[0..4]);
 }
 
-ubyte[] AccessVariable(uint ID)
+///TODO: Rewrite, make nicer...
+ubyte[] AccessVariable(Machine Mach, int ID)
 {
+    if(ID >= Mach.Prog.Header.PointerTable.length)
+        throw new ProgramRunnerException(format("The pointer table ID is out of bounds. Trying to access (relative) '0x%X'.", ID));
+
     ubyte[] Return;
+    ProgramInstructions Instruction = cast(ProgramInstructions)Mach.Prog.Header.PointerTable[ID];
+    ID += 1;
 
+    if(Instruction == ProgramInstructions.INTEGER)
+    {
+        Return = Mach.Prog.Header.PointerTable[ID..ID + 4];
+    }
+    else if(Instruction == ProgramInstructions.STRING)
+    {
+        ubyte StrLength = Mach.Prog.Header.PointerTable[ID];
+        ID += 1;      
 
+        Return = Mach.Prog.Header.PointerTable[ID..ID + StrLength];
+    }
 
     return Return;
+}
+
+unittest
+{
+    Machine Mach = new Machine(new Program("Test.svma"));
+
+    int Value = bigEndianToNative!int(cast(ubyte[4])AccessVariable(Mach, 0x00000000)[0..4]);
+
+    assert(Value == 255);
 }
