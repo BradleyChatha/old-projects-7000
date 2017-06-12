@@ -257,10 +257,9 @@ private NodeValue parseValue(ParseTree tree)
 {
     import std.conv : to;
 
-    tree.enforceTreeName("Sasm.Value");
-    assert(tree.children.length == 1);
-
-    tree       = tree.children[0];
+    if(tree.name == "Sasm.Value")
+        tree = tree.children[0];
+        
     auto match = tree.matches[0];
 
     switch(tree.name)
