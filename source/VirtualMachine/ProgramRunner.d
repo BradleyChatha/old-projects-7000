@@ -56,7 +56,6 @@ void RunProgram(Machine Mach)
         else if(CurrentInstruction == ProgramInstructions.JUMP)
         {
             uint Location = bigEndianToNative!int(cast(ubyte[4])Mach.ReadBytes(4)[0..4]);
-            //writeln(Location);
             Mach.ProgramCounter = Location;
         }
         else if(CurrentInstruction == ProgramInstructions.STDOUT)
@@ -77,29 +76,42 @@ void RawValueToStdout(Machine Mach)
     if(CurrentInstruction == ProgramInstructions.STRING)
     {
         Mach.ProgramCounter += 1;
-        ubyte StrLength = Mach.Prog.Body.Body[Mach.ProgramCounter];
-        Mach.ProgramCounter += 1;
-        string Str = "";
-
-        for(int i = 0; i < StrLength; i++)
-        {
-            Str ~= cast(char)Mach.Prog.Body.Body[Mach.ProgramCounter];
-            Mach.ProgramCounter += 1;
-        }
-
-        write(Str);
+        write(GetString(Mach));
     }
     else if(CurrentInstruction == ProgramInstructions.INTEGER)
     {
         Mach.ProgramCounter += 1;
-        int Value = bigEndianToNative!int(cast(ubyte[4])Mach.ReadBytes(4)[0..4]);
-        write(Value);
+        write(GetInt(Mach));
     }
     else 
         throw new ProgramRunnerException("Unkown type being streamed to stdout."); 
 }
 
-void AccessVariable(uint ID)
+string GetString(Machine Mach)
 {
-    
+    ubyte StrLength = Mach.Prog.Body.Body[Mach.ProgramCounter];
+    Mach.ProgramCounter += 1;
+    string Str = "";
+
+    for(int i = 0; i < StrLength; i++)
+    {
+        Str ~= cast(char)Mach.Prog.Body.Body[Mach.ProgramCounter];
+        Mach.ProgramCounter += 1;
+    }
+
+    return Str;
+}
+
+int GetInt(Machine Mach)
+{
+    return bigEndianToNative!int(cast(ubyte[4])Mach.ReadBytes(4)[0..4]);
+}
+
+ubyte[] AccessVariable(uint ID)
+{
+    ubyte[] Return;
+
+
+
+    return Return;
 }
