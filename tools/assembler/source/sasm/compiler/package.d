@@ -22,6 +22,7 @@ class Compiler
         size_t _pointerTableLengthPointer;
         uint   _pointerTableLength;
         size_t _functionTableLengthPointer;
+        size_t _bodyPointer;
     }
 
     public
@@ -104,6 +105,8 @@ class Compiler
 
         void writeBody()
         {
+            this._bodyPointer = this._index;
+
             foreach(child; this._code.opcodes)
                 this.writeOpcode(child);
         }
@@ -116,7 +119,7 @@ class Compiler
                 if((label in this._labels) !is null)
                     throw new Exception(label); // TODO: Improve message.
 
-                this._labels[label] = Label(label, this._index);
+                this._labels[label] = Label(label, this._index - this._bodyPointer);
             }
 
             // Write the opcode
@@ -135,10 +138,14 @@ class Compiler
                     case Value_String:
                         auto str = operand.value!string;
 
-                        // Code tis very sloppy though.
                         this.write(0x05);
                         this.write(cast(ubyte)str.length); // TODO: Size check.
                         this.write(cast(immutable(ubyte[]))str);
+                        break;
+
+                    case Value_Float32:
+                        this.write(0x04);
+                        this.writeBE!float(operand.value!float);
                         break;
 
                     default:

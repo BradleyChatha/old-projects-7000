@@ -12,32 +12,35 @@ SasmUncommented:
 // The main grammar
 mixin(grammar(`
 Sasm:
-    Code <- (Label / Mneumonic)*
+    Code < (Label / Mneumonic)+
 
     # Mneumonics
-    Mneumonic <- Mne_Print /
-                 Mne_Nop
+    Mneumonic < Mne_Print /
+                Mne_Nop
 
     Mne_Print < :'print' Value
     Mne_Nop   < 'nop'
 
     # Data Values
-    Value  <- String /
-              Int32
+    Value  <- String   /
+              Int32    /
+              Float32
 
-    String < :'string' ;Lit_String
-    Int32  < :'int32'  ;Lit_Integer  
+    String  < :'string' ;Lit_String
+    Int32   < :'int32'  ;Lit_Integer
+    Float32 < :'float'  ;Lit_Float
 
     # Data Literals
-    Lit_String  <- :doublequote ~(!doublequote Character)* :doublequote
-    Lit_Integer <  digits
+    Lit_String  < :doublequote ~(!doublequote Character)* :doublequote
+    Lit_Integer < digits
+    Lit_Float   <~ digits ('.' digits)? :'f'
     
     # Character handling
-    Character <- ;EscapedCharacter / .
+    Character < ;EscapedCharacter / .
     EscapedCharacter <~ backslash ('n' / 'r' / backslash / doublequote)
 
     # .SomeLabelName: -> 'SomeLabelName'
-    Label <- :'.' identifier :Colon
+    Label < :'.' identifier :Colon
     Colon < ':'
 `));
 
@@ -72,6 +75,13 @@ unittest
 {
     auto test = new GrammarTester!(Sasm, "Lit_Integer");
     test.assertSimilar("129213", "Lit_Integer");
+}
+
+unittest
+{
+    auto test = new GrammarTester!(Sasm, "Lit_Float");
+    test.assertSimilar("2053f",    "Lit_Float");
+    test.assertSimilar("2053.69f", "Lit_Float");
 }
 
 unittest
@@ -126,9 +136,11 @@ unittest
 
     auto tree = parseSasm(`
         .Main:
-            print string "Hello world!\n"
-            print int32  69
-            print string "\nPlease update this test once the grammar is more complete!"
+            print string "Hello\nWorld!"
+            print int32  2013
+            print float  2013f
+            print float  2013.13f
+            nop
     `);
 
     import std.stdio;

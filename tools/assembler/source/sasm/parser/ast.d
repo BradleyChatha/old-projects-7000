@@ -11,6 +11,7 @@ abstract class Node
     {
         Value_String,
         Value_I32,
+        Value_Float32,
 
         Mneumonic,
         Code
@@ -60,7 +61,7 @@ class NodeValue : Node
     import std.variant : Algebraic;
 
     ///
-    alias Value = Algebraic!(int, string);
+    alias Value = Algebraic!(int, string, float);
 
     private
     {
@@ -81,6 +82,13 @@ class NodeValue : Node
         {
             super(Node.Type.Value_String);
             this._value = str;
+        }
+
+        /// Ctor for Float32 values.
+        this(float f32)
+        {
+            super(Node.Type.Value_Float32);
+            this._value = f32;
         }
 
         override void writeDebugString(TabWriter writer)
@@ -253,8 +261,9 @@ private NodeValue parseValue(ParseTree tree)
 
     switch(tree.name)
     {
-        case "Sasm.String": return new NodeValue(match.escapeString);
-        case "Sasm.Int32":  return new NodeValue(match.to!int);
+        case "Sasm.String":  return new NodeValue(match.escapeString);
+        case "Sasm.Int32":   return new NodeValue(match.to!int);
+        case "Sasm.Float32": return new NodeValue(match.to!float);
 
         default:
             throw new Exception(tree.name);
