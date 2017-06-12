@@ -124,5 +124,5 @@ unittest
 
     import std.stdio;
     writeln(tree);
-    writeln(tree.treeToAst.opcodes);
+    writeln(tree.treeToAst);
 }

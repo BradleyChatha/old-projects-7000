@@ -1,5 +1,6 @@
 module sasm.parser.ast;
 
+import sasm.parser.tabwriter;
 import pegged.grammar;
 
 ///
@@ -26,6 +27,18 @@ abstract class Node
         this(Type type)
         {
             this._type = type;
+        }
+
+        ///
+        abstract void writeDebugString(TabWriter writer);
+
+        ///
+        override string toString()
+        {
+            auto writer = new TabWriter();
+            this.writeDebugString(writer);
+
+            return writer.text();
         }
 
         /++
@@ -68,6 +81,12 @@ class NodeValue : Node
         {
             super(Node.Type.Value_String);
             this._value = str;
+        }
+
+        override void writeDebugString(TabWriter writer)
+        {
+            import std.format : format;
+            writer.write(format("[Value] <Type:%s> <Value:%s>", this.type, this._value));
         }
 
         /++
@@ -116,6 +135,18 @@ class NodeMneumonic : Node
 
             super(Node.Type.Mneumonic);
         }
+
+        override void writeDebugString(TabWriter writer)
+        {
+            import std.format    : format;
+            import std.algorithm : each;
+
+            writer.write(format("[Mneumonic] <Opcode:%s> <Labels:%s>", this.opcode, this.labels));
+            writer.write("[Values]");
+            writer.entab();
+            this.operands.each!(o => o.writeDebugString(writer));
+            writer.detab();
+        }
     }
 }
 
@@ -133,6 +164,17 @@ class NodeCode : Node
         this()
         {
             super(Node.Type.Code);
+        }
+
+        override void writeDebugString(TabWriter writer)
+        {
+            import std.algorithm : each;
+
+            writer.write("[Code]");
+            writer.write("[Mneumonics]");
+            writer.entab();
+            this.opcodes.each!(o => o.writeDebugString(writer));
+            writer.detab();
         }
     }
 }
