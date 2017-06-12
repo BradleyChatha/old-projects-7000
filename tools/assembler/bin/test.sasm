@@ -1,0 +1,8 @@
+.Main:
+    print string "Hello World!"
+
+.SixtyNine:
+    print int32 69
+
+    jump label .SixtyNine:
+    nop
