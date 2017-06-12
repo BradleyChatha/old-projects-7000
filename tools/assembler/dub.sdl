@@ -1,0 +1,8 @@
+name "assembler"
+description "Assembler for Soup VM"
+authors "Sealab"
+copyright "Copyright © 2017, Sealab"
+license "MIT"
+dependency "pegged" version="~>0.4.2"
+
+targetPath "bin"

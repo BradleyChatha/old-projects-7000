@@ -1,0 +1,12 @@
+declare Six int32 6
+
+.Main:
+    print string "Hello\nWorld!"
+    print int32  2013
+    print float  2013f
+    print float  2013.13f
+    print variable Six
+    print label .Main:
+    nop
+    jump label .Main:
+    nop

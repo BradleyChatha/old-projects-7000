@@ -5,5 +5,9 @@
 	],
 	"description": "A minimal D application.",
 	"copyright": "Copyright © 2017, sherb",
-	"license": "proprietary"
+	"license": "proprietary",
+
+	"subPackages": [
+		"./tools/assembler/"
+	]
 }
