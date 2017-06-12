@@ -20,7 +20,7 @@ Sasm:
                 Mne_Jump
 
     Mne_Print < :'print' Value
-    Mne_Jump  < :'jump' Val_Labelgit
+    Mne_Jump  < :'jump' Val_Label
     Mne_Nop   < 'nop'
 
     # Data Values
