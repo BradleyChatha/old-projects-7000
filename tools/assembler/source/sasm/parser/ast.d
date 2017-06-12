@@ -15,6 +15,7 @@ abstract class Node
         Value_I32,
         Value_Float32,
         Value_Label,
+        Value_Variable,
 
         Mneumonic,
         Code,
@@ -82,9 +83,11 @@ class NodeValue : Node
         }
 
         /// Ctor for string values.
-        this(string str, Flag!"isLabel" label = No.isLabel)
+        this(string str, Flag!"isLabel" label = No.isLabel, Flag!"isVariable" variable = No.isVariable)
         {
-            super((label) ? Node.Type.Value_Label : Node.Type.Value_String);
+            super((label) ? Node.Type.Value_Label 
+                          : (variable) ? Node.Type.Value_Variable
+                                       : Node.Type.Value_String);
             this._value = str;
         }
 
@@ -317,10 +320,11 @@ private NodeValue parseValue(ParseTree tree)
 
     switch(tree.name)
     {
-        case "Sasm.Val_Label":  return new NodeValue(match, Yes.isLabel);
-        case "Sasm.String":     return new NodeValue(match.escapeString);
-        case "Sasm.Int32":      return new NodeValue(match.to!int);
-        case "Sasm.Float32":    return new NodeValue(match.to!float);
+        case "Sasm.Val_Variable":   return new NodeValue(match, No.isLabel, Yes.isVariable);
+        case "Sasm.Val_Label":      return new NodeValue(match, Yes.isLabel);
+        case "Sasm.String":         return new NodeValue(match.escapeString);
+        case "Sasm.Int32":          return new NodeValue(match.to!int);
+        case "Sasm.Float32":        return new NodeValue(match.to!float);
 
         default:
             throw new Exception(tree.name);

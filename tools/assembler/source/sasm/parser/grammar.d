@@ -27,15 +27,17 @@ Sasm:
     Variable < :'declare' identifier Value
 
     # Data Values
-    Value  <- String   /
-              Int32    /
-              Float32  /
-              Val_Label
+    Value  <- String        /
+              Int32         /
+              Float32       /
+              Val_Label     /
+              Val_Variable
 
-    String      < :'string' ;Lit_String
-    Int32       < :'int32'  ;Lit_Integer
-    Float32     < :'float'  ;Lit_Float
-    Val_Label   < :'label'  ;Label
+    String       < :'string'    ;Lit_String
+    Int32        < :'int32'     ;Lit_Integer
+    Float32      < :'float'     ;Lit_Float
+    Val_Label    < :'label'     ;Label
+    Val_Variable < :'variable'  ;identifier
 
     # Data Literals
     Lit_String  < :doublequote ~(!doublequote Character)* :doublequote
@@ -149,6 +151,7 @@ unittest
             print int32  2013
             print float  2013f
             print float  2013.13f
+            print variable Six
             nop
             jump label .Main:
     `);

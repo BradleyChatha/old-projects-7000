@@ -180,6 +180,15 @@ class Compiler
                     this.writeBE!int(ptr.offset);
                     break;
 
+                case Value_Variable:
+                    auto ptr = (value.value!string in this._variables);
+                    assert(ptr !is null, "Add an exception + error message here");
+
+                    this.write(0x06); // Variable
+                    this.write(0x00); // Get
+                    this.writeBE!int(ptr.offset);
+                    break;
+
                 default:
                     throw new Exception("TODO");
             }

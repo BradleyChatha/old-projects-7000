@@ -1,5 +1,7 @@
     declare One int32 1
     declare Str string "Hello World!\n"
     
+    print variable Str
+
     nop
     nop
