@@ -10,19 +10,19 @@ class Compiler
         struct Label
         {
             string name;
-            size_t offset;
+            uint   offset;
         }
 
         NodeCode _code;
         ubyte[]  _binary;
-        size_t   _index;
+        uint     _index;
 
         Label[string] _labels;
 
-        size_t _pointerTableLengthPointer;
+        uint _pointerTableLengthPointer;
         uint   _pointerTableLength;
-        size_t _functionTableLengthPointer;
-        size_t _bodyPointer;
+        uint _functionTableLengthPointer;
+        uint _bodyPointer;
     }
 
     public
