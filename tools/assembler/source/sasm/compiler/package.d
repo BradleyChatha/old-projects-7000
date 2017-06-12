@@ -86,7 +86,9 @@ class Compiler
             // Write the pointer table itself
             foreach(variable; this._code.variables)
             {
-                auto info = Variable(variable.name, (this._index - ((int.sizeof * 2) + "SVM".length)), variable.value.type);
+                auto info = Variable(variable.name, 
+                                     cast(uint)(this._index - ((int.sizeof * 2) + "SVM".length)), 
+                                     variable.value.type);
                 this._variables[info.name] = info;
 
                 this.writeValue(variable.value);
