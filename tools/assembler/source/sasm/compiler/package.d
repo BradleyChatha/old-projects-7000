@@ -148,6 +148,20 @@ class Compiler
                         this.writeBE!float(operand.value!float);
                         break;
 
+                    case Value_Label:
+                        auto name = operand.value!string;
+                        auto ptr  = (name in this._labels);
+
+                        if(ptr is null)
+                            throw new Exception(name); // TODO
+
+                        // Special case: Jump doesn't expect this
+                        if(node.opcode != NodeMneumonic.Instruction.Jump)
+                            this.write(0x03);
+
+                        this.writeBE!int(ptr.offset);
+                        break;
+
                     default:
                         throw new Exception("TODO");
                 }

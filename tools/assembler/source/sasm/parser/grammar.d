@@ -16,19 +16,23 @@ Sasm:
 
     # Mneumonics
     Mneumonic < Mne_Print /
-                Mne_Nop
+                Mne_Nop   /
+                Mne_Jump
 
     Mne_Print < :'print' Value
+    Mne_Jump  < :'jump' Value
     Mne_Nop   < 'nop'
 
     # Data Values
     Value  <- String   /
               Int32    /
-              Float32
+              Float32  /
+              Val_Label
 
-    String  < :'string' ;Lit_String
-    Int32   < :'int32'  ;Lit_Integer
-    Float32 < :'float'  ;Lit_Float
+    String      < :'string' ;Lit_String
+    Int32       < :'int32'  ;Lit_Integer
+    Float32     < :'float'  ;Lit_Float
+    Val_Label   < :'label'  ;Label
 
     # Data Literals
     Lit_String  < :doublequote ~(!doublequote Character)* :doublequote
@@ -141,6 +145,7 @@ unittest
             print float  2013f
             print float  2013.13f
             nop
+            jump label .Main:
     `);
 
     import std.stdio;

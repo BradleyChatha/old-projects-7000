@@ -3,6 +3,8 @@ module sasm.parser.ast;
 import sasm.parser.tabwriter;
 import pegged.grammar;
 
+public import std.typecons : Flag, Yes, No;
+
 ///
 abstract class Node
 {
@@ -12,6 +14,7 @@ abstract class Node
         Value_String,
         Value_I32,
         Value_Float32,
+        Value_Label,
 
         Mneumonic,
         Code
@@ -78,9 +81,9 @@ class NodeValue : Node
         }
 
         /// Ctor for string values.
-        this(string str)
+        this(string str, Flag!"isLabel" label = No.isLabel)
         {
-            super(Node.Type.Value_String);
+            super((label) ? Node.Type.Value_Label : Node.Type.Value_String);
             this._value = str;
         }
 
@@ -118,7 +121,8 @@ class NodeMneumonic : Node
     enum Instruction
     {
         Nop   = 0x00,
-        Print = 0x01
+        Print = 0x01,
+        Jump  = 0x07 // ?
     }
 
     public
@@ -261,9 +265,10 @@ private NodeValue parseValue(ParseTree tree)
 
     switch(tree.name)
     {
-        case "Sasm.String":  return new NodeValue(match.escapeString);
-        case "Sasm.Int32":   return new NodeValue(match.to!int);
-        case "Sasm.Float32": return new NodeValue(match.to!float);
+        case "Sasm.Val_Label":  return new NodeValue(match, Yes.isLabel);
+        case "Sasm.String":     return new NodeValue(match.escapeString);
+        case "Sasm.Int32":      return new NodeValue(match.to!int);
+        case "Sasm.Float32":    return new NodeValue(match.to!float);
 
         default:
             throw new Exception(tree.name);
@@ -327,7 +332,8 @@ private NodeMneumonic.Instruction nameToOpcode(string name)
             _opcodeStrings = 
             [
                 "Sasm.Mne_Print": Print,
-                "Sasm.Mne_Nop":   Nop
+                "Sasm.Mne_Nop":   Nop,
+                "Sasm.Mne_Jump":  Jump
             ];
         }
     }
