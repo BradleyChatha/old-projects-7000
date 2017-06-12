@@ -12,7 +12,7 @@ SasmUncommented:
 // The main grammar
 mixin(grammar(`
 Sasm:
-    Code < (Label / Mneumonic)*
+    Code <- (Label / Mneumonic)*
 
     # Mneumonics
     Mneumonic <- Mne_Print
@@ -36,7 +36,7 @@ Sasm:
 
     # .SomeLabelName: -> 'SomeLabelName'
     Label <- :'.' identifier :Colon
-    Colon <- ':'
+    Colon < ':'
 `));
 
 unittest
@@ -108,6 +108,13 @@ ParseTree parseSasm(string code)
 
     auto s = Sasm(sc.matches[0]);
     enforce(s.successful, new Exception("Failure parsing Sasm: " ~ s.failMsg));
+
+    debug
+    {
+        import std.stdio : writefln;
+
+        writefln("Error message (even if there's not an error): %s", s.failMsg);
+    }
 
     return s;
 }

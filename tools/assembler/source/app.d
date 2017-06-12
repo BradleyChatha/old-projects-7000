@@ -1,6 +1,8 @@
-import std.stdio;
+import std.stdio, std.file;
+import sasm.compiler;
 
 void main()
 {
-	writeln("Edit source/app.d to start your project.");
+	auto compiler = new Compiler(".Main: print string \"Hello\\nWorld!\"");
+	std.file.write("Test.svma", compiler.compile);
 }

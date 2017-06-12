@@ -97,7 +97,7 @@ class NodeValue : Node
          +  The `Value` of the value.
          + ++/
         @property
-        inout(Value) value(T)() inout
+        inout(T) value(T)() inout
         {
             return this._value.get!T;
         }
