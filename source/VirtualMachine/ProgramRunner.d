@@ -64,8 +64,6 @@ void RunProgram(Machine Mach)
         }
         else if(CurrentInstruction == ProgramInstructions.VARIABLE)
         {
-
-
             CurrentInstruction = cast(ProgramInstructions)Prog.Body.Body[Mach.ProgramCounter];
         }
         else
@@ -110,7 +108,7 @@ void RawValueToStdout(Machine Mach)
         }
         else if(CurrentInstruction == ProgramInstructions.INTEGER)
         {
-            
+            write(bigEndianToNative!int(cast(ubyte[4])Data[0..4]));
         }
     }
     else 
