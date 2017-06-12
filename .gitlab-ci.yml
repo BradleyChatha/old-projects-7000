@@ -7,7 +7,12 @@ before_script:
 stages:
     - test
     
-dub_test:
+dub_test_vm:
     stage: test
     script:
         - dub test
+
+dub_test_assembler:
+    stage: test
+    script:
+        - dub test :assembler
