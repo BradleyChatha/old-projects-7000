@@ -80,7 +80,7 @@ class Compiler
 
             // Write the size of the pointer table (INCORRECT)
             auto current = this._index;
-            uint size    = cast(uint)(current - this._functionTableLengthPointer) - int.sizeof;
+            uint size    = cast(uint)((current - this._functionTableLengthPointer) - int.sizeof);
             assert(size <= current, "overflow");
 
             this._pointerTableLength = size;
