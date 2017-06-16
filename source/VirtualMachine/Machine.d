@@ -97,7 +97,7 @@ class ProgramComponent
     @property
     uint Length()
     {
-        return this.Contents.length;
+        return cast(uint)this.Contents.length;
     }
 
     public ubyte[] Contents;
