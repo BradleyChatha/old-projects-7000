@@ -64,7 +64,38 @@ void RunProgram(Machine Mach)
         }
         else if(CurrentInstruction == ProgramInstructions.VARIABLE)
         {
-            CurrentInstruction = cast(ProgramInstructions)Prog.Body.Body[Mach.ProgramCounter];
+            Mach.ProgramCounter += 1;
+            ProgramVariableUseage Use = cast(ProgramVariableUseage)Prog.Body.Body[Mach.ProgramCounter];
+            Mach.ProgramCounter += 1;
+
+            if(Use == ProgramVariableUseage.Assignment)
+            {
+                uint Address = Prog.Body.Body[Mach.ProgramCounter];
+                Mach.ProgramCounter += 1;
+                uint DataLength = 0;
+
+                CurrentInstruction = cast(ProgramInstructions)Prog.Header.PointerTable[Address];
+                Address += 1;
+                
+                switch(CurrentInstruction)
+                {
+                    case ProgramInstructions.INTEGER:
+                        DataLength = 4;
+                        break;
+
+                    case ProgramInstructions.STRING:
+                        DataLength = Prog.Header.PointerTable[Address];
+                        break;
+
+                    default: 
+                        throw new ProgramRunnerException(format("Unknown type to try and modify '0x%X'", CurrentInstruction));
+                }
+
+                ProgramInstructions ValueSource = Prog.Body.Body[Mach.ProgramCounter];
+                Mach.ProgramCounter += 1;
+                
+                if()
+            }
         }
         else
         {
@@ -90,6 +121,12 @@ void RawValueToStdout(Machine Mach)
     else if(CurrentInstruction == ProgramInstructions.VARIABLE)
     {
         Mach.ProgramCounter += 1;
+        ProgramVariableUseage Use = cast(ProgramVariableUseage)Mach.Prog.Body.Body[Mach.ProgramCounter];
+
+        if(Use != ProgramVariableUseage.Access)
+            throw new ProgramRunnerException("Cannot read from variable assignments.");
+
+        Mach.ProgramCounter += 1;
         uint Location = bigEndianToNative!int(cast(ubyte[4])Mach.ReadBytes(4)[0..4]);
         ubyte[] Data = AccessVariable(Mach, Location);
     
@@ -112,7 +149,7 @@ void RawValueToStdout(Machine Mach)
         }
     }
     else 
-        throw new ProgramRunnerException("Unkown type being streamed to stdout."); 
+        throw new ProgramRunnerException(format("Unkown type being streamed to stdout (0x%X).", CurrentInstruction)); 
 }
 
 string GetString(Machine Mach, bool IncrementCounter = true)
