@@ -31,6 +31,8 @@ class Compiler
         uint _pointerTableLength;
         uint _functionTableLengthPointer;
         uint _bodyPointer;
+
+        enum _headerSize = (int.sizeof * 2) + "SVM".length;
     }
 
     public
@@ -79,6 +81,8 @@ class Compiler
 
             this._functionTableLengthPointer = this._index;
             this.writeBE!int(0); // Function table length
+
+            assert(this._index == Compiler._headerSize, "The full header wasn't written out.");
         }
 
         void writePointerTable()
@@ -87,7 +91,7 @@ class Compiler
             foreach(variable; this._code.variables)
             {
                 auto info = Variable(variable.name, 
-                                     cast(uint)(this._index - ((int.sizeof * 2) + "SVM".length)), 
+                                     cast(uint)(this._index - Compiler._headerSize), 
                                      variable.value.type);
                 this._variables[info.name] = info;
 
@@ -130,6 +134,7 @@ class Compiler
         void writeOpcode(NodeMneumonic node)
         {
             // Assign labels
+            // TODO: Move this before the code generation step, so code can reference labels that are below
             foreach(label; node.labels)
             {
                 if((label in this._labels) !is null)

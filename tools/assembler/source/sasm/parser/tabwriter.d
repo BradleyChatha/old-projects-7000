@@ -15,6 +15,7 @@ class TabWriter
     public
     {
         ///
+        @safe
         void write(string text)
         {
             import std.range : repeat, take;
@@ -24,7 +25,8 @@ class TabWriter
         }
 
         ///
-        void entab()
+        @safe @nogc
+        void entab() nothrow
         {
             if(this._tabs == size_t.max)
                 return;
@@ -33,7 +35,8 @@ class TabWriter
         }
 
         ///
-        void detab()
+        @safe @nogc
+        void detab() nothrow
         {
             if(this._tabs == 0)
                 return;
@@ -42,7 +45,7 @@ class TabWriter
         }
 
         ///
-        @property
+        @property @safe
         string text()
         {
             return this._text.data.idup;

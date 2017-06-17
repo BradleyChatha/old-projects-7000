@@ -33,15 +33,18 @@ abstract class Node
     public
     {
         ///
-        this(Type type)
+        @safe @nogc
+        this(Type type) nothrow
         {
             this._type = type;
         }
 
         ///
+        @safe
         abstract void writeDebugString(TabWriter writer);
 
         ///
+        @safe
         override string toString()
         {
             auto writer = new TabWriter();
@@ -79,14 +82,16 @@ class NodeValue : Node
     public
     {
         /// Ctor for Int32 values.
-        this(int i32)
+        @trusted @nogc
+        this(int i32) nothrow
         {
             super(Node.Type.Value_I32);
             this._value = i32;
         }
 
         /// Ctor for string values.
-        this(string str, Flag!"isLabel" label = No.isLabel, Flag!"isVariable" variable = No.isVariable)
+        @trusted @nogc
+        this(string str, Flag!"isLabel" label = No.isLabel, Flag!"isVariable" variable = No.isVariable) nothrow
         {
             super((label) ? Node.Type.Value_Label 
                           : (variable) ? Node.Type.Value_Variable
@@ -95,12 +100,14 @@ class NodeValue : Node
         }
 
         /// Ctor for Float32 values.
-        this(float f32)
+        @trusted @nogc
+        this(float f32) nothrow
         {
             super(Node.Type.Value_Float32);
             this._value = f32;
         }
 
+        @trusted
         override void writeDebugString(TabWriter writer)
         {
             import std.format : format;
@@ -114,7 +121,7 @@ class NodeValue : Node
          + Returns:
          +  The `Value` of the value.
          + ++/
-        @property
+        @property @trusted
         inout(T) value(T)() inout
         {
             return this._value.get!T;
@@ -125,11 +132,17 @@ class NodeValue : Node
 ///
 class NodeMneumonic : Node
 {
+    ///
     enum Instruction
     {
+        ///
         Nop   = 0x00,
+        
+        ///
         Print = 0x01,
-        Jump  = 0x07 // ?
+
+        ///
+        Jump  = 0x07
     }
 
     public
@@ -147,7 +160,8 @@ class NodeMneumonic : Node
     public
     {
         ///
-        this(Instruction opcode, NodeValue[] operands = null, string[] labels = null)
+        @safe @nogc
+        this(Instruction opcode, NodeValue[] operands = null, string[] labels = null) nothrow
         {
             this.opcode     = opcode;
             this.operands   = operands;
@@ -156,6 +170,7 @@ class NodeMneumonic : Node
             super(Node.Type.Mneumonic);
         }
 
+        @trusted
         override void writeDebugString(TabWriter writer)
         {
             import std.format    : format;
@@ -182,11 +197,13 @@ class NodeCode : Node
     public
     {
         ///
-        this()
+        @safe @nogc
+        this() nothrow
         {
             super(Node.Type.Code);
         }
 
+        @safe
         override void writeDebugString(TabWriter writer)
         {
             import std.algorithm : each;
@@ -218,7 +235,8 @@ class NodeDeclaration : Node
     public
     {
         ///
-        this(string name, NodeValue value = null)
+        @safe @nogc
+        this(string name, NodeValue value = null) nothrow
         {
             this.name  = name;
             this.value = value;
@@ -226,6 +244,7 @@ class NodeDeclaration : Node
         }
 
         ///
+        @safe
         override void writeDebugString(TabWriter writer)
         {
             writer.write("[Declaration] <Name:" ~ this.name ~ ">");
@@ -242,6 +261,7 @@ private struct ParseInfo
 }
 
 ///
+@safe
 NodeCode treeToAst(ParseTree tree)
 {
     import std.format : format;
@@ -269,6 +289,7 @@ NodeCode treeToAst(ParseTree tree)
     return code;
 }
 
+@safe
 private void parseLabel(ParseTree tree, ref ParseInfo info)
 {
     tree.enforceTreeName("Sasm.Label");
@@ -277,6 +298,7 @@ private void parseLabel(ParseTree tree, ref ParseInfo info)
     info.labelStack ~= tree.matches[0];
 }
 
+@safe
 private NodeMneumonic parseMneumonic(ParseTree tree, ref ParseInfo info)
 {
     tree.enforceTreeName("Sasm.Mneumonic");
@@ -298,6 +320,7 @@ private NodeMneumonic parseMneumonic(ParseTree tree, ref ParseInfo info)
     return code;
 }
 
+@safe
 private NodeDeclaration parseDeclaration(ParseTree tree)
 {
     tree.enforceTreeName("Sasm.Variable");
@@ -312,6 +335,7 @@ private NodeDeclaration parseDeclaration(ParseTree tree)
     return new NodeDeclaration(name, value);
 }
 
+@safe
 private NodeValue parseValue(ParseTree tree)
 {
     import std.conv : to;
@@ -334,6 +358,7 @@ private NodeValue parseValue(ParseTree tree)
     }
 }
 
+@trusted
 private string escapeString(string s)
 {
     import std.exception : assumeUnique;
@@ -380,6 +405,7 @@ private string escapeString(string s)
 
 // "Mne_Print": Instruction.Print, etc.
 private static NodeMneumonic.Instruction[string] _opcodeStrings;
+@safe
 private NodeMneumonic.Instruction nameToOpcode(string name)
 {
     import std.exception : enforce;
