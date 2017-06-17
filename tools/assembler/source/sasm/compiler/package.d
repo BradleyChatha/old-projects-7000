@@ -28,9 +28,11 @@ class Compiler
         Variable[string]    _variables;
 
         uint _pointerTableLengthPointer;
-        uint   _pointerTableLength;
+        uint _pointerTableLength;
         uint _functionTableLengthPointer;
         uint _bodyPointer;
+
+        enum _headerSize = (int.sizeof * 2) + "SVM".length;
     }
 
     public
@@ -79,6 +81,8 @@ class Compiler
 
             this._functionTableLengthPointer = this._index;
             this.writeBE!int(0); // Function table length
+
+            assert(this._index == Compiler._headerSize, "The full header wasn't written out.");
         }
 
         void writePointerTable()
@@ -87,7 +91,7 @@ class Compiler
             foreach(variable; this._code.variables)
             {
                 auto info = Variable(variable.name, 
-                                     cast(uint)(this._index - ((int.sizeof * 2) + "SVM".length)), 
+                                     cast(uint)(this._index - Compiler._headerSize), 
                                      variable.value.type);
                 this._variables[info.name] = info;
 
@@ -130,6 +134,7 @@ class Compiler
         void writeOpcode(NodeMneumonic node)
         {
             // Assign labels
+            // TODO: Move this before the code generation step, so code can reference labels that are below
             foreach(label; node.labels)
             {
                 if((label in this._labels) !is null)
@@ -151,20 +156,35 @@ class Compiler
             switch(value.type) with(Node.Type)
             {
                 case Value_I32: 
-                    this.write(0x03);
+                    this.write(value.type);
                     this.writeBE!int(value.value!int);
+                    break;
+
+                case Value_U32:
+                    this.write(value.type);
+                    this.writeBE!uint(value.value!uint);
+                    break;
+
+                case Value_I8:
+                    this.write(value.type);
+                    this.write(value.value!byte);
+                    break;
+
+                case Value_U8:
+                    this.write(value.type);
+                    this.write(value.value!ubyte);
                     break;
 
                 case Value_String:
                     auto str = value.value!string;
 
-                    this.write(0x05);
+                    this.write(value.type);
                     this.write(cast(ubyte)str.length); // TODO: Size check.
                     this.write(cast(immutable(ubyte[]))str);
                     break;
 
                 case Value_Float32:
-                    this.write(0x04);
+                    this.write(value.type);
                     this.writeBE!float(value.value!float);
                     break;
 
@@ -177,7 +197,7 @@ class Compiler
 
                     // Special case: Jump doesn't expect this
                     if(!isJumpCommand)
-                        this.write(0x03);
+                        this.write(Node.Type.Value_I32);
 
                     this.writeBE!int(ptr.offset);
                     break;
@@ -186,7 +206,7 @@ class Compiler
                     auto ptr = (value.value!string in this._variables);
                     assert(ptr !is null, "Add an exception + error message here");
 
-                    this.write(0x06); // Variable
+                    this.write(value.type); // Variable
                     this.write(0x00); // Get
                     this.writeBE!int(ptr.offset);
                     break;
