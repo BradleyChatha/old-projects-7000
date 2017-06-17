@@ -84,36 +84,21 @@ class NodeValue : Node
 
     public
     {
-        /// Ctor for Int32 values.
-        @trusted @nogc
-        this(int i32) nothrow
-        {
-            super(Node.Type.Value_I32);
-            this._value = i32;
-        }
 
-        /// Ctor for UInt32 values.
-        @trusted @nogc
-        this(uint u32) nothrow
+        /// Ctor for most other types.
+        @trusted
+        this(T)(T value)
+        if(!is(T == string))
         {
-            super(Node.Type.Value_U32);
-            this._value = u32;
-        }
+                 static if(is(T == int))    alias nType = Node.Type.Value_I32;
+            else static if(is(T == uint))   alias nType = Node.Type.Value_U32;
+            else static if(is(T == byte))   alias nType = Node.Type.Value_I8;
+            else static if(is(T == ubyte))  alias nType = Node.Type.Value_U8;
+            else static if(is(T == float))  alias nType = Node.Type.Value_Float32;
+            else static assert(false, T.stringof);
 
-        /// Ctor for Int8 values.
-        @trusted @nogc
-        this(byte i8) nothrow
-        {
-            super(Node.Type.Value_I8);
-            this._value = i8;
-        }
-
-        /// Ctor for Int32 values.
-        @trusted @nogc
-        this(ubyte u8) nothrow
-        {
-            super(Node.Type.Value_U8);
-            this._value = u8;
+            super(nType);
+            this._value = value;
         }
 
         /// Ctor for string values.
@@ -124,14 +109,6 @@ class NodeValue : Node
                           : (variable) ? Node.Type.Value_Variable
                                        : Node.Type.Value_String);
             this._value = str;
-        }
-
-        /// Ctor for Float32 values.
-        @trusted @nogc
-        this(float f32) nothrow
-        {
-            super(Node.Type.Value_Float32);
-            this._value = f32;
         }
 
         @trusted
