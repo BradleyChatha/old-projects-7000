@@ -9,13 +9,16 @@ public import std.typecons : Flag, Yes, No;
 abstract class Node
 {
     ///
-    enum Type
+    enum Type : ubyte
     {
-        Value_String,
-        Value_I32,
-        Value_Float32,
-        Value_Label,
-        Value_Variable,
+        Value_String    = 0x05,
+        Value_I32       = 0x03,
+        Value_Float32   = 0x04,
+        Value_Label     = 0x01, // Note: The type descriptor for 'Label' is never actually written out, it shares the same as I32.
+        Value_Variable  = 0x06,
+
+        // DUMMY VALUE
+        Dummy = 0xE0,
 
         Mneumonic,
         Code,

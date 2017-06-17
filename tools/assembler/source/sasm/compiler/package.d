@@ -28,7 +28,7 @@ class Compiler
         Variable[string]    _variables;
 
         uint _pointerTableLengthPointer;
-        uint   _pointerTableLength;
+        uint _pointerTableLength;
         uint _functionTableLengthPointer;
         uint _bodyPointer;
     }
@@ -151,20 +151,20 @@ class Compiler
             switch(value.type) with(Node.Type)
             {
                 case Value_I32: 
-                    this.write(0x03);
+                    this.write(value.type);
                     this.writeBE!int(value.value!int);
                     break;
 
                 case Value_String:
                     auto str = value.value!string;
 
-                    this.write(0x05);
+                    this.write(value.type);
                     this.write(cast(ubyte)str.length); // TODO: Size check.
                     this.write(cast(immutable(ubyte[]))str);
                     break;
 
                 case Value_Float32:
-                    this.write(0x04);
+                    this.write(value.type);
                     this.writeBE!float(value.value!float);
                     break;
 
@@ -177,7 +177,7 @@ class Compiler
 
                     // Special case: Jump doesn't expect this
                     if(!isJumpCommand)
-                        this.write(0x03);
+                        this.write(Node.Type.Value_I32);
 
                     this.writeBE!int(ptr.offset);
                     break;
@@ -186,7 +186,7 @@ class Compiler
                     auto ptr = (value.value!string in this._variables);
                     assert(ptr !is null, "Add an exception + error message here");
 
-                    this.write(0x06); // Variable
+                    this.write(value.type); // Variable
                     this.write(0x00); // Get
                     this.writeBE!int(ptr.offset);
                     break;
