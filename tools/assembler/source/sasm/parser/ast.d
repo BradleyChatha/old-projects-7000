@@ -88,7 +88,7 @@ class NodeValue : Node
         /// Ctor for most other types.
         @trusted
         this(T)(T value)
-        if(!is(T == string))
+        if(!is(T == string) && NodeValue.Value.allowed!T)
         {
                  static if(is(T == int))    alias nType = Node.Type.Value_I32;
             else static if(is(T == uint))   alias nType = Node.Type.Value_U32;
