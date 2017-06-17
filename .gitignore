@@ -3,6 +3,8 @@
 *.obj
 *.bak
 
+*.Daniel.sasm
+*.bat
 dub.selections.json
 
 #Folders
