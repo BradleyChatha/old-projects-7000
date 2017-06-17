@@ -73,6 +73,14 @@ class ProgramComponent
         return this.Contents[this.Counter + Offset];
     }
 
+    public void SetCounterLocation(uint Location)
+    {
+        if(Location >= this.Length)
+            throw new ProgramException("Cannot access a location larger than contents.");
+
+        this.Counter = Location;
+    }
+
     /**
      * Converts the size of T bytes to type T.
      * Params:

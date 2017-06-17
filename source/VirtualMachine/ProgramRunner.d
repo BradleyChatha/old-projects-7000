@@ -38,6 +38,11 @@ class ProgramRunner
                     STDOut.PushToSTDOut(Prog);
                     break;
 
+                case Instruction.Jump:
+                    uint Address = this.Prog.ProgramBody.ByteArrayToType!(uint)();
+                    this.Prog.ProgramBody.SetCounterLocation(Address);
+                    break;
+
                 default:
                     throw new ProgramRunnerException(format("Unknown program instruction '0x%X'", cast(ubyte)CurrentInstruction));
             }
