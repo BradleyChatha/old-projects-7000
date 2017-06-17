@@ -11,11 +11,14 @@ abstract class Node
     ///
     enum Type : ubyte
     {
+        Value_I32       = 0x01,
+        Value_U32       = 0x00,
+        Value_U8        = 0x03,
+        Value_I8        = 0x04,
+        Value_Float32   = 0x02,
         Value_String    = 0x05,
-        Value_I32       = 0x03,
-        Value_Float32   = 0x04,
-        Value_Label     = 0x01, // Note: The type descriptor for 'Label' is never actually written out, it shares the same as I32.
-        Value_Variable  = 0x06,
+        Value_Label     = 0xDF, // Note: The type descriptor for 'Label' is never actually written out, it shares the same as I32.
+        Value_Variable  = 0x69,
 
         // DUMMY VALUE
         Dummy = 0xE0,
@@ -72,7 +75,7 @@ class NodeValue : Node
     import std.variant : Algebraic;
 
     ///
-    alias Value = Algebraic!(int, string, float);
+    alias Value = Algebraic!(int, string, float, uint, ubyte, byte);
 
     private
     {
@@ -87,6 +90,30 @@ class NodeValue : Node
         {
             super(Node.Type.Value_I32);
             this._value = i32;
+        }
+
+        /// Ctor for UInt32 values.
+        @trusted @nogc
+        this(uint u32) nothrow
+        {
+            super(Node.Type.Value_U32);
+            this._value = u32;
+        }
+
+        /// Ctor for Int8 values.
+        @trusted @nogc
+        this(byte i8) nothrow
+        {
+            super(Node.Type.Value_I8);
+            this._value = i8;
+        }
+
+        /// Ctor for Int32 values.
+        @trusted @nogc
+        this(ubyte u8) nothrow
+        {
+            super(Node.Type.Value_U8);
+            this._value = u8;
         }
 
         /// Ctor for string values.
@@ -139,10 +166,10 @@ class NodeMneumonic : Node
         Nop   = 0x00,
         
         ///
-        Print = 0x01,
+        Print = 0x02,
 
         ///
-        Jump  = 0x07
+        Jump  = 0x03
     }
 
     public
@@ -352,6 +379,9 @@ private NodeValue parseValue(ParseTree tree)
         case "Sasm.String":         return new NodeValue(match.escapeString);
         case "Sasm.Int32":          return new NodeValue(match.to!int);
         case "Sasm.Float32":        return new NodeValue(match.to!float);
+        case "Sasm.UInt32":         return new NodeValue(match.to!uint);
+        case "Sasm.Int8":           return new NodeValue(match.to!byte);
+        case "Sasm.UInt8":          return new NodeValue(match.to!ubyte);
 
         default:
             throw new Exception(tree.name);
