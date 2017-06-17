@@ -137,7 +137,7 @@ final class Program
         this.PointerTable = new ProgramComponent(ProgramInitaliserComponent.GetByteArray(PointerTableLength));
         this.FunctionTable = new ProgramComponent(ProgramInitaliserComponent.GetByteArray(FunctionTableLength));
 
-        uint Length = ProgramInitaliserComponent.Length - ProgramInitaliserComponent.Counter;
+        uint Length = (ProgramInitaliserComponent.Length - ProgramInitaliserComponent.Counter);
 
         this.ProgramBody = new ProgramComponent(ProgramInitaliserComponent.GetByteArray(Length));
 
@@ -151,4 +151,7 @@ final class Program
 unittest
 {
     Program Comp = new Program("Test.SVMA");
+
+    ProgramComponent Prog = new ProgramComponent(cast(ubyte[])[0x40, 0xf0, 0x00, 0x00]);
+    assert(Prog.ByteArrayToType!(float)() == 7.5);
 }

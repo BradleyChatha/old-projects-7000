@@ -7,3 +7,13 @@ enum Instruction : ubyte
     STD_Out,
     Jump
 }
+
+enum DataType : ubyte
+{
+    UInteger = 0x00,
+    Integer,
+    Float,
+    UByte,
+    Byte,
+    String
+}
