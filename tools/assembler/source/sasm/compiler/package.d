@@ -148,7 +148,7 @@ class Compiler
 
             // Write the operands.
             foreach(operand; node.operands)
-                this.writeValue(operand, operand.type == NodeMneumonic.Instruction.Jump);
+                this.writeValue(operand, node.opcode == NodeMneumonic.Instruction.Jump);
         }
 
         void writeValue(NodeValue value, bool isJumpCommand = false)
@@ -202,13 +202,15 @@ class Compiler
                     this.writeBE!int(ptr.offset);
                     break;
 
-                case Value_Variable:
+                case Value_Variable_Ptr:
+                case Value_Variable_Stack:
                     auto ptr = (value.value!string in this._variables);
                     assert(ptr !is null, "Add an exception + error message here");
 
-                    this.write(value.type); // Variable
+                    this.write(0x04); // Variable (Hard coded)
                     this.write(0x00); // Get
-                    this.writeBE!int(ptr.offset);
+                    this.write(value.type == Value_Variable_Ptr ? 0x00 : 0x01); // Whether it's in the stack or pointer table
+                    this.writeBE!uint(ptr.offset);
                     break;
 
                 default:

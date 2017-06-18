@@ -8,7 +8,7 @@ declare Six int32 6
     print uint8  255
     print float  2013f
     print float  2013.13f
-    print variable Six
+    print ptrtable variable Six
     print label .Main:
     nop
     jump label .Main:
