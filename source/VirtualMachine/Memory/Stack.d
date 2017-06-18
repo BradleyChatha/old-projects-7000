@@ -16,6 +16,11 @@ static class Stack
         return Return;
     }
 
+    public static ubyte[] PeekTop()
+    {
+        return MemoryStack[MemoryStack.length - 1];
+    }
+
     @property
     public static uint Length()
     {

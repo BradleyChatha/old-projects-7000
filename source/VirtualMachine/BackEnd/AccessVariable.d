@@ -55,4 +55,6 @@ static class AccessVariable
                 throw new AccessVariableException(format("Cannot access unkown data type '0x%X'.", VariableType));
         }
     }
+
+    
 }
