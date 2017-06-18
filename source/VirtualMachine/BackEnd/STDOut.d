@@ -9,6 +9,7 @@ import std.bitmanip : bigEndianToNative;
 import VirtualMachine.Machine;
 import VirtualMachine.MachineInstructions;
 import VirtualMachine.Memory.Stack;
+import VirtualMachine.BackEnd.AccessVariable;
 
 class STDOutException : Exception
 {
@@ -19,44 +20,52 @@ static class STDOut
 {
     static void PushToSTDOut(Program Prog)
     {
-        DataType Type = cast(DataType)Prog.ProgramBody.ByteArrayToType!(ubyte)();
+        Instruction IsVariable = cast(Instruction)Prog.ProgramBody.ByteArrayToType!(ubyte)();
 
-        switch(Type)
+        if(IsVariable == Instruction.Variable)
         {
-            case DataType.UInteger:
-                write(Prog.ProgramBody.ByteArrayToType!(uint)());                
-                break;
+            write(AccessVariable.Access(Prog));
+        }
+        else
+        {
+            DataType Type = cast(DataType)IsVariable;
+            switch(Type)
+            {
+                case DataType.UInteger:
+                    write(Prog.ProgramBody.ByteArrayToType!(uint)());                
+                    break;
 
-            case DataType.Integer:
-                write(Prog.ProgramBody.ByteArrayToType!(int)());                
-                break;
+                case DataType.Integer:
+                    write(Prog.ProgramBody.ByteArrayToType!(int)());                
+                    break;
 
-            case DataType.Float:
-                write(Prog.ProgramBody.ByteArrayToType!(float)());
-                break;
+                case DataType.Float:
+                    write(Prog.ProgramBody.ByteArrayToType!(float)());
+                    break;
 
-            case DataType.UByte:
-                write(Prog.ProgramBody.ByteArrayToType!(ubyte)());
-                break;
+                case DataType.UByte:
+                    write(Prog.ProgramBody.ByteArrayToType!(ubyte)());
+                    break;
 
-            case DataType.Byte:
-                write(Prog.ProgramBody.ByteArrayToType!(byte)());
-                break;
+                case DataType.Byte:
+                    write(Prog.ProgramBody.ByteArrayToType!(byte)());
+                    break;
 
-            case DataType.String:
-                ubyte Length = Prog.ProgramBody.ByteArrayToType!(ubyte)();
-                string Data = "";
+                case DataType.String:
+                    ubyte Length = Prog.ProgramBody.ByteArrayToType!(ubyte)();
+                    string Data = "";
 
-                for(ubyte i = 0; i < Length; i++)
-                {
-                    Data ~= Prog.ProgramBody.GetNextByte();
-                }
+                    for(ubyte i = 0; i < Length; i++)
+                    {
+                        Data ~= Prog.ProgramBody.GetNextByte();
+                    }
 
-                write(Data);
-                break;
+                    write(Data);
+                    break;
 
-            default:
-                throw new STDOutException(format("Unknown type which is being sent to stdout '0x%X'", cast(ubyte)Type));
+                default:
+                    throw new STDOutException(format("Unknown type which is being sent to stdout '0x%X'", cast(ubyte)Type));
+            }
         }
     }
 }
