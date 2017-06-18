@@ -27,23 +27,25 @@ Sasm:
     Variable < :'declare' identifier Value
 
     # Data Values
-    Value  <- String        /
-              Int8          /
-              UInt8         /
-              Int32         /
-              UInt32        /
-              Float32       /
-              Val_Label     /
-              Val_Variable
+    Value  <- String             /
+              Int8               /
+              UInt8              /
+              Int32              /
+              UInt32             /
+              Float32            /
+              Val_Label          /
+              Val_Variable_Ptr   /
+              Val_Variable_Stack
 
-    String       < :'string'    ;Lit_String
-    Int32        < :'int32'     ;Lit_Integer
-    UInt32       < :'uint32'    ;Lit_Integer
-    Int8         < :'int8'      ;Lit_Integer
-    UInt8        < :'uint8'     ;Lit_Integer
-    Float32      < :'float'     ;Lit_Float
-    Val_Label    < :'label'     ;Label
-    Val_Variable < :'variable'  ;identifier
+    String              < :'string'               ;Lit_String
+    Int32               < :'int32'                ;Lit_Integer
+    UInt32              < :'uint32'               ;Lit_Integer
+    Int8                < :'int8'                 ;Lit_Integer
+    UInt8               < :'uint8'                ;Lit_Integer
+    Float32             < :'float'                ;Lit_Float
+    Val_Label           < :'label'                ;Label
+    Val_Variable_Ptr    < :'ptrtable' :'variable' ;identifier
+    Val_Variable_Stack  < :'stack'    :'variable' ;identifier
 
     # Data Literals
     Lit_String  < :doublequote ~(!doublequote Character)* :doublequote

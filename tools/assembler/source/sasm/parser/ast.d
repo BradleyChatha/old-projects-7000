@@ -11,14 +11,15 @@ abstract class Node
     ///
     enum Type : ubyte
     {
-        Value_I32       = 0x01,
-        Value_U32       = 0x00,
-        Value_U8        = 0x03,
-        Value_I8        = 0x04,
-        Value_Float32   = 0x02,
-        Value_String    = 0x05,
-        Value_Label     = 0xDF, // Note: The type descriptor for 'Label' is never actually written out, it shares the same as I32.
-        Value_Variable  = 0x69,
+        Value_I32               = 0x01,
+        Value_U32               = 0x00,
+        Value_U8                = 0x03,
+        Value_I8                = 0x04,
+        Value_Float32           = 0x02,
+        Value_String            = 0x05,
+        Value_Label             = 0xD0, // Note: The type descriptor for 'Label' is never actually written out, it shares the same as I32.
+        Value_Variable_Ptr      = 0xD1, // Note: 'Variable' is actually an instruction, not a type, so the value in this enum does nothing.
+        Value_Variable_Stack    = 0xD2, // Note: ^^^^
 
         // DUMMY VALUE
         Dummy = 0xE0,
@@ -103,11 +104,15 @@ class NodeValue : Node
 
         /// Ctor for string values.
         @trusted @nogc
-        this(string str, Flag!"isLabel" label = No.isLabel, Flag!"isVariable" variable = No.isVariable) nothrow
+        this(string str,                                Flag!"isLabel" label         = No.isLabel, 
+            Flag!"isVariable" variable = No.isVariable, Flag!"isStackVariable" stack = No.isStackVariable) nothrow
         {
-            super((label) ? Node.Type.Value_Label 
-                          : (variable) ? Node.Type.Value_Variable
-                                       : Node.Type.Value_String);
+            with(Node.Type)
+            {
+                super((label) ? Value_Label 
+                              : (variable) ? ((stack) ? Value_Variable_Stack : Value_Variable_Ptr)
+                                           : Value_String);
+            }
             this._value = str;
         }
 
@@ -351,14 +356,15 @@ private NodeValue parseValue(ParseTree tree)
 
     switch(tree.name)
     {
-        case "Sasm.Val_Variable":   return new NodeValue(match, No.isLabel, Yes.isVariable);
-        case "Sasm.Val_Label":      return new NodeValue(match, Yes.isLabel);
-        case "Sasm.String":         return new NodeValue(match.escapeString);
-        case "Sasm.Int32":          return new NodeValue(match.to!int);
-        case "Sasm.Float32":        return new NodeValue(match.to!float);
-        case "Sasm.UInt32":         return new NodeValue(match.to!uint);
-        case "Sasm.Int8":           return new NodeValue(match.to!byte);
-        case "Sasm.UInt8":          return new NodeValue(match.to!ubyte);
+        case "Sasm.Val_Variable_Stack":     return new NodeValue(match, No.isLabel, Yes.isVariable, Yes.isStackVariable);
+        case "Sasm.Val_Variable_Ptr":       return new NodeValue(match, No.isLabel, Yes.isVariable, No.isStackVariable);
+        case "Sasm.Val_Label":              return new NodeValue(match, Yes.isLabel);
+        case "Sasm.String":                 return new NodeValue(match.escapeString);
+        case "Sasm.Int32":                  return new NodeValue(match.to!int);
+        case "Sasm.Float32":                return new NodeValue(match.to!float);
+        case "Sasm.UInt32":                 return new NodeValue(match.to!uint);
+        case "Sasm.Int8":                   return new NodeValue(match.to!byte);
+        case "Sasm.UInt8":                  return new NodeValue(match.to!ubyte);
 
         default:
             throw new Exception(tree.name);
