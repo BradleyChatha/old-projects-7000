@@ -1,12 +1,11 @@
 import std.stdio;
+
 import VirtualMachine.Machine;
-import VirtualMachine.Program;
 import VirtualMachine.ProgramRunner;
 
 void main()
 {
-	Program Prog = new Program("Test.SVMA");
-    Machine Mach = new Machine(Prog);
-
-    RunProgram(Mach);
+    Program Prog = new Program("Test.SVMA");
+    ProgramRunner Runner = new ProgramRunner(Prog);
+    Runner.ExecuteProgram();
 }

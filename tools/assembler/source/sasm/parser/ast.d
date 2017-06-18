@@ -11,11 +11,14 @@ abstract class Node
     ///
     enum Type : ubyte
     {
+        Value_I32       = 0x01,
+        Value_U32       = 0x00,
+        Value_U8        = 0x03,
+        Value_I8        = 0x04,
+        Value_Float32   = 0x02,
         Value_String    = 0x05,
-        Value_I32       = 0x03,
-        Value_Float32   = 0x04,
-        Value_Label     = 0x01, // Note: The type descriptor for 'Label' is never actually written out, it shares the same as I32.
-        Value_Variable  = 0x06,
+        Value_Label     = 0xDF, // Note: The type descriptor for 'Label' is never actually written out, it shares the same as I32.
+        Value_Variable  = 0x69,
 
         // DUMMY VALUE
         Dummy = 0xE0,
@@ -72,7 +75,7 @@ class NodeValue : Node
     import std.variant : Algebraic;
 
     ///
-    alias Value = Algebraic!(int, string, float);
+    alias Value = Algebraic!(int, string, float, uint, ubyte, byte);
 
     private
     {
@@ -81,12 +84,21 @@ class NodeValue : Node
 
     public
     {
-        /// Ctor for Int32 values.
-        @trusted @nogc
-        this(int i32) nothrow
+
+        /// Ctor for most other types.
+        @trusted
+        this(T)(T value)
+        if(!is(T == string) && NodeValue.Value.allowed!T)
         {
-            super(Node.Type.Value_I32);
-            this._value = i32;
+                 static if(is(T == int))    alias nType = Node.Type.Value_I32;
+            else static if(is(T == uint))   alias nType = Node.Type.Value_U32;
+            else static if(is(T == byte))   alias nType = Node.Type.Value_I8;
+            else static if(is(T == ubyte))  alias nType = Node.Type.Value_U8;
+            else static if(is(T == float))  alias nType = Node.Type.Value_Float32;
+            else static assert(false, T.stringof);
+
+            super(nType);
+            this._value = value;
         }
 
         /// Ctor for string values.
@@ -97,14 +109,6 @@ class NodeValue : Node
                           : (variable) ? Node.Type.Value_Variable
                                        : Node.Type.Value_String);
             this._value = str;
-        }
-
-        /// Ctor for Float32 values.
-        @trusted @nogc
-        this(float f32) nothrow
-        {
-            super(Node.Type.Value_Float32);
-            this._value = f32;
         }
 
         @trusted
@@ -139,10 +143,10 @@ class NodeMneumonic : Node
         Nop   = 0x00,
         
         ///
-        Print = 0x01,
+        Print = 0x02,
 
         ///
-        Jump  = 0x07
+        Jump  = 0x03
     }
 
     public
@@ -352,6 +356,9 @@ private NodeValue parseValue(ParseTree tree)
         case "Sasm.String":         return new NodeValue(match.escapeString);
         case "Sasm.Int32":          return new NodeValue(match.to!int);
         case "Sasm.Float32":        return new NodeValue(match.to!float);
+        case "Sasm.UInt32":         return new NodeValue(match.to!uint);
+        case "Sasm.Int8":           return new NodeValue(match.to!byte);
+        case "Sasm.UInt8":          return new NodeValue(match.to!ubyte);
 
         default:
             throw new Exception(tree.name);

@@ -28,13 +28,19 @@ Sasm:
 
     # Data Values
     Value  <- String        /
+              Int8          /
+              UInt8         /
               Int32         /
+              UInt32        /
               Float32       /
               Val_Label     /
               Val_Variable
 
     String       < :'string'    ;Lit_String
     Int32        < :'int32'     ;Lit_Integer
+    UInt32       < :'uint32'    ;Lit_Integer
+    Int8         < :'int8'      ;Lit_Integer
+    UInt8        < :'uint8'     ;Lit_Integer
     Float32      < :'float'     ;Lit_Float
     Val_Label    < :'label'     ;Label
     Val_Variable < :'variable'  ;identifier

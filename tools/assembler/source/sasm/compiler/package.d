@@ -160,6 +160,21 @@ class Compiler
                     this.writeBE!int(value.value!int);
                     break;
 
+                case Value_U32:
+                    this.write(value.type);
+                    this.writeBE!uint(value.value!uint);
+                    break;
+
+                case Value_I8:
+                    this.write(value.type);
+                    this.write(value.value!byte);
+                    break;
+
+                case Value_U8:
+                    this.write(value.type);
+                    this.write(value.value!ubyte);
+                    break;
+
                 case Value_String:
                     auto str = value.value!string;
 
