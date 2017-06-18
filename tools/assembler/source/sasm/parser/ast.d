@@ -5,18 +5,46 @@ import pegged.grammar;
 
 public import std.typecons : Flag, Yes, No;
 
+// Because a single new instruction/data type/whatever will require *every* value to be updated, we need to keep track of some magic stuff
+// to make things easier to keep updated.
+enum MagicalStuff : ubyte
+{
+    // Counts (This is mostly what needs to be edited, the rest will be sorted out from these values)
+    InstructionCount = 5,
+    DataTypeCount    = 6,
+    VarAccessCount   = 2,
+    VarLocationCount = 2,
+
+    // Max values for the 4 enums in the VM/MachineInstructions.d file
+    InstructionMax = InstructionCount,
+    DataTypeMax    = InstructionMax + DataTypeCount,
+    VarAccessMax   = DataTypeMax    + VarAccessCount,
+    VarLocationMax = VarAccessMax   + VarLocationCount,
+
+    // Var access values
+    VarGet = DataTypeMax,
+    VarSet = DataTypeMax + 1,
+
+    // Var location values
+    VarPtr   = VarAccessMax,
+    VarStack = VarAccessMax + 1,
+
+    // Other
+    VarOpcode = 0x04
+}
+
 ///
 abstract class Node
 {
     ///
     enum Type : ubyte
     {
-        Value_I32               = 0x01,
-        Value_U32               = 0x00,
-        Value_U8                = 0x03,
-        Value_I8                = 0x04,
-        Value_Float32           = 0x02,
-        Value_String            = 0x05,
+        Value_I32               = MagicalStuff.InstructionMax + 0x01,
+        Value_U32               = MagicalStuff.InstructionMax + 0x00,
+        Value_U8                = MagicalStuff.InstructionMax + 0x03,
+        Value_I8                = MagicalStuff.InstructionMax + 0x04,
+        Value_Float32           = MagicalStuff.InstructionMax + 0x02,
+        Value_String            = MagicalStuff.InstructionMax + 0x05,
         Value_Label             = 0xD0, // Note: The type descriptor for 'Label' is never actually written out, it shares the same as I32.
         Value_Variable_Ptr      = 0xD1, // Note: 'Variable' is actually an instruction, not a type, so the value in this enum does nothing.
         Value_Variable_Stack    = 0xD2, // Note: ^^^^

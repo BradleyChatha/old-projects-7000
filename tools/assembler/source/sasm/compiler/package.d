@@ -207,9 +207,10 @@ class Compiler
                     auto ptr = (value.value!string in this._variables);
                     assert(ptr !is null, "Add an exception + error message here");
 
-                    this.write(0x04); // Variable (Hard coded)
-                    this.write(0x00); // Get
-                    this.write(value.type == Value_Variable_Ptr ? 0x00 : 0x01); // Whether it's in the stack or pointer table
+                    this.write(MagicalStuff.VarOpcode); // Variable
+                    this.write(MagicalStuff.VarGet);    // Get
+                    this.write(value.type == Value_Variable_Ptr ? MagicalStuff.VarPtr 
+                                                                : MagicalStuff.VarStack); // Whether it's in the stack or pointer table
                     this.writeBE!uint(ptr.offset);
                     break;
 
