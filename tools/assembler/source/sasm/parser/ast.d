@@ -40,10 +40,19 @@ private string magicValues()
     import std.format : format;
 
     string output = "";
-    foreach(value; EnumMembers!MagicalStuff)
+
+    void addToOutput(alias E)()
     {
-        output ~= format("%s: %s\n", value.to!string, value.to!ubyte);
+        output ~= format("[Enum '%s' values]\n", E.stringof);
+        foreach(value; EnumMembers!E)
+        {
+            output ~= format("%s: %s\n", value.to!string, value.to!ubyte);
+        }
+        output ~= '\n';
     }
+
+    addToOutput!MagicalStuff;
+    addToOutput!(Node.Type);
 
     return output;
 }
