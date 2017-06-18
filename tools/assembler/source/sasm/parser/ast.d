@@ -9,13 +9,19 @@ public import std.typecons : Flag, Yes, No;
 abstract class Node
 {
     ///
-    enum Type
+    enum Type : ubyte
     {
-        Value_String,
-        Value_I32,
-        Value_Float32,
-        Value_Label,
-        Value_Variable,
+        Value_I32       = 0x01,
+        Value_U32       = 0x00,
+        Value_U8        = 0x03,
+        Value_I8        = 0x04,
+        Value_Float32   = 0x02,
+        Value_String    = 0x05,
+        Value_Label     = 0xDF, // Note: The type descriptor for 'Label' is never actually written out, it shares the same as I32.
+        Value_Variable  = 0x69,
+
+        // DUMMY VALUE
+        Dummy = 0xE0,
 
         Mneumonic,
         Code,
@@ -30,15 +36,18 @@ abstract class Node
     public
     {
         ///
-        this(Type type)
+        @safe @nogc
+        this(Type type) nothrow
         {
             this._type = type;
         }
 
         ///
+        @safe
         abstract void writeDebugString(TabWriter writer);
 
         ///
+        @safe
         override string toString()
         {
             auto writer = new TabWriter();
@@ -66,7 +75,7 @@ class NodeValue : Node
     import std.variant : Algebraic;
 
     ///
-    alias Value = Algebraic!(int, string, float);
+    alias Value = Algebraic!(int, string, float, uint, ubyte, byte);
 
     private
     {
@@ -75,15 +84,26 @@ class NodeValue : Node
 
     public
     {
-        /// Ctor for Int32 values.
-        this(int i32)
+
+        /// Ctor for most other types.
+        @trusted
+        this(T)(T value)
+        if(!is(T == string) && NodeValue.Value.allowed!T)
         {
-            super(Node.Type.Value_I32);
-            this._value = i32;
+                 static if(is(T == int))    alias nType = Node.Type.Value_I32;
+            else static if(is(T == uint))   alias nType = Node.Type.Value_U32;
+            else static if(is(T == byte))   alias nType = Node.Type.Value_I8;
+            else static if(is(T == ubyte))  alias nType = Node.Type.Value_U8;
+            else static if(is(T == float))  alias nType = Node.Type.Value_Float32;
+            else static assert(false, T.stringof);
+
+            super(nType);
+            this._value = value;
         }
 
         /// Ctor for string values.
-        this(string str, Flag!"isLabel" label = No.isLabel, Flag!"isVariable" variable = No.isVariable)
+        @trusted @nogc
+        this(string str, Flag!"isLabel" label = No.isLabel, Flag!"isVariable" variable = No.isVariable) nothrow
         {
             super((label) ? Node.Type.Value_Label 
                           : (variable) ? Node.Type.Value_Variable
@@ -91,13 +111,7 @@ class NodeValue : Node
             this._value = str;
         }
 
-        /// Ctor for Float32 values.
-        this(float f32)
-        {
-            super(Node.Type.Value_Float32);
-            this._value = f32;
-        }
-
+        @trusted
         override void writeDebugString(TabWriter writer)
         {
             import std.format : format;
@@ -111,7 +125,7 @@ class NodeValue : Node
          + Returns:
          +  The `Value` of the value.
          + ++/
-        @property
+        @property @trusted
         inout(T) value(T)() inout
         {
             return this._value.get!T;
@@ -122,11 +136,17 @@ class NodeValue : Node
 ///
 class NodeMneumonic : Node
 {
+    ///
     enum Instruction
     {
+        ///
         Nop   = 0x00,
-        Print = 0x01,
-        Jump  = 0x07 // ?
+        
+        ///
+        Print = 0x02,
+
+        ///
+        Jump  = 0x03
     }
 
     public
@@ -144,7 +164,8 @@ class NodeMneumonic : Node
     public
     {
         ///
-        this(Instruction opcode, NodeValue[] operands = null, string[] labels = null)
+        @safe @nogc
+        this(Instruction opcode, NodeValue[] operands = null, string[] labels = null) nothrow
         {
             this.opcode     = opcode;
             this.operands   = operands;
@@ -153,6 +174,7 @@ class NodeMneumonic : Node
             super(Node.Type.Mneumonic);
         }
 
+        @trusted
         override void writeDebugString(TabWriter writer)
         {
             import std.format    : format;
@@ -179,11 +201,13 @@ class NodeCode : Node
     public
     {
         ///
-        this()
+        @safe @nogc
+        this() nothrow
         {
             super(Node.Type.Code);
         }
 
+        @safe
         override void writeDebugString(TabWriter writer)
         {
             import std.algorithm : each;
@@ -215,7 +239,8 @@ class NodeDeclaration : Node
     public
     {
         ///
-        this(string name, NodeValue value = null)
+        @safe @nogc
+        this(string name, NodeValue value = null) nothrow
         {
             this.name  = name;
             this.value = value;
@@ -223,6 +248,7 @@ class NodeDeclaration : Node
         }
 
         ///
+        @safe
         override void writeDebugString(TabWriter writer)
         {
             writer.write("[Declaration] <Name:" ~ this.name ~ ">");
@@ -239,6 +265,7 @@ private struct ParseInfo
 }
 
 ///
+@safe
 NodeCode treeToAst(ParseTree tree)
 {
     import std.format : format;
@@ -266,6 +293,7 @@ NodeCode treeToAst(ParseTree tree)
     return code;
 }
 
+@safe
 private void parseLabel(ParseTree tree, ref ParseInfo info)
 {
     tree.enforceTreeName("Sasm.Label");
@@ -274,6 +302,7 @@ private void parseLabel(ParseTree tree, ref ParseInfo info)
     info.labelStack ~= tree.matches[0];
 }
 
+@safe
 private NodeMneumonic parseMneumonic(ParseTree tree, ref ParseInfo info)
 {
     tree.enforceTreeName("Sasm.Mneumonic");
@@ -295,6 +324,7 @@ private NodeMneumonic parseMneumonic(ParseTree tree, ref ParseInfo info)
     return code;
 }
 
+@safe
 private NodeDeclaration parseDeclaration(ParseTree tree)
 {
     tree.enforceTreeName("Sasm.Variable");
@@ -309,6 +339,7 @@ private NodeDeclaration parseDeclaration(ParseTree tree)
     return new NodeDeclaration(name, value);
 }
 
+@safe
 private NodeValue parseValue(ParseTree tree)
 {
     import std.conv : to;
@@ -325,12 +356,16 @@ private NodeValue parseValue(ParseTree tree)
         case "Sasm.String":         return new NodeValue(match.escapeString);
         case "Sasm.Int32":          return new NodeValue(match.to!int);
         case "Sasm.Float32":        return new NodeValue(match.to!float);
+        case "Sasm.UInt32":         return new NodeValue(match.to!uint);
+        case "Sasm.Int8":           return new NodeValue(match.to!byte);
+        case "Sasm.UInt8":          return new NodeValue(match.to!ubyte);
 
         default:
             throw new Exception(tree.name);
     }
 }
 
+@trusted
 private string escapeString(string s)
 {
     import std.exception : assumeUnique;
@@ -377,6 +412,7 @@ private string escapeString(string s)
 
 // "Mne_Print": Instruction.Print, etc.
 private static NodeMneumonic.Instruction[string] _opcodeStrings;
+@safe
 private NodeMneumonic.Instruction nameToOpcode(string name)
 {
     import std.exception : enforce;
