@@ -33,6 +33,22 @@ enum MagicalStuff : ubyte
     VarOpcode = 0x04
 }
 
+private string magicValues()
+{
+    import std.traits : EnumMembers;
+    import std.conv   : to;
+    import std.format : format;
+
+    string output = "";
+    foreach(value; EnumMembers!MagicalStuff)
+    {
+        output ~= format("%s: %s\n", value.to!string, value.to!ubyte);
+    }
+
+    return output;
+}
+debug pragma(msg, magicValues());
+
 ///
 abstract class Node
 {
