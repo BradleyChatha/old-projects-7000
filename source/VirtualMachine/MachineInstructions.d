@@ -6,27 +6,33 @@ enum Instruction : ubyte
     STD_In,
     STD_Out,
     Jump,
-    Variable
+    Variable,
+
+    Instruction_Max    
 }
 
 enum DataType : ubyte
 {
-    UInteger = 0x00,
+    UInteger = cast(ubyte)Instruction.Instruction_Max,
     Integer,
     Float,
     UByte,
     Byte,
-    String
+    String,
+
+    DataType_Max
 }
 
 enum VariableUseage : ubyte
 {
-    Access = 0x00,
-    Modify
+    Access = cast(ubyte)DataType.DataType_Max,
+    Modify,
+
+    VariableUseage_Max,
 }
 
 enum VariableLocation : ubyte
 {
-    PointerTable = 0x00,
+    PointerTable = cast(ubyte)VariableUseage.VariableUseage_Max,
     Stack
 }

@@ -1,15 +1,5 @@
-declare Six int32 6
+declare Six uint32 6
 
 .Main:
-    print string "Hello\nWorld!"
-    print int32  2013
-    print uint32 1204
-    print int8   127
-    print uint8  255
-    print float  2013f
-    print float  2013.13f
+    print int8 127
     print ptrtable variable Six
-    print label .Main:
-    nop
-    jump label .Main:
-    nop

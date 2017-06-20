@@ -24,7 +24,10 @@ static class STDOut
 
         if(IsVariable == Instruction.Variable)
         {
-            write(AccessVariable.Access(Prog));
+            if(cast(VariableUseage)Prog.ProgramBody.ByteArrayToType!(ubyte)() == VariableUseage.Access)
+                write(AccessVariable.Access(Prog));
+            else
+                throw new STDOutException("Unknown or incorrect accessor");
         }
         else
         {

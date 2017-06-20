@@ -50,11 +50,23 @@ static class AccessVariable
                 }
                 return cast(Variant)Data;
 
+            case DataType.UInteger:
+                return cast(Variant)Prog.PointerTable.ByteArrayToType!(uint)();
+
+            case DataType.Integer:
+                return cast(Variant)Prog.PointerTable.ByteArrayToType!(int)();
+
+            case DataType.Float:
+                return cast(Variant)Prog.PointerTable.ByteArrayToType!(float)();
+
+            case DataType.UByte:
+                return cast(Variant)Prog.PointerTable.ByteArrayToType!(ubyte)();
+
+            case DataType.Byte:
+                return cast(Variant)Prog.PointerTable.ByteArrayToType!(byte)();
 
             default:
                 throw new AccessVariableException(format("Cannot access unkown data type '0x%X'.", VariableType));
         }
     }
-
-    
 }
