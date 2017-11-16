@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>C++ Tutorial</title>
+        <meta charset = "utf-8"/>
+        <meta name = "viewport" content="width = device-width, inital-scale = 1"/> 
+
+        <!--Needed for Bootstrap, my own css will come after this.-->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/jquery-3.2.1.js" integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE=" crossorigin="anonymous"></script>
+        
+        <!--My own stuff-->
+        <link rel = "stylesheet" type = "text/css" href = "../css/Basic.css"/>
+        <link rel = "stylesheet" type = "text/css" href = "../css/CppTutorial.css"/>
+        <script src="../JS/PageSettings.js"></script>
+    </head>
+
+    <body>
+        <!--Title and logo bar-->
+        <p class = "titlebar">Code Place</p>
+        <!--Navigation bar-->
+        <div class = "container-fluid" color = #ff00ff>
+            <div class = "row">
+                <div class = "col-md-4" style = "background-color: #000000" onclick="Redirect('../Index.html')"><span class = "navbarcontents"><div class = "text-center">Home</div></span></div>
+                <div class = "col-md-4" style = "background-color: #000000" onclick="Redirect('CppTutorial.html')"><span class = "navbarcontents"><div class = "text-center">C++ Tutoirals</div></span></div>
+                <div class = "col-md-4" style = "background-color: #000000" onclick="Redirect('CppErrors.html')"><span class = "navbarcontents"><div class = "text-center">C++ Error Messages</div></span></div>
+            </div>  
+        </div>
+
+        <!--Content-->
+        <br/>        
+        <div class = "container-fluid">
+            <ol type = "1" class = "contentlist">
+                <li> <span class = "chaptertitle">Basics</span>
+                    <ol type = "i" class = "innercontentlist">
+                    <li onclick="Redirect('CppTutorial.html#introduction')">Introduction</li>
+                    <li>Compilers, IDEs, and text editors</li>
+                    <li>Writing to the screen</li>
+                    <li>Variables and user input</li>
+                </ol></li>
+            </ol>
+        </div>
+
+        <div class = "row">
+            <div class = "col-md-4"></div> <!-- Description -->
+            <div class = "col-md-4"></div> <!-- Code -->
+        </div>
+
+    </body>
+</html>
