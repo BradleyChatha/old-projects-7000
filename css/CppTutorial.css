@@ -5,3 +5,8 @@
 .innercontentlist {
     text-decoration: underline;
 }
+
+.sectiontitle {
+    text-decoration: underline;
+    font-weight: 900;
+}
