@@ -10,12 +10,14 @@
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
         <script src="https://code.jquery.com/jquery-3.2.1.js" integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE=" crossorigin="anonymous"></script>
         
+        <!--Prism for syntax highlighting-->
+        <link rel = "stylesheet" href="../css/Prism/prism.css"/>
+        <script src = "../JS/Prism/prism.js"></script>
+
         <!--My own stuff-->
         <link rel = "stylesheet" type = "text/css" href = "../css/Basic.css"/>
         <link rel = "stylesheet" type = "text/css" href = "../css/CppTutorial.css"/>
         <script src="../JS/PageSettings.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/languages/go.min.js"></script>
-        <script>hljs.initHighlightingOnLoad();</script>
     </head>
 
     <body>
@@ -100,11 +102,42 @@
                     </div>
                 </div>
                     <div class = "row">
-                        <div class = "col-md-4 mx-auto text-center">
+                        <div class = "col-md-5 mx-auto text-center">
                             <p>
+                                One of the most basic things to do in any programming language is to write something to the console, traditionally the words "Hello, World!".
+                                Look at the code to the right, this is an example of how to write to the console in C++. Any time you see "//" there is a comment after that position and the writing on the rest of the line will not be compiled.
+                            </p> 
+                        </div> <!-- Description -->
+                        <div class = "col-md-45 mx-auto">
+                            <p>
+                                <pre class = "">
+                                    <code class="language-cpp">
+//This line tells the compiler that there is another file to be used.
+//This is where the information the 'cout' line is.
+#include &ltiostream&gt
+                                            
+//This tells the compiler that we want to use code which belong to the group, or namepsace,"std".
+//This is the C++ Standard Library. 
+using namespace std;
+                                   
+//This is a function. This is the first place the compiler goes to when the program is being built.
+//The words inside of the brackets will be discussed later.
+int main(int argc, char** argv)
+{
+    //This is how words are being wrote the console. The 'cout' means character out.
+    //The following '<<' dictates that is going to cout. In this case it is a string.
+    //Strings are shown as words inside of speech marks ("), there must be an opening speech mark.
+    //'endl' means end line. This can also be done with '\n'. It forces the next information to be printed into the line below.
+    cout << "Hello, World!" << endl;
+    
+    ///This tells the function that it has ended now.
+    return 0;
+}                                        
+                                    </code>
+                                </pre>
                             </p>
-                        </div>
-                    </div> <!-- Description -->                 
+                        </div> <!--Code-->
+                    </div>                  
             </div>
     </body>
 </html>
