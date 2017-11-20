@@ -10,3 +10,7 @@
     text-decoration: underline;
     font-weight: 900;
 }
+
+.code {
+    font-family: "Courier New", "Consolas", serif;
+}
