@@ -22,3 +22,7 @@ body {
     color: #000000; 
     text-align: center;
 }
+
+.anchorlink {
+    cursor: pointer;
+}
