@@ -9,12 +9,7 @@ body {
     color: #ffffff;
     align-self: center;
 }
-
-.navbar {
-    width: 80%;
-    align-self: center;
-}
-
+    
 .titlebar {
     font-weight: 500;
     font-family: "Calibri Light", sans-serif, serif;

@@ -137,7 +137,85 @@ int main(int argc, char** argv)
                                 </pre>
                             </p>
                         </div> <!--Code-->
-                    </div>                  
+                    </div>      
+                    <div class = "row" id = "cin">
+                        <div class = "col-md-4 mx-auto text-center">
+                            <h2 class = "sectiontitle">Variables and user input</h2>
+                        </div>
+                    </div>                    
+                    <div class = "row">
+                        <div class = "col-md-5 mx-auto text-center">
+                            <p>
+                                Variables are named areas in memory, you can read and write (in most cases) to them. In C++ you specify what type of data you want. There are several types of variable. <br/>
+                                <table class="table table-condensed">
+                                    <thead>
+                                        <tr>
+                                            <th>Variable Type</th>
+                                            <th>What it stores</th>
+                                            <th>Size in bytes</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>int</td>
+                                            <td>A whole number, or integer.</td>
+                                            <td>4</td>
+                                        </tr>
+                                        <tr>
+                                            <td>char</td>
+                                            <td>A single character.</td>
+                                            <td>1</td>
+                                        </tr>
+                                        <tr>
+                                            <td>float</td>
+                                            <td>A decimal number.</td>
+                                            <td>4</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                
+                                Variables can either be assigned a value in code or can be used to store input from the user. Variables are used when ever information needs to be stored, for example results of calculations.<br/>
+                                Some variables can be printed to the console by use of cout. Look at the following code. <br/>  
+
+                                Console user input pauses the program at that point until the user enters something and (usually) presses the return key.
+                            </p> 
+                        </div> <!-- Description -->
+                        <div class = "col-md-45 mx-auto">
+                            <p>
+                                <pre class = "">
+                                    <code class="language-cpp"> 
+                                        #include &ltiostream&gt
+                                        //This allows us to have proper access to strings.
+                                        #include &ltstring&gt
+                                        
+                                        using namespace std;
+
+                                        int main(int argc, char** argv)
+                                        {
+                                            //'int' dictates that the type of data the variable will store.
+                                            int My_Int = 100;
+                                            //Strings can change in their size depending on how much information they have.
+                                            string User_Input = "";
+                                            
+                                            //No endl stops the user input from being on a new line.
+                                            cout << "Enter your name: ";
+
+                                            //To get the user input from the console 'cin' is used.
+                                            //cin uses '>>' instead of '<<'. I imagine this as the direction the data is going.
+                                            //cout has data going into it (<<) and cin has data coming out of it (>>).
+                                            //Of course this isn't how it actually works but it makes it easier to remember when learning.
+                                            cin >> User_Input;
+
+                                            //This prints the input which was given by the user.
+                                            cout << "Hello " << User_Input << endl;
+                                            
+                                            return 0;
+                                        }
+                                    </code>
+                                </pre>
+                            </p>
+                        </div> <!--Code-->
+                    </div>              
             </div>
     </body>
 </html>
