@@ -181,39 +181,37 @@ int main(int argc, char** argv)
                             </p> 
                         </div> <!-- Description -->
                         <div class = "col-md-45 mx-auto">
-                            <p>
-                                <pre class = "">
-                                    <code class="language-cpp"> 
-                                        #include &ltiostream&gt
-                                        //This allows us to have proper access to strings.
-                                        #include &ltstring&gt
+                            <pre class = "">
+                                <code class="language-cpp"> 
+#include &ltiostream&gt
+//This allows us to have proper access to strings.
+#include &ltstring&gt
                                         
-                                        using namespace std;
+using namespace std;
 
-                                        int main(int argc, char** argv)
-                                        {
-                                            //'int' dictates that the type of data the variable will store.
-                                            int My_Int = 100;
-                                            //Strings can change in their size depending on how much information they have.
-                                            string User_Input = "";
-                                            
-                                            //No endl stops the user input from being on a new line.
-                                            cout << "Enter your name: ";
+int main(int argc, char** argv)
+{
+    //'int' dictates that the type of data the variable will store.
+    int My_Int = 100;
+    //Strings can change in their size depending on how much information they have.
+    string User_Input = "";
+                                                
+    //No endl stops the user input from being on a new line.
+    cout << "Enter your name: ";
 
-                                            //To get the user input from the console 'cin' is used.
-                                            //cin uses '>>' instead of '<<'. I imagine this as the direction the data is going.
-                                            //cout has data going into it (<<) and cin has data coming out of it (>>).
-                                            //Of course this isn't how it actually works but it makes it easier to remember when learning.
-                                            cin >> User_Input;
+    //To get the user input from the console 'cin' is used.
+    //cin uses '>>' instead of '<<'. I imagine this as the direction the data is going.
+    //cout has data going into it (<<) and cin has data coming out of it (>>).
+    //Of course this isn't how it actually works but it makes it easier to remember when learning.
+    cin >> User_Input;
 
-                                            //This prints the input which was given by the user.
-                                            cout << "Hello " << User_Input << endl;
-                                            
-                                            return 0;
-                                        }
-                                    </code>
-                                </pre>
-                            </p>
+    //This prints the input which was given by the user.
+    cout << "Hello " << User_Input << endl;
+                                                
+    return 0;
+}
+                                </code>
+                            </pre>
                         </div> <!--Code-->
                     </div>              
             </div>

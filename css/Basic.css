@@ -25,3 +25,8 @@ body {
 .top {
     position: fixed;
 }
+
+.sectiontitle {
+    text-decoration: underline;
+    font-weight: 900;
+}
