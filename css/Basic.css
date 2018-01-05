@@ -22,6 +22,10 @@ body {
     cursor: pointer;
 }
 
+.anchorlink:hover{
+    color: #0452f8
+}
+
 .top {
     position: fixed;
 }
