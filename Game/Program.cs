@@ -17,7 +17,9 @@ namespace Game
             DrawWindow Wnd = new DrawWindow(new Vector2u(1024, 720), "Test");
             Player Plr = new Player("Tahn.png", ref Wnd);
             Plr.Position = new Vector2f(10, 78);
+            Button Btn = new Button("Tahn.png", new Vector2f(400, 400), () => Console.WriteLine("Clicked"), () => Console.WriteLine("Hover Entered"), () => Console.WriteLine("Hover left"), ref Wnd);
 
+            Wnd.AddDrawable(Btn);
             Wnd.AddDrawable(Plr);
             Wnd.Loop();
 

@@ -8,8 +8,10 @@ namespace Game.Gameplay
         override public void Init()
         {
             Logger.Log(LogLevel.Debug, "Called new TestSummon.Init");
+            base.Init();
             this.Cooldown = 3.0f;
-            this.CurrentCooldown = 0.0f;
+            this.CastTime = 5.0f;
+            this.CanMoveWhileCasting = false;
             this.ActivationKey = Keyboard.Key.Num1;
         }
 

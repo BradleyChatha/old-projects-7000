@@ -66,8 +66,6 @@ namespace Game.Gameplay
         {
             base.Draw(Wnd);
 
-            Logger.Log(LogLevel.Debug, "override Player.Draw");
-
             if(this.PlayerPet != null)
                 this.PlayerPet.Draw(Wnd);
         }
