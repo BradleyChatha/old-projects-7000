@@ -152,12 +152,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Engine\AI\Pathfinder.cs" />
+    <Compile Include="Engine\Cache\Cache.cs" />
+    <Compile Include="Engine\Cache\TextureCache.cs" />
     <Compile Include="Engine\Drawable\Drawable.cs" />
     <Compile Include="Engine\Map\Map.cs" />
     <Compile Include="Engine\Map\Prop.cs" />
     <Compile Include="Engine\Map\StaticProp.cs" />
     <Compile Include="Engine\Maths\VectorMaths.cs" />
     <Compile Include="Engine\UI\Button.cs" />
+    <Compile Include="Engine\UI\Label.cs" />
     <Compile Include="Engine\UI\UIElement.cs" />
     <Compile Include="Engine\Window\FPSCounter.cs" />
     <Compile Include="Engine\Logger\Logger.cs" />
