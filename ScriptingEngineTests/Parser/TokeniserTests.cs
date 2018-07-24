@@ -15,13 +15,10 @@ namespace ScriptingEngine.Parser.Tests
         public void TokeniseTest()
         {
             Parser P = new Parser();
-            var l = P.Parse("1.3 2 Hello World, != 123 \"dsdsds\" int bool");//"2.3 100 bool int \"asa\" != = ident");
+            var l = P.Parse("1.3 2 Hello World, != 123 \"dsdsds\" int bool 2.3 100 bool int \"asa\" <= > = ident + * / - && &");
             Tokeniser T = new Tokeniser(l);
             
             var a = T.Tokenise();
-
-            Console.WriteLine();
-
         }
     }
 }

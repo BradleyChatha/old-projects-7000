@@ -24,6 +24,17 @@ namespace ScriptingEngine.Parser
             {
                 char Current = Raw[i];
 
+                if(Current == 'i')
+                    Console.WriteLine();
+
+                if(!IsInString && (Current == ' ' || Current == '\t' || Current == '\r' || Current == '\n'))
+                {
+                    ParsedCode.Add(CurrentString);
+                    CurrentString = "";
+                    IsInNumber = false;
+                    continue;
+                }
+
                 if(Current  == '"' && PreviousChar != '\\')
                 {
                     if (IsInString)
@@ -48,7 +59,7 @@ namespace ScriptingEngine.Parser
                     continue;
                 }
 
-                if(int.TryParse(Current.ToString(), out int Result) && !IsInNumber)
+                if(int.TryParse(Current.ToString(), out int Result1) && !IsInNumber)
                 {
                     IsInNumber = true;
                     CurrentString += Current;
@@ -57,7 +68,7 @@ namespace ScriptingEngine.Parser
 
                 if(IsInNumber)
                 {
-                    if(!int.TryParse(Current.ToString(), out int A) && Current != '.')
+                    if(!int.TryParse(Current.ToString(), out int Result2) && Current != '.')
                     {
                         IsInNumber = false;
                         ParsedCode.Add(CurrentString);
@@ -86,6 +97,8 @@ namespace ScriptingEngine.Parser
                     ParsedCode.Add(CurrentString);
                     CurrentString = "";
                     IsHandlingSpecial = false;
+                    CurrentString = "";
+                    CurrentString += Current;
                     continue;
                 }
 
@@ -103,10 +116,14 @@ namespace ScriptingEngine.Parser
             if(CurrentString != "")
                 ParsedCode.Add(CurrentString);
 
+            ///Danhack
             for (int i = 0; i < ParsedCode.Count; i++)
             {
-                if(ParsedCode[i] == "" || string.IsNullOrWhiteSpace(ParsedCode[i]))
+                if(ParsedCode[i] == "")
+                { 
                     ParsedCode.RemoveAt(i);
+                    i--;
+                }
             }
 
             return ParsedCode;
