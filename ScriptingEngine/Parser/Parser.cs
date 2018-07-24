@@ -15,6 +15,7 @@ namespace ScriptingEngine.Parser
             string CurrentString = "";
             bool IsInString = false;
             bool IsHandlingSpecial = false;
+            bool IsInNumber = false;
             char PreviousChar = ' ';
 
             char[] SpecialChars = { '=', '!', '+', '-', '*', '/', '<', '>', '|', '.', '&', ',' };
@@ -43,6 +44,28 @@ namespace ScriptingEngine.Parser
 
                 if (IsInString)
                 {
+                    CurrentString += Current;
+                    continue;
+                }
+
+                if(int.TryParse(Current.ToString(), out int Result) && !IsInNumber)
+                {
+                    IsInNumber = true;
+                    CurrentString += Current;
+                    continue;
+                }
+
+                if(IsInNumber)
+                {
+                    if(!int.TryParse(Current.ToString(), out int A) && Current != '.')
+                    {
+                        IsInNumber = false;
+                        ParsedCode.Add(CurrentString);
+                        CurrentString = "";
+                        CurrentString += Current;
+                        continue;
+                    }
+
                     CurrentString += Current;
                     continue;
                 }
@@ -82,7 +105,7 @@ namespace ScriptingEngine.Parser
 
             for (int i = 0; i < ParsedCode.Count; i++)
             {
-                if(ParsedCode[i] == "")
+                if(ParsedCode[i] == "" || string.IsNullOrWhiteSpace(ParsedCode[i]))
                     ParsedCode.RemoveAt(i);
             }
 

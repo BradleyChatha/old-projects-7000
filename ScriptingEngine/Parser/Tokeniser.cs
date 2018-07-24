@@ -21,7 +21,9 @@ namespace ScriptingEngine.Parser
         Colon,
         Assignment,
         Mathmatical,
-        Accessor
+        Accessor,
+        Comma,
+        BooleanOperator
     }
 
     public struct Token
@@ -56,8 +58,23 @@ namespace ScriptingEngine.Parser
                         T.Type = TokenType.Mathmatical;
                         break;
 
+                    case "==":
+                    case "!=":
+                    case "&&":
+                    case "!":
+                    case "<":
+                    case "<=":
+                    case ">":
+                    case ">=":
+                        T.Type = TokenType.BooleanOperator;
+                        break;
+
                     case ".":
                         T.Type = TokenType.Accessor;
+                        break;
+
+                    case ",":
+                        T.Type = TokenType.Comma;
                         break;
 
                     case "(":
@@ -112,12 +129,12 @@ namespace ScriptingEngine.Parser
                         if(int.TryParse(Current, out int ThrowAway))
                         {
                             T.Type = TokenType.Int;
-                            continue;
+                            break;
                         }
                         else if(float.TryParse(Current, out float Throw))
                         {
                             T.Type = TokenType.Float;
-                            continue;
+                            break;
                         }
                         
                         if(Current[0] == '"')
@@ -125,7 +142,7 @@ namespace ScriptingEngine.Parser
                             if(Current[Current.Length - 1] == '"')
                             {
                                 T.Type = TokenType.String;
-                                continue;
+                                break;
                             }
                             else
                             {
