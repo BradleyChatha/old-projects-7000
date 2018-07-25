@@ -65,10 +65,16 @@ namespace ScriptingEngine.Parser
                     CurrentString += Current;
                     continue;
                 }
+                else if(Current == '-' && (Current + 1) < RawLength && int.TryParse(Raw[Current + 1].ToString(), out int Result2) && !IsInNumber)
+                {
+                    IsInNumber = true;
+                    CurrentString += Current;
+                    continue;
+                }
 
                 if(IsInNumber)
                 {
-                    if(!int.TryParse(Current.ToString(), out int Result2) && Current != '.')
+                    if(!int.TryParse(Current.ToString(), out int Result3) && Current != '.')
                     {
                         IsInNumber = false;
                         ParsedCode.Add(CurrentString);
