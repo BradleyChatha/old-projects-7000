@@ -1,0 +1,4 @@
+<Map>
+    <Background src = "Bg.png" height = "100" width = "100"/>
+    <StaticProp src = "Dirt.png" x = "300" y = "675"/>
+</Map>

@@ -1,0 +1,4 @@
+#If a file is given then it is loaded as a static map.
+#If a type (I.E portal) is given then it is loaded as a special type of tile, any type of tile which has to update (I.e. interactive, animated).
+background Tilly.png
+Tahn.png 300 675
