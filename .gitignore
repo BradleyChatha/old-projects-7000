@@ -9,8 +9,6 @@
 *.sln.docstates
 
 # Build results
-[Dd]ebug/
-[Rr]elease/
 x64/
 [Bb]in/
 [Oo]bj/
@@ -20,6 +18,8 @@ x64/
 Deps/
 *.dll
 *.exe
+
+
 
 # NuGet Packages
 *.nupkg
