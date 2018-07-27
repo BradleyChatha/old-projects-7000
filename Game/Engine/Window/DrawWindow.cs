@@ -13,6 +13,7 @@ namespace Game.Engine
         {
             this.WindowHandle = new RenderWindow(new VideoMode(WindowSize.X, WindowSize.Y, 32), Title);
             this.WindowHandle.Closed += (s, e) => {this.WindowHandle.Close(); Logger.Log(LogLevel.Info, "Destroyed the DrawWindow"); };
+
             this.DrawStack = new List<Drawable>();
             this.Rng = new Random();
 
