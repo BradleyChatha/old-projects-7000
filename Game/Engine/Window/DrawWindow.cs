@@ -44,7 +44,6 @@ namespace Game.Engine
 
                 for(int i = 0; i < this.DrawStack.Count; i++)
                     this.DrawStack[i].Draw(this);
-                    //this.WindowHandle.Draw(this.DrawStack[i].DrawableSprite);
 
                 this.WindowHandle.Display();
                 FPSCounter.Update();

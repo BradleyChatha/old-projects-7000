@@ -8,9 +8,10 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>Game</RootNamespace>
     <AssemblyName>Game</AssemblyName>
-    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -62,16 +63,16 @@
       <HintPath>..\packages\RoyT.AStar.2.1.0\lib\netstandard1.0\RoyT.AStar.dll</HintPath>
     </Reference>
     <Reference Include="sfmlnet-audio-2">
-      <HintPath>..\Deps\SFML.Net-2.2\lib\sfmlnet-audio-2.dll</HintPath>
+      <HintPath>..\Deps\sfmlnet-audio-2.dll</HintPath>
     </Reference>
     <Reference Include="sfmlnet-graphics-2">
-      <HintPath>..\Deps\SFML.Net-2.2\lib\sfmlnet-graphics-2.dll</HintPath>
+      <HintPath>..\Deps\sfmlnet-graphics-2.dll</HintPath>
     </Reference>
     <Reference Include="sfmlnet-system-2">
-      <HintPath>..\Deps\SFML.Net-2.2\lib\sfmlnet-system-2.dll</HintPath>
+      <HintPath>..\Deps\sfmlnet-system-2.dll</HintPath>
     </Reference>
     <Reference Include="sfmlnet-window-2">
-      <HintPath>..\Deps\SFML.Net-2.2\lib\sfmlnet-window-2.dll</HintPath>
+      <HintPath>..\Deps\sfmlnet-window-2.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.AppContext, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">

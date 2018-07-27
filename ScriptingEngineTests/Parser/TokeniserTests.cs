@@ -1,5 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using ScriptingEngine.Parser;
+using ScriptingEngine;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +15,7 @@ namespace ScriptingEngine.Parser.Tests
         public void TokeniseTest()
         {
             Parser P = new Parser();
-            var l = P.Parse("1.3 2 Hello World, != 123 \"dsdsds\" int bool 2.3 100 bool int \"asa\" <= > = ident + * / - && & -4.3 -100");
+            var l = P.Parse("1.3 2 Hello World, != 123 \"dsdsds\" int bool 2.3 100 bool int \"asa\" <= > = ident + * / - && & -4.3 -100 ");
             Tokeniser T = new Tokeniser(l);
             
             var a = T.Tokenise();

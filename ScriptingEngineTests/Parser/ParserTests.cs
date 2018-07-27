@@ -1,5 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using ScriptingEngine.Parser;
+using ScriptingEngine;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -42,6 +42,7 @@ namespace ScriptingEngine.Parser
         public List<Token> Tokenise()
         {
             List<Token> Tokens = new List<Token>();
+            Error ErrorHandler = new Error();
 
             for (int i = 0; i < Code.Count; i++)
             {
@@ -139,14 +140,14 @@ namespace ScriptingEngine.Parser
                         
                         if(Current[0] == '"')
                         {
-                            if(Current[Current.Length - 1] == '"')
+                            if(Current[Current.Length - 1] == '"' && (Current.Length - 1) != 0)
                             {
                                 T.Type = TokenType.String;
                                 break;
                             }
                             else
                             {
-                                ///Throw an error.
+                                ErrorHandler.PushNewError("Expected closing '\"', found EOF instead");
                             }
                         }
 
@@ -156,6 +157,8 @@ namespace ScriptingEngine.Parser
 
                 Tokens.Add(T);
             }
+
+            ErrorHandler.PrintAllErrors();
 
             return Tokens;
         }
