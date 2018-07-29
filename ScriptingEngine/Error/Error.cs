@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ScriptingEngine
 {
-    class Error
+    public class Error
     {
         public Error()
         {
@@ -27,13 +27,22 @@ namespace ScriptingEngine
             if (this.HasBeenErrors)
             {
                 foreach (string E in this.Errors)
-                    Console.WriteLine(Errors);
+                { 
+                    Console.WriteLine(E);
+                }
 
                 Console.WriteLine("Press any key to continue...");
                 Console.ReadKey();
                 Environment.Exit(-1);
             }
         }
+
+#if DEBUG
+        public List<string> GetErrors()
+        {
+            return this.Errors;
+        }
+#endif
 
         public bool HasBeenErrors
         {
