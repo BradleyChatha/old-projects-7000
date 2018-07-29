@@ -8,6 +8,9 @@ namespace ScriptingEngine.Parser
 {
     public class Parser
     {
+        public Parser()
+        { }
+
         public List<string> Parse(string Raw)
         {
             List<string> ParsedCode = new List<string>();

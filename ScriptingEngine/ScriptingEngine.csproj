@@ -41,7 +41,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AST\BaseASTNode.cs" />
+    <Compile Include="AST\AbstractSyntaxTree.cs" />
+    <Compile Include="AST\ASTNode.cs" />
+    <Compile Include="AST\Mathimatical\AdditionASTNode.cs" />
+    <Compile Include="AST\Mathimatical\DivisionASTNode.cs" />
+    <Compile Include="AST\Mathimatical\MultiplicationASTNode.cs" />
+    <Compile Include="AST\Mathimatical\SubtractionASTNode.cs" />
+    <Compile Include="AST\TypeASTNodes.cs" />
     <Compile Include="Error\Error.cs" />
     <Compile Include="Parser\Parser.cs" />
     <Compile Include="Parser\Tokeniser.cs" />

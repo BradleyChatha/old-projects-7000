@@ -115,6 +115,7 @@ namespace ScriptingEngine.Parser
                     case "continue":
                     case "break":
                     case "var":
+                    case "void":
                         T.Type = TokenType.Keyword;
                         break;
 

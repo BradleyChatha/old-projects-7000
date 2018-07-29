@@ -19,7 +19,6 @@ namespace ScriptingEngine.Parser.Tests
             Tokeniser T = new Tokeniser(l);
             
             var a = T.Tokenise();
-            Console.WriteLine();
         }
     }
 }

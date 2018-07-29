@@ -7,9 +7,9 @@ using ScriptingEngine.Parser;
 
 namespace ScriptingEngine.AST
 {
-    class BaseASTNode
+    public class ASTNode
     {
-        public BaseASTNode()
+        public ASTNode()
         {
 
         }
