@@ -43,6 +43,7 @@
   <ItemGroup>
     <Compile Include="AST\AbstractSyntaxTree.cs" />
     <Compile Include="AST\ASTNode.cs" />
+    <Compile Include="AST\ASTScope.cs" />
     <Compile Include="AST\Mathimatical\AdditionASTNode.cs" />
     <Compile Include="AST\Mathimatical\DivisionASTNode.cs" />
     <Compile Include="AST\Mathimatical\MultiplicationASTNode.cs" />
