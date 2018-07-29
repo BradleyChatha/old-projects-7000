@@ -21,9 +21,15 @@ namespace ScriptingEngine.AST
             this.Nodes.Add(Node);
         }
 
-        List<ASTNode> Nodes;
-        List<ASTScope> ChildScopes;
-        ASTScope Parent;
+        public void AddChildScope(ASTScope ChildScope)
+        {
+            this.ChildScopes.Add(ChildScope);
+        }
+        
+        public ASTScope Parent;
+
+        private List<ASTNode> Nodes;
+        private List<ASTScope> ChildScopes;
     }
 
     public class AbstractSyntaxTree
@@ -46,8 +52,11 @@ namespace ScriptingEngine.AST
 
                 if(Current.Type == TokenType.Mathmatical)
                 {
-                    if((i - 1) > 0 || (i + 1) < TokenCount)
-                        this.ErrorHandler.PushNewError("Incomplete addition statment");
+                    if((i - 1) < 0 || (i + 1) > TokenCount - 1)
+                    { 
+                        this.ErrorHandler.PushNewError("Incomplete maths statment");
+                        break;
+                    }
 
                     switch(Current.Code)
                     {
@@ -67,9 +76,27 @@ namespace ScriptingEngine.AST
                             this.CurrentScope.AddASTNode(this.ConstructDivisionStatement(Tokens[i - 1], Tokens[i + 1]));
                             break;
                     }
-                    
+                }
+                else if(Current.Type == TokenType.OpenBraces)
+                {
+                    ASTScope TempScope = this.ConstructNewScope(this.CurrentScope);
+                    this.CurrentScope = TempScope;
+                }
+                else if(Current.Type == TokenType.CloseBraces)
+                {
+                    if(this.CurrentScope == this.GlobalScope)
+                    {
+                        this.ErrorHandler.PushNewError("Unexpected closing brace");
+                        break;
+                    }
+
+                    ASTScope Child = this.CurrentScope;
+                    this.CurrentScope = this.CurrentScope.Parent;
+                    this.CurrentScope.AddChildScope(Child);
                 }
             }
+
+            this.ErrorHandler.PrintAllErrors();
         }
 
         public ASTScope GetCurrent()
@@ -159,6 +186,11 @@ namespace ScriptingEngine.AST
             IntegerTypeASTNode RightNode = new IntegerTypeASTNode(Right);
 
             return new DivisionASTNode(LeftNode, RightNode);
+        }
+
+        private ASTScope ConstructNewScope(ASTScope ParentScope)
+        {
+            return new ASTScope(ParentScope);
         }
 
         private List<Token> Tokens;
