@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScriptingEngine", "Scriptin
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScriptingEngineTests", "ScriptingEngineTests\ScriptingEngineTests.csproj", "{986D9A8F-C140-4C87-A56C-F8A3EA22A2DC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScriptTests", "ScriptTests\ScriptTests.csproj", "{1602E344-D7CA-4912-A638-3E192D3FEDEE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,6 +43,14 @@ Global
 		{986D9A8F-C140-4C87-A56C-F8A3EA22A2DC}.Release|Any CPU.Build.0 = Release|Any CPU
 		{986D9A8F-C140-4C87-A56C-F8A3EA22A2DC}.Release|x86.ActiveCfg = Release|Any CPU
 		{986D9A8F-C140-4C87-A56C-F8A3EA22A2DC}.Release|x86.Build.0 = Release|Any CPU
+		{1602E344-D7CA-4912-A638-3E192D3FEDEE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1602E344-D7CA-4912-A638-3E192D3FEDEE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1602E344-D7CA-4912-A638-3E192D3FEDEE}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{1602E344-D7CA-4912-A638-3E192D3FEDEE}.Debug|x86.Build.0 = Debug|Any CPU
+		{1602E344-D7CA-4912-A638-3E192D3FEDEE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1602E344-D7CA-4912-A638-3E192D3FEDEE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1602E344-D7CA-4912-A638-3E192D3FEDEE}.Release|x86.ActiveCfg = Release|Any CPU
+		{1602E344-D7CA-4912-A638-3E192D3FEDEE}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
