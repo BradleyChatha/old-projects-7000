@@ -21,9 +21,11 @@ namespace ScriptingEngine.Parser
             bool IsInNumber = false;
             char PreviousChar = ' ';
 
-            char[] SpecialChars = { '=', '!', '+', '-', '*', '/', '<', '>', '|', '.', '&', ',' };
+            char[] SpecialChars = { '!', '+', '-', '*', '/', '.', ',', '{', '}', '(', ')' }; ///Single chars
+            char[] MultiCharOps = { '=', '<', '>', '|', '&' }; // For handling things like ==
 
-            for(int i = 0; i < RawLength; i++)
+
+            for (int i = 0; i < RawLength; i++)
             {
                 char Current = Raw[i];
 
@@ -62,7 +64,31 @@ namespace ScriptingEngine.Parser
                     continue;
                 }
 
-                if(int.TryParse(Current.ToString(), out int Result1) && !IsInNumber)
+                if ((SpecialChars.Contains(Current) || MultiCharOps.Contains(Current)) && !IsInString)
+                {
+
+                    ParsedCode.Add(CurrentString);
+                    CurrentString = "";
+                    CurrentString += Current;
+
+                    if (MultiCharOps.Contains(Current) && !IsHandlingSpecial)
+                        IsHandlingSpecial = true;
+                    else
+                    {
+                        ParsedCode.Add(CurrentString);
+                        CurrentString = "";
+                    }
+
+                    continue;
+                }
+                else if (IsHandlingSpecial && !IsInString)
+                {
+                    ParsedCode.Add(CurrentString);
+                    CurrentString = "";
+                    IsHandlingSpecial = false;
+                }
+
+                if (int.TryParse(Current.ToString(), out int Result1) && !IsInNumber)
                 {
                     IsInNumber = true;
                     CurrentString += Current;
@@ -86,27 +112,6 @@ namespace ScriptingEngine.Parser
                         continue;
                     }
 
-                    CurrentString += Current;
-                    continue;
-                }
-
-                if (SpecialChars.Contains(Current))
-                {
-                    if(!IsHandlingSpecial)
-                    {
-                        ParsedCode.Add(CurrentString);
-                        CurrentString = "";
-                        IsHandlingSpecial = true;
-                        CurrentString += Current;
-                        continue;
-                    }
-                }
-                else if(IsHandlingSpecial)
-                {
-                    ParsedCode.Add(CurrentString);
-                    CurrentString = "";
-                    IsHandlingSpecial = false;
-                    CurrentString = "";
                     CurrentString += Current;
                     continue;
                 }

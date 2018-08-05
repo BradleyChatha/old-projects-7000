@@ -44,16 +44,20 @@
     <Compile Include="AST\AbstractSyntaxTree.cs" />
     <Compile Include="AST\ASTNode.cs" />
     <Compile Include="AST\ASTScope.cs" />
+    <Compile Include="AST\IdentifierASTNode.cs" />
     <Compile Include="AST\Mathimatical\AdditionASTNode.cs" />
     <Compile Include="AST\Mathimatical\DivisionASTNode.cs" />
     <Compile Include="AST\Mathimatical\MultiplicationASTNode.cs" />
     <Compile Include="AST\Mathimatical\SubtractionASTNode.cs" />
     <Compile Include="AST\TypeASTNodes.cs" />
+    <Compile Include="AST\Variable\IntASTNode.cs" />
     <Compile Include="Error\Error.cs" />
     <Compile Include="Parser\Parser.cs" />
     <Compile Include="Parser\Tokeniser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Runner\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

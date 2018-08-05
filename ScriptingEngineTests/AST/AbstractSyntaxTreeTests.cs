@@ -16,7 +16,7 @@ namespace ScriptingEngine.AST.Tests
         public void ConstructTreeTest()
         {
             Parser.Parser P = new Parser.Parser();
-            var PCode = P.Parse("1 + 1 {2 + 2 {7 * 2 {6 / 2 }}} {5 - 3} {2 + 9} 8 * 2");
+            var PCode = P.Parse("var : int MyInt {var : int Doot = 10}");
             Tokeniser Tok = new Tokeniser(PCode);
             var TCode = Tok.Tokenise();
 

@@ -69,6 +69,61 @@ namespace ScriptingEngine.AST
                     this.CurrentScope = this.CurrentScope.Parent;
                     this.CurrentScope.AddChildScope(Child);
                 }
+                else if(Current.Type == TokenType.Keyword)
+                {
+                    if(Current.Code == "var")
+                    {
+                        bool HasError = false;
+
+                        ///var : int myint = 10
+                        if(i + 3 > TokenCount)
+                        {
+                            this.ErrorHandler.PushNewError("Incomplete variable declaration");
+                            break;
+                        }
+
+                        if (this.Tokens[i + 1].Type == TokenType.Colon)
+                        {
+                            i += 2;
+
+                            if(this.Tokens[i].Type == TokenType.Keyword)
+                            {
+                                switch(Tokens[i].Code)
+                                { 
+                                    case "int":
+                                        i += 1;
+                                        Token Ident = Tokens[i];
+
+                                        if(i + 2 < TokenCount && this.Tokens[i + 1].Type == TokenType.Assignment)
+                                        {
+                                            ///It has an assignment
+                                                if(this.Tokens[i + 2].Type == TokenType.Int)
+                                                {
+                                                    i += 2;
+                                                    this.CurrentScope.AddASTNode(this.ConstructIntASTNode(Ident, this.Tokens[i]));
+                                                }
+                                            else
+                                            {
+                                                HasError = true;
+                                                this.ErrorHandler.PushNewError("Missing assignment operator");
+                                            }
+                                        }
+                                        else
+                                            this.CurrentScope.AddASTNode(this.ConstructIntASTNode(Ident));
+                                        break;
+                                }
+
+                                if(HasError)
+                                    break;
+                            }
+                        }
+                        else
+                        {
+                            this.ErrorHandler.PushNewError("Missing colon");
+                            break;
+                        }
+                    }
+                }
             }
 
             this.ErrorHandler.PrintAllErrors();
@@ -166,6 +221,16 @@ namespace ScriptingEngine.AST
         private ASTScope ConstructNewScope(ASTScope ParentScope)
         {
             return new ASTScope(ParentScope);
+        }
+
+        private IntASTNode ConstructIntASTNode(Token Identifier)
+        {
+            return new IntASTNode(new IdentifierASTNode(Identifier));
+        }
+
+        private IntASTNode ConstructIntASTNode(Token Identifier, Token Value)
+        {
+            return new IntASTNode(new IdentifierASTNode(Identifier), new IntegerTypeASTNode(Value));
         }
 
         private List<Token> Tokens;
