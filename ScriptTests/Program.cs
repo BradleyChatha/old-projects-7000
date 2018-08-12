@@ -13,7 +13,7 @@ namespace ScriptTests
         static void Main(string[] args)
         {
             Parser P = new Parser();
-            var pc = P.Parse("var : int MyInt {var : int Doot = 10}");
+            var pc = P.Parse("var : int MyInt = -10.6");
             Tokeniser Tok = new Tokeniser(pc);
             var tc = Tok.Tokenise();
             AbstractSyntaxTree Tree = new AbstractSyntaxTree(tc);

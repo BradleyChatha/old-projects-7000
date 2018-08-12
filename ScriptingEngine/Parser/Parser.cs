@@ -24,17 +24,19 @@ namespace ScriptingEngine.Parser
             char[] SpecialChars = { '!', '+', '-', '*', '/', '.', ',', '{', '}', '(', ')' }; ///Single chars
             char[] MultiCharOps = { '=', '<', '>', '|', '&' }; // For handling things like ==
 
+            void PushCode()
+            {
+                if(CurrentString != "")
+                    ParsedCode.Add(CurrentString);
+            }
 
             for (int i = 0; i < RawLength; i++)
             {
                 char Current = Raw[i];
 
-                if(Current == 'i')
-                    Console.WriteLine();
-
-                if(!IsInString && (Current == ' ' || Current == '\t' || Current == '\r' || Current == '\n'))
+                if (!IsInString && (Current == ' ' || Current == '\t' || Current == '\r' || Current == '\n'))
                 {
-                    ParsedCode.Add(CurrentString);
+                    PushCode();
                     CurrentString = "";
                     IsInNumber = false;
                     continue;
@@ -45,7 +47,7 @@ namespace ScriptingEngine.Parser
                     if (IsInString)
                     {
                         CurrentString += Current;
-                        ParsedCode.Add(CurrentString);
+                        PushCode();
                         CurrentString = "";
                         IsInString = false;
                         continue;
@@ -64,10 +66,9 @@ namespace ScriptingEngine.Parser
                     continue;
                 }
 
-                if ((SpecialChars.Contains(Current) || MultiCharOps.Contains(Current)) && !IsInString)
+                if ((SpecialChars.Contains(Current) || MultiCharOps.Contains(Current)) && !IsInString && (ParsedCode[ParsedCode.Count - 1][0] != '=' && !int.TryParse(ParsedCode[ParsedCode.Count - 1], out int _)))
                 {
-
-                    ParsedCode.Add(CurrentString);
+                    PushCode();
                     CurrentString = "";
                     CurrentString += Current;
 
@@ -75,7 +76,7 @@ namespace ScriptingEngine.Parser
                         IsHandlingSpecial = true;
                     else
                     {
-                        ParsedCode.Add(CurrentString);
+                        PushCode();
                         CurrentString = "";
                     }
 
@@ -83,7 +84,7 @@ namespace ScriptingEngine.Parser
                 }
                 else if (IsHandlingSpecial && !IsInString)
                 {
-                    ParsedCode.Add(CurrentString);
+                    PushCode();
                     CurrentString = "";
                     IsHandlingSpecial = false;
                 }
@@ -106,7 +107,7 @@ namespace ScriptingEngine.Parser
                     if(!int.TryParse(Current.ToString(), out int Result3) && Current != '.')
                     {
                         IsInNumber = false;
-                        ParsedCode.Add(CurrentString);
+                        PushCode();
                         CurrentString = "";
                         CurrentString += Current;
                         continue;
@@ -118,7 +119,7 @@ namespace ScriptingEngine.Parser
 
                 if (Current == ' ' && CurrentString != "")
                 {
-                    ParsedCode.Add(CurrentString);
+                    PushCode();
                     CurrentString = "";
                     continue;
                 }
@@ -127,10 +128,9 @@ namespace ScriptingEngine.Parser
                 PreviousChar = Current;
             }
 
-            if(CurrentString != "")
-                ParsedCode.Add(CurrentString);
+            PushCode();
 
-            ///Danhack
+            /*//Danhack
             for (int i = 0; i < ParsedCode.Count; i++)
             {
                 if(ParsedCode[i] == "")
@@ -138,7 +138,7 @@ namespace ScriptingEngine.Parser
                     ParsedCode.RemoveAt(i);
                     i--;
                 }
-            }
+            }*/
 
             return ParsedCode;
         }
