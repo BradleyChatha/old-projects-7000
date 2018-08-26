@@ -52,12 +52,11 @@
     <Compile Include="AST\TypeASTNodes.cs" />
     <Compile Include="AST\Variable\IntASTNode.cs" />
     <Compile Include="Error\Error.cs" />
+    <Compile Include="Interpreter\VariableManager.cs" />
     <Compile Include="Parser\Parser.cs" />
     <Compile Include="Parser\Tokeniser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Runner\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -24,7 +24,16 @@ namespace ScriptingEngine.AST
             this.Value = new IntegerTypeASTNode(Tok);
         }
 
-        private IdentifierASTNode Identifier;
-        private IntegerTypeASTNode Value;
+        public IdentifierASTNode Identifier
+        {
+            get;
+            private set;
+        }
+
+        public IntegerTypeASTNode Value
+        {
+            get;
+            private set;
+        }
     }
 }
