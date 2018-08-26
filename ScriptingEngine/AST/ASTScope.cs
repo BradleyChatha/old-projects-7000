@@ -6,13 +6,45 @@ using System.Threading.Tasks;
 
 namespace ScriptingEngine.AST
 {
+    public class ASTScopeIdentifierGenerator
+    {
+        public static void InitIdentifier()
+        {
+            IDCounter = -1;
+        }
+
+        public static int GetCurrentID()
+        {
+            return IDCounter;
+        }
+
+        public static int GenerateNextID()
+        {
+            IDCounter += 1;
+            return IDCounter;
+        }
+
+        public static int IDCounter;
+    }
+
+    public class ASTScopeIdentifier : ASTNode
+    {
+        public ASTScopeIdentifier(int Owner)
+        {
+            this.OwnerID = Owner;
+        }
+
+        public int OwnerID;
+    }
+
     public class ASTScope
     {
-        public ASTScope(ASTScope Parent = null)
+        public ASTScope(int ID, ASTScope Parent = null)
         {
             this.Parent = Parent;
             this.Nodes = new List<ASTNode>();
             this.ChildScopes = new List<ASTScope>();
+            this.ScopeID = ID;
         }
 
         public void AddASTNode(ASTNode Node)
@@ -25,6 +57,7 @@ namespace ScriptingEngine.AST
             this.ChildScopes.Add(ChildScope);
         }
 
+        public int ScopeID;
         public ASTScope Parent;
 
         private List<ASTNode> Nodes;

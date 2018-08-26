@@ -11,8 +11,9 @@ namespace ScriptingEngine.AST
     {
         public AbstractSyntaxTree(List<Token> Tokens)
         {
+            ASTScopeIdentifierGenerator.InitIdentifier();
             this.Tokens = Tokens;
-            this.GlobalScope = new ASTScope();
+            this.GlobalScope = new ASTScope(ASTScopeIdentifierGenerator.GenerateNextID()); ///Global scope ID should always be 0
             this.CurrentScope = GlobalScope;
             this.ErrorHandler = new Error();
         }
@@ -54,6 +55,7 @@ namespace ScriptingEngine.AST
                 }
                 else if(Current.Type == TokenType.OpenBraces)
                 {
+                    this.CurrentScope.AddASTNode(this.ConstructASTScopeID());
                     ASTScope TempScope = this.ConstructNewScope(this.CurrentScope);
                     this.CurrentScope = TempScope;
                 }
@@ -97,11 +99,11 @@ namespace ScriptingEngine.AST
                                         if(i + 2 < TokenCount && this.Tokens[i + 1].Type == TokenType.Assignment)
                                         {
                                             ///It has an assignment
-                                                if(this.Tokens[i + 2].Type == TokenType.Int)
-                                                {
-                                                    i += 2;
-                                                    this.CurrentScope.AddASTNode(this.ConstructIntASTNode(Ident, this.Tokens[i]));
-                                                }
+                                            if(this.Tokens[i + 2].Type == TokenType.Int)
+                                            {
+                                                i += 2;
+                                                this.CurrentScope.AddASTNode(this.ConstructIntASTNode(Ident, this.Tokens[i]));
+                                            }
                                             else
                                             {
                                                 HasError = true;
@@ -220,7 +222,7 @@ namespace ScriptingEngine.AST
 
         private ASTScope ConstructNewScope(ASTScope ParentScope)
         {
-            return new ASTScope(ParentScope);
+            return new ASTScope(ASTScopeIdentifierGenerator.GetCurrentID(), ParentScope);
         }
 
         private IntASTNode ConstructIntASTNode(Token Identifier)
@@ -231,6 +233,11 @@ namespace ScriptingEngine.AST
         private IntASTNode ConstructIntASTNode(Token Identifier, Token Value)
         {
             return new IntASTNode(new IdentifierASTNode(Identifier), new IntegerTypeASTNode(Value));
+        }
+
+        private ASTScopeIdentifier ConstructASTScopeID()
+        {
+            return new ASTScopeIdentifier(ASTScopeIdentifierGenerator.GenerateNextID());
         }
 
         private List<Token> Tokens;

@@ -66,7 +66,7 @@ namespace ScriptingEngine.Parser
                     continue;
                 }
 
-                if ((SpecialChars.Contains(Current) || MultiCharOps.Contains(Current)) && !IsInString && (ParsedCode[ParsedCode.Count - 1][0] != '=' && !int.TryParse(ParsedCode[ParsedCode.Count - 1], out int _)))
+                if ((SpecialChars.Contains(Current) || MultiCharOps.Contains(Current)) && !IsInString && ParsedCode.Count > 0 && (ParsedCode[ParsedCode.Count - 1][0] != '=' && !int.TryParse(ParsedCode[ParsedCode.Count - 1], out int _)))
                 {
                     PushCode();
                     CurrentString = "";
@@ -129,16 +129,6 @@ namespace ScriptingEngine.Parser
             }
 
             PushCode();
-
-            /*//Danhack
-            for (int i = 0; i < ParsedCode.Count; i++)
-            {
-                if(ParsedCode[i] == "")
-                { 
-                    ParsedCode.RemoveAt(i);
-                    i--;
-                }
-            }*/
 
             return ParsedCode;
         }
