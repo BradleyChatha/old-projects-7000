@@ -11,49 +11,29 @@ namespace ScriptingEngine.Interpreter
 {
     class VariableManager
     {
-        enum VariableType
-        {
-            Int = 0,
-            Float,
-            String,
-            Bool
-        }
-
-        struct VariableDescriptor
-        {
-            public VariableType Type;
-            public string ID;
-        }
-
         public VariableManager()
         {
-            this.Variables = new Dictionary<VariableDescriptor, ASTNode>();
+            this.Variables = new Dictionary<Token, ASTNode>();
             this.ErrorHandler = new Error();
         }
 
         public void AddNewVariable(IntASTNode Variable)
         {
-            VariableDescriptor Descriptor;
-            Descriptor.Type = VariableType.Int;
-            Descriptor.ID = Variable.Identifier.Tok.Code;
+            this.Variables.Add(Variable.Identifier.Tok, Variable);
         }
 
         public IntASTNode GetIntVariable(IdentifierASTNode Identifier)
         {
-            VariableDescriptor Descriptor;
-            Descriptor.Type = VariableType.Int;
-            Descriptor.ID = Identifier.Tok.Code;
-
-            if (!this.Variables.ContainsKey(Descriptor))
+            if (!this.Variables.ContainsKey(Identifier.Tok))
             {
-                this.ErrorHandler.PushNewError($"Unkown identifier '{Descriptor.ID}'");
+                this.ErrorHandler.PushNewError($"Unkown identifier '{Identifier.Tok.Code}'");
                 this.ErrorHandler.PrintAllErrors();
             }
 
-            return this.Variables[Descriptor] as IntASTNode;
+            return this.Variables[Identifier.Tok] as IntASTNode;
         }
 
-        private Dictionary<VariableDescriptor, ASTNode> Variables; ///VariableDescriptor = identifier, ASTNode = value
+        private Dictionary<Token, ASTNode> Variables; ///Token = identifier, ASTNode = value
         private Error ErrorHandler;
     }
 }
