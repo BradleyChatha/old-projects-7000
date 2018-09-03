@@ -168,6 +168,7 @@
     <Compile Include="Engine\Window\DrawWindow.cs" />
     <Compile Include="Gameplay\Entities\Components\Abilities\Ability.cs" />
     <Compile Include="Gameplay\Entities\Components\Abilities\PlayerBasicAttackComponent.cs" />
+    <Compile Include="Gameplay\Entities\Components\Abilities\Projectiles\BasicAttackProjectile.cs" />
     <Compile Include="Gameplay\Entities\Components\Abilities\TestSummon.cs" />
     <Compile Include="Gameplay\Entities\Components\CameraComponent.cs" />
     <Compile Include="Gameplay\Entities\Components\IComponent.cs" />

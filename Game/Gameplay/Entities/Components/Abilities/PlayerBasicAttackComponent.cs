@@ -14,12 +14,15 @@ namespace Game.Gameplay
 
             this.CastTime = 0.0f;
             this.Cooldown = 0.15f;
+
+            this.ActivationKey = SFML.Window.Keyboard.Key.Space;
         }
 
         protected override void OnUse(Entity Owner)
         {
             
         }
-
+        
+        private List<BasicAttackProjectile> Projectiles;
     }
 }
