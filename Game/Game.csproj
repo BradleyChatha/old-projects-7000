@@ -167,9 +167,11 @@
     <Compile Include="Engine\Logger\Logger.cs" />
     <Compile Include="Engine\Window\DrawWindow.cs" />
     <Compile Include="Gameplay\Entities\Components\Abilities\Ability.cs" />
+    <Compile Include="Gameplay\Entities\Components\Abilities\PlayerBasicAttackComponent.cs" />
     <Compile Include="Gameplay\Entities\Components\Abilities\TestSummon.cs" />
     <Compile Include="Gameplay\Entities\Components\CameraComponent.cs" />
     <Compile Include="Gameplay\Entities\Components\IComponent.cs" />
+    <Compile Include="Gameplay\Entities\Components\Stats\HealthComponent.cs" />
     <Compile Include="Gameplay\Entities\Entity.cs" />
     <Compile Include="Gameplay\Entities\Pets\Pet.cs" />
     <Compile Include="Gameplay\Entities\Player.cs" />

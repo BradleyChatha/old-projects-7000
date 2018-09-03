@@ -7,15 +7,30 @@ namespace Game.Engine
 {
     class Button : UIElement
     {
-        public Button(string ButtonPath, Vector2f Position, OnClick ClickEvent, OnEnterHover HoverEnterEvent, OnLeaveHover HoverLeaveEvent, ref DrawWindow WindowHandle) : base(ButtonPath, ref WindowHandle)
+        public Button(string ButtonPath, Vector2f Position, ref DrawWindow WindowHandle) : base(ButtonPath, ref WindowHandle)
         {
-            this.ClickEvent = ClickEvent;
-            this.HoverEnterEvent = HoverEnterEvent;
-            this.HoverLeaveEvent = HoverLeaveEvent;
+
             this.HasBeenClicked = false;
             this.Position = Position;
 
             Logger.Log(LogLevel.Info, "Created a new button UI element");
+        }
+
+        public void AddEvents(OnClick ClickEvent, OnEnterHover HoverEnterEvent, OnLeaveHover HoverLeaveEvent)
+        {
+            this.ClickEvent = ClickEvent;
+            this.HoverEnterEvent = HoverEnterEvent;
+            this.HoverLeaveEvent = HoverLeaveEvent;
+        }
+
+        public void ChangeColour(Color NewColour)
+        {
+            this.DrawableSprite.Color = NewColour;
+        }
+
+        public void SetToDefaultColour()
+        {
+            this.DrawableSprite.Color = new Color(255, 255, 255);
         }
 
         public override void Update()
