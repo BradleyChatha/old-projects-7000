@@ -1,0 +1,1 @@
+[Token Debug] TokenType["TOKENTYPE_KEYWORD_CLASS"] TokenData["Class"] TokenDebugInfo:File["Meme.e"] TokenDebugInfo:Line["10"] TokenDebugInfo:Column["1

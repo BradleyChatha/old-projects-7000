@@ -1,0 +1,8 @@
+﻿  Lexer.cpp
+  Main.cpp
+  Generating code
+e:\programming\c++\ec\ec\lexer.cpp(105): warning C4715: 'Lexer::NextStringToken': not all control paths return a value
+  All 196 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Finished generating code
+  EC.vcxproj -> E:\Programming\C++\EC\Release\EC.exe
+  EC.vcxproj -> E:\Programming\C++\EC\Release\EC.pdb (Full PDB)
