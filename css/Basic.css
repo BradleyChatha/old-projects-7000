@@ -1,0 +1,46 @@
+body {
+    background-color: #FDF6E3;
+}
+
+.navbarcontents {
+    font-weight: 200;
+    font-family: "Calibri Light", sans-serif, serif;
+    font-style:  normal;
+    color: #ffffff;
+    align-self: center;
+}
+    
+.titlebar {
+    font-weight: 500;
+    font-family: "Calibri Light", sans-serif, serif;
+    font-style: normal;
+    color: #000000; 
+    text-align: center;
+}
+
+.anchorlink {
+    cursor: pointer;
+}
+
+.anchorlink:hover{
+    color: #0452f8
+}
+
+.top {
+    position: fixed;
+}
+
+.sectiontitle {
+    text-decoration: underline;
+    font-weight: 900;
+}
+
+.padding-top {
+    padding-top: 5px;
+    padding-bottom: 5px; 
+}
+
+.padding-right {
+    padding-right: 5px;
+    padding-left: 5px;
+}

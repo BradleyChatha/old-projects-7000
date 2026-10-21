@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>C++ Errors</title>
+        <meta charset = "utf-8"/>
+        <meta name = "viewport" content="width = device-width, inital-scale = 1"/> 
+
+        <!--Needed for Bootstrap, my own css will come after this.-->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/jquery-3.2.1.js" integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE=" crossorigin="anonymous"></script>
+        
+        <!--My own stuff-->
+        <link rel = "stylesheet" type = "text/css" href = "../css/Basic.css"/>
+        <script src="../JS/PageSettings.js"></script>
+    </head>
+
+    <body id = "page">
+        <!--Title and logo bar-->
+        <p class = "titlebar" ID = "titlebar"><img src = "../Assets/C++ Tutorial Logo.png" alt = "Code Place Logo">Code Place</p>
+        <!--Navigation bar-->
+        <div class = "container-fluid" color = #ff00ff>
+            <div class = "row">
+                    <div class = "col-md-4" style = "background-color: #000000; cursor: pointer;" onclick="Redirect('../Index.html')"><span class = "navbarcontents"><div class = "text-center">Home</div></span></div>
+                    <div class = "col-md-4" style = "background-color: #000000; cursor: pointer;" onclick="Redirect('CppTutorial.html')"><span class = "navbarcontents"><div class = "text-center">C++ Tutoirals</div></span></div>
+                    <div class = "col-md-4" style = "background-color: #000000; cursor: pointer;" onclick="Redirect('CppErrors.html')"><span class = "navbarcontents"><div class = "text-center">C++ Error Messages</div></span></div>
+            </div>  
+        </div>
+
+        <!--Content-->
+        <div class = "container-fluid">
+            <div class = "row" id = "cout">
+                <div class = "col-md-4 mx-auto text-center">
+                    <h2 class = "sectiontitle">C++ compiler errors and what they mean</h2>
+                </div>
+            </div>
+            <div class = "row">
+                <div class = "col-md-5 mx-auto text-center">
+                    <p>
+                        C++ compiler errors can be confusing and hard to work out. Alot of the time they lack clarity in what they mean. The table below will explain some errors meanings.<br/>
+                        It is worth noting that different compilers word the errors slightly differently, but it should be easy to work out what error means what. For the examples I will be using the C++ compiler which comes with Microsoft Visual Studio.<br/>
+                        <table class = "table table-condensed table-bordered table-hover">
+                            <thead>
+                                <th>Error message</th>
+                                <th>Meaning</th>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Expected a ';'</td>
+                                    <td>There is a line which is missing a semicolon on the end of it.</td>
+                                </tr>
+                                <tr>
+                                    <td>No exsisting conversion between [type 1] and [type 2]</td>
+                                    <td>This means that the computer cannot automatically convert between one data type and the other.</td>
+                                </tr>
+                                <tr>
+                                    <td>Cannot open include file [file name]. No such file or directory.</td>
+                                    <td>There is a typo in the name of the include file, or it doesn't exist, which is preventing the compiler from finding it.</td>
+                                </tr>
+                                <tr>
+                                    <td>Too few arguments in function call</td>
+                                    <td>There is a function being called which doesn't have enough parameters being passed through it.</td>
+                                </tr>                            
+                                <tr>
+                                    <td>Incomplete type is not allowed.</td>
+                                    <td>This is an error message which has a few useages. It is commonly used to express if the program is trying to create a variable of type 'void', but can also describe classes where there is only a forward declaration.</td>
+                                </tr>
+                                <tr>
+                                    <td>[Name] is not a class or a namespace.</td>
+                                    <td>What you tried to access doesn't exsist with that name, most likely a typo.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </p> 
+                </div> <!-- Description -->
+            </div>
+        </div>
+    </body>
+</html>

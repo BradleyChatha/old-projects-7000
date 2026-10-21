@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>C++ Tutorial</title>
+        <meta charset = "utf-8"/>
+        <meta name = "viewport" content="width = device-width, inital-scale = 1"/> 
+
+        <!--Needed for Bootstrap, my own css will come after this.-->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/jquery-3.2.1.js" integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE=" crossorigin="anonymous"></script>
+        
+        <!--Prism for syntax highlighting-->
+        <link rel = "stylesheet" href="../css/Prism/prism.css"/>
+        <script src = "../JS/Prism/prism.js"></script>
+
+        <!--My own stuff-->
+        <link rel = "stylesheet" type = "text/css" href = "../css/Basic.css"/>
+        <link rel = "stylesheet" type = "text/css" href = "../css/CppTutorial.css"/>
+        <script src="../JS/PageSettings.js"></script>
+    </head>
+
+    <body>
+        <!--Title and logo bar-->
+        <p class = "titlebar" ID = "titlebar"><img src = "../Assets/C++ Tutorial Logo.png" alt = "Code Place Logo">Code Place</p>
+        <div class = "top"></div>
+        <!--Navigation bar-->
+        <div class = "container-fluid" color = #ff00ff>
+            <div class = "row">
+                <div class = "col-md-4" style = "background-color: #000000; cursor: pointer;" onclick="Redirect('../Index.html')"><span class = "navbarcontents"><div class = "text-center">Home</div></span></div>
+                <div class = "col-md-4" style = "background-color: #000000; cursor: pointer;" onclick="Redirect('CppTutorial.html')"><span class = "navbarcontents"><div class = "text-center">C++ Tutoirals</div></span></div>
+                <div class = "col-md-4" style = "background-color: #000000; cursor: pointer;" onclick="Redirect('CppErrors.html')"><span class = "navbarcontents"><div class = "text-center">C++ Error Messages</div></span></div>
+            </div>  
+        </div>
+
+        <!--Content-->
+        <br/>        
+        <div class = "container-fluid">
+            <ol type = "1" class = "contentlist">
+                <li> <span class = "chaptertitle">Basics</span>
+                    <ol type = "i" class = "innercontentlist">
+                    <li class = "anchorlink" onclick="Redirect('CppTutorial.html#introduction')">Introduction</li>
+                    <li class = "anchorlink" onclick="Redirect('CppTutorial.html#IDE')">Compilers, IDEs, and text editors</li>
+                    <li class = "anchorlink" onclick="Redirect('CppTutorial.html#cout')">Writing to the screen</li>
+                    <li class = "anchorlink" onclick="Redirect('CppTutorial.html#cin')">Variables and user input</li>
+                </ol></li>
+            </ol>
+        </div>
+
+        <div class = "container-fluid">
+            <div class = "row" id = "intoduction">
+                <div class = "col-md-4 mx-auto text-center">
+                    <h2 class = "sectiontitle">Indroduction</h2>
+                </div>
+            </div>
+            <div class = "row">
+                <div class = "col-md-4 mx-auto text-center">
+                    <p>This tutorial is designed to be a help for those who wish to learn C++. C++ is a programming language which is very commonly used for hobbiest and professionals alike.<br/>
+                    C++ was first released in 1983 by Bjarne Stroustrup. While it is commonly thought as a subset of C rather than it's own language this is incorrect.<br/>
+                    </p>
+                </div> <!-- Description -->
+            </div>
+
+            <div class = "row" id = "IDE">
+                <div class = "col-md-4 mx-auto text-center">
+                    <h2 class = "sectiontitle">Compilers, IDEs, and text editors</h2>
+                </div>
+            </div>
+                <div class = "row">
+                    <div class = "col-md-4 mx-auto text-center">
+                        <p>At the least needed for C++ is a compiler. A compiler turns human readable code into machine code, which can be ran by the computer.<br/>
+                        There are many compilers and they're platform specific, but for this we'll focus on Windows. Linux users already have a compiler installed.<br/>
+                        There are two main options when programming in C++. One is to use a text editor with a command line compiler and the other is to use an Integrated Development Environment (IDE).<br/>
+                        <br/>
+                        There are many kinds of text editors and <span style = "text-decoration: underline">most</span> have syntax highlighting.<br/>
+                        Two very common text editors are <a href="https://notepad-plus-plus.org/">Notepad++</a> and <a href = "https://code.visualstudio.com/">Visual Studio Code</a>. Both have their advantages and disadvantages.<br/>
+                        <span style = "font-weight: 900;">Notepad++:</span><br/>
+                        <span style = "color: #009900">+ Syntax highlighting </span><br/>
+                        <span style = "color: #009900">+ Settings easy to navigate </span><br/>
+                        <span style = "color: #009900">+ Easy to add new languages </span><br/>
+                        <span style = "color: #990000">- Limited predictive text </span><br/>
+                        <br/>   
+                        <span style = "font-weight: 900;">Visual Studio Code:</span><br/>
+                        <span style = "color: #009900">+ Syntax highlighting </span><br/>
+                        <span style = "color: #009900">+ Settings easy to navigate </span><br/>
+                        <span style = "color: #009900">+ Easy to add new languages </span><br/>
+                        <span style = "color: #009900">+ Has support for addons </span><br/>
+                        <span style = "color: #990000">- Better predictive text than Nodepad++ but still not as good as a dedicated IDE. </span><br/>
+                        <br/>
+                        There are two major command line compilers which I will cover. <a href = "https://sourceforge.net/projects/mingw/files/">MinGW</a> and <a href = "http://releases.llvm.org/download.html">Clang</a>.<br/>
+                        Both are about the same as each other in terms of what they do, it's down to personal preference on which you choose.<br/>
+                        MinGW uses the command <span class = "code">g++</span> to compile files and clang uses the command <span class = "code">clang++</span>.<br/>
+                        <br/>
+                        IDEs are a combination of a text editor and a compiler all in one package. They have syntax highlighting and (for the most part) reliable predictive text. 
+                        One of the most popular IDEs is <a href = "https://www.visualstudio.com/downloads/">Microsoft Visual Studio</a>.
+                        </p>
+                    </div>
+                </div> <!-- Description -->  
+                <div class = "row" id = "cout">
+                    <div class = "col-md-4 mx-auto text-center">
+                        <h2 class = "sectiontitle">Writing to the screen.</h2>
+                    </div>
+                </div>
+                    <div class = "row">
+                        <div class = "col-md-5 mx-auto text-center">
+                            <p>
+                                One of the most basic things to do in any programming language is to write something to the console, traditionally the words "Hello, World!".
+                                Look at the following C++ code, this is an example of how to write to the console in C++. Any time you see "//" there is a comment after that position and the writing on the rest of the line will not be compiled.
+                                For outputting to the console "cout" is used, this stands for character out. Which simply means that characters will be pushed to stdout (a data stream) and from there it will go to the console window to be displayed.
+                            </p> 
+                        </div> <!-- Description -->
+                        <div class = "col-md-45 mx-auto">
+                            <p>
+                                <pre class = "">
+                                    <code class="language-cpp">
+//This line tells the compiler that there is another file to be used.
+//This is where the information the 'cout' line is.
+#include &ltiostream&gt
+                                            
+//This tells the compiler that we want to use code which belong to the group, or namepsace,"std".
+//This is the C++ Standard Library. 
+using namespace std;
+                                   
+//This is a function. This is the first place the compiler goes to when the program is being built.
+//The words inside of the brackets will be discussed later.
+int main(int argc, char** argv)
+{
+    //This is how words are being wrote the console. The 'cout' means character out.
+    //The following '<<' dictates that is going to cout. In this case it is a string.
+    //Strings are shown as words inside of speech marks ("), there must be an opening speech mark.
+    //'endl' means end line. This can also be done with '\n'. It forces the next information to be printed into the line below.
+    cout << "Hello, World!" << endl;
+    
+    ///This tells the function that it has ended now.
+    return 0;
+}                                        
+                                    </code>
+                                </pre>
+                            </p>
+                        </div> <!--Code-->
+                    </div>      
+                    <div class = "row" id = "cin">
+                        <div class = "col-md-4 mx-auto text-center">
+                            <h2 class = "sectiontitle">Variables and user input</h2>
+                        </div>
+                    </div>                    
+                    <div class = "row">
+                        <div class = "col-md-5 mx-auto text-center">
+                            <p>
+                                Variables are named areas in memory, you can read and write (in most cases) to them. In C++ you specify what type of data you want. There are several types of variable. <br/>
+                                <table class="table table-condensed">
+                                    <thead>
+                                        <tr>
+                                            <th>Variable Type</th>
+                                            <th>What it stores</th>
+                                            <th>Size in bytes</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>int</td>
+                                            <td>A whole number, or integer.</td>
+                                            <td>4</td>
+                                        </tr>
+                                        <tr>
+                                            <td>char</td>
+                                            <td>A single character.</td>
+                                            <td>1</td>
+                                        </tr>
+                                        <tr>
+                                            <td>float</td>
+                                            <td>A decimal number, or floating-point number.</td>
+                                            <td>4</td>
+                                        </tr>
+                                        <tr>
+                                            <td>bool</td>
+                                            <td>Stores a value of either true or false (1 or 0), also known as a boolean.</td>
+                                            <td>Some platforms use 4 bytes but it only requires 1 byte.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                
+                                Variables can either be assigned a value in code or can be used to store input from the user. Variables are used when ever information needs to be stored, for example results of calculations.<br/>
+                                Some variables can be printed to the console by use of cout. Look at the following code. <br/>  
+
+                                Console user input pauses the program at that point until the user enters something and (usually) presses the return key. To get user input "cin" is used, which stands for character in. This means that user input is got from another stream, stdin, and then can be used in the program.
+                            </p> 
+                        </div> <!-- Description -->
+                        <div class = "col-md-45 mx-auto">
+                            <pre class = "">
+                                <code class="language-cpp"> 
+#include &ltiostream&gt
+//This allows us to have proper access to strings.
+#include &ltstring&gt
+                                        
+using namespace std;
+
+int main(int argc, char** argv)
+{
+    //'int' dictates that the type of data the variable will store.
+    int My_Int = 100;
+    //Strings can change in their size depending on how much information they have.
+    string User_Input = "";
+                                                
+    //No endl stops the user input from being on a new line.
+    cout << "Enter your name: ";
+
+    //To get the user input from the console 'cin' is used.
+    //cin uses '>>' instead of '<<'. I imagine this as the direction the data is going.
+    //cout has data going into it (<<) and cin has data coming out of it (>>).
+    //Of course this isn't how it actually works but it makes it easier to remember when learning.
+    cin >> User_Input;
+
+    //This prints the input which was given by the user.
+    cout << "Hello " << User_Input << endl;
+                                                
+    return 0;
+}
+                                </code>
+                            </pre>
+                        </div> <!--Code-->
+                    </div>              
+            </div>
+    </body>
+</html>
