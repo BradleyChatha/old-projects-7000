@@ -1,0 +1,11 @@
+#Files
+*.exe
+*.obj
+*.dll
+*.pdb
+
+#Folders
+/.vs/
+/SPlatformer/obj/
+/SPlatformer/bin/Debug/
+/SPlatformer/bin/Release/
