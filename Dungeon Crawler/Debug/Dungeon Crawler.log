@@ -1,0 +1,22 @@
+﻿Build started 26/02/2015 18:29:42.
+     1>Project "C:\Users\sherb_000\Documents\sfml-gui\Dungeon Crawler\Dungeon Crawler.vcxproj" on node 2 (Rebuild target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /I"C:\Users\sherb_000\Documents\sfml-gui\/Deps/include" /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt AssetLoader.cpp GuiButton.cpp GuiControl.cpp GuiImage.cpp GuiTextbox.cpp
+         GuiTextbox.cpp
+         GuiImage.cpp
+         GuiControl.cpp
+         GuiButton.cpp
+         AssetLoader.cpp
+         Generating Code...
+       Lib:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\Lib.exe /OUT:"C:\Users\sherb_000\Documents\sfml-gui\Debug\SFML Gui.lib" /NOLOGO Debug\AssetLoader.obj
+         Debug\GuiButton.obj
+         Debug\GuiControl.obj
+         Debug\GuiImage.obj
+         Debug\GuiTextbox.obj
+         Dungeon Crawler.vcxproj -> C:\Users\sherb_000\Documents\sfml-gui\Debug\SFML Gui.lib
+     1>Done Building Project "C:\Users\sherb_000\Documents\sfml-gui\Dungeon Crawler\Dungeon Crawler.vcxproj" (Rebuild target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:04.86
