@@ -1,0 +1,4 @@
+﻿  Main.cpp
+c:\users\sherb\documents\visual studio 2015\projects\platformer\platformer\logger.h(29): warning C4091: 'static ': ignored on left of 'Logger' when no variable is declared
+  Platformer.vcxproj -> C:\Users\sherb\Documents\Visual Studio 2015\Projects\Platformer\x64\Debug\Platformer.exe
+  Platformer.vcxproj -> C:\Users\sherb\Documents\Visual Studio 2015\Projects\Platformer\x64\Debug\Platformer.pdb (Full PDB)
