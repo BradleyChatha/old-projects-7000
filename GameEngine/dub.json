@@ -1,0 +1,15 @@
+{
+	"name": "gameengine",
+	"authors": [
+		"sherb"
+	],
+	"dependencies": {
+		"derelict-gl3": "~>1.0.19",
+		"derelict-glfw3": "~>3.1.0",
+		"gl3n": "~>1.3.1"
+	},
+	"description": "MLG SICK GAME ENGINE",
+	"copyright": "Copyright © 2016, sherb",
+	"license": "proprietary",
+	"targetPath": "bin"
+}

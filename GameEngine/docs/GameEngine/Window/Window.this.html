@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1"/>
+		<title>Function Window.this</title>
+		<link rel="stylesheet" href="../../css/style.min.css"/>
+		<script type="text/javascript" src="../../js/script.min.js"></script>
+	</head>
+	<body onload="setupDdox();">
+		<header>
+		</header>
+		<nav id="main-nav">
+				<noscript>
+					<p style="color: red">The search functionality needs JavaScript enabled</p>
+				</noscript>
+				<div id="symbolSearchPane" style="display: none">
+					<input id="symbolSearch" type="text" placeholder="Search" onchange="performSymbolSearch(24);" onkeypress="this.onchange();" onpaste="this.onchange();" oninput="this.onchange();" autofocus="autofocus"/>
+					<ul id="symbolSearchResults" style="display: none"></ul>
+					<script type="application/javascript" src="../../symbols.js"></script>
+					<script type="application/javascript">
+var symbolSearchRootDir = "../../";
+document.getElementById('symbolSearchPane').style.display = 'block';
+					</script>
+				</div>
+						<ul>
+						<li>
+							<a href="../../GameEngine/Core.html">GameEngine.Core</a>
+						</li>
+						<li>
+							<a href="../../GameEngine/Input.html">GameEngine.Input</a>
+						</li>
+						<li>
+							<a href="../../GameEngine/Renderer2D.html">GameEngine.Renderer2D</a>
+						</li>
+						<li>
+							<a href="../../GameEngine/Shader.html">GameEngine.Shader</a>
+						</li>
+						<li>
+							<a href="../../GameEngine/Window.html">GameEngine.Window</a>
+						</li>
+						</ul>
+			<p id="main-nav-footer">
+ Built with
+				<a href="https://github.com/MartinNowak/scod">scod</a>
+			</p>
+		</nav>
+		<div id="main-contents">
+			<h1>Function Window.this</h1>
+			<section>
+				<p>Creates a new window for rendering to.
+</p>
+<section></section>
+
+					<section>
+						<h3>Prototype</h3>
+						<div class="prototype">
+							<code class="lang-d">
+<span class="pln">this</span><span class="pun">(</span>
+								<br/>
+&nbsp;&nbsp;<span class="typ">string</span> <span class="pln">Title</span><span class="pun">,</span>
+								<br/>
+&nbsp;&nbsp;<span class="typ">int</span> <span class="pln">Width</span><span class="pun">,</span>
+								<br/>
+&nbsp;&nbsp;<span class="typ">int</span> <span class="pln">Height</span>
+								<br/>
+<span class="pun">)</span><span class="pun">;</span>
+							</code>
+						</div>
+					</section>
+<section><h3>Parameters</h3>
+<table><col class="caption"><tr><th>Name</th><th>Description</th></tr>
+<tr><td id="Title">Title</td><td> The title of the window.</td></tr>
+<tr><td id="Width">Width</td><td> How wide the window is.</td></tr>
+<tr><td id="Height">Height</td><td> How high the window is.</td></tr>
+</table>
+</section>
+
+			</section>
+			<footer>
+				<hr/>
+				<div id="license-info">
+
+
+
+				</div>
+			</footer>
+		</div>
+	</body>
+</html>
