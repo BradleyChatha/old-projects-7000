@@ -1,0 +1,17 @@
+.dub
+dub.userprefs
+dub.selections.json
+docs.json
+
+*.o
+*.obj
+*.lst
+
+__test__*__
+__dummy.html
+
+/docs/
+/lib/*.*
+/lib/tools/**
+/lib/assets/shaders/*.bin
+/tests/*/bin/**
