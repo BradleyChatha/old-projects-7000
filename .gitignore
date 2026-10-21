@@ -1,0 +1,9 @@
+#Files
+*.exe
+*.obj
+*.dll
+
+#Folders
+/.vs/
+/Asteroids/obj/
+/Asteroids/bin/
