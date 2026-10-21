@@ -1,0 +1,8 @@
+<Room>
+	<Description>There are no boobs in here.</Description>
+
+	<Direction Compass = "North">Dead end</Direction>
+	<Direction Compass = "East">Dead end</Direction>
+	<Direction Compass = "South">StartRoom.xml</Direction>
+	<Direction Compass = "West">Dead end</Direction>
+</Room>

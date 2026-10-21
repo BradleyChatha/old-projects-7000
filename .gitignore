@@ -1,0 +1,6 @@
+#Files
+*.exe
+*.obj
+
+#Folders
+/Text Adventure/__pycache__/
