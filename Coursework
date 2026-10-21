@@ -1,0 +1,15 @@
+#include <iostream>
+
+class Number
+{
+public:
+    Number() {}
+    unsigned int seven(void) { return 7; }
+};
+
+int main(int argc, char** argv)
+{
+    Number *num = new Number();
+    std::cout << num->seven() << std::endl;
+    return 0;
+}
