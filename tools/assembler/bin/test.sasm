@@ -1,0 +1,5 @@
+declare Six uint32 6
+
+.Main:
+    print int8 127
+    print ptrtable variable Six

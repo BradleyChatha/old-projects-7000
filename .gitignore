@@ -1,0 +1,13 @@
+#Files
+*.exe
+*.obj
+*.bak
+
+*.Daniel.sasm
+*.bat
+dub.selections.json
+
+#Folders
+/.vs/
+/.dub/
+/.vscode/

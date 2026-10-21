@@ -1,0 +1,246 @@
+module sasm.compiler;
+
+import sasm.parser.ast;
+
+///
+class Compiler
+{
+    private
+    {
+        struct Label
+        {
+            string name;
+            uint   offset; // Relative to the body
+        }
+
+        struct Variable
+        {
+            string      name;
+            uint        offset; // Relative to the pointer table
+            Node.Type   type;   // Value_Float, Value_String, etc.
+        }
+
+        NodeCode _code;
+        ubyte[]  _binary;
+        uint     _index;
+
+        Label[string]       _labels;
+        Variable[string]    _variables;
+
+        uint _pointerTableLengthPointer;
+        uint _pointerTableLength;
+        uint _functionTableLengthPointer;
+        uint _bodyPointer;
+
+        enum _headerSize = (int.sizeof * 2) + "SVM".length;
+    }
+
+    public
+    {
+        ///
+        this(string sasm)
+        {
+            import std.stdio           : writefln;
+            import sasm.parser.grammar : parseSasm;
+            this._code = sasm.parseSasm.treeToAst();
+
+            debug
+            {
+                writefln("Parsing the Sasm code:\n%s", sasm);
+                writefln("\n\nParseTree:\n%s", sasm.parseSasm);
+                writefln("\n\nAST:\n%s", this._code);
+            }
+        }
+
+        ///
+        ubyte[] compile()
+        {
+            if(this._binary is null)
+                this.doCompile();
+            
+            return this._binary;
+        }
+    }
+
+    private
+    {
+        void doCompile()
+        {
+            this.writeHeader();
+            this.writePointerTable();
+            this.writeFunctionTable();
+            this.writeBody();
+        }
+
+        void writeHeader()
+        {
+            this.write(cast(ubyte[])['S', 'V', 'M']);
+
+            this._pointerTableLengthPointer = this._index;
+            this.writeBE!int(0); // Pointer table length
+
+            this._functionTableLengthPointer = this._index;
+            this.writeBE!int(0); // Function table length
+
+            assert(this._index == Compiler._headerSize, "The full header wasn't written out.");
+        }
+
+        void writePointerTable()
+        {
+            // Write the pointer table itself
+            foreach(variable; this._code.variables)
+            {
+                auto info = Variable(variable.name, 
+                                     cast(uint)(this._index - Compiler._headerSize), 
+                                     variable.value.type);
+                this._variables[info.name] = info;
+
+                this.writeValue(variable.value);
+            }
+
+            // Write the size of the pointer table
+            auto current = this._index;
+            uint size    = cast(uint)((current - this._functionTableLengthPointer) - int.sizeof);
+            assert(size <= current, "overflow");
+
+            this._pointerTableLength = size;
+            this._index  = this._pointerTableLengthPointer;
+            this.writeBE!int(size);
+            this._index  = current;
+        }
+
+        void writeFunctionTable()
+        {
+            // Write the function table itself
+
+            // Write the size of the function table
+            auto current = this._index;
+            uint size    = cast(uint)(current - (this._functionTableLengthPointer + int.sizeof + this._pointerTableLength));
+            assert(size <= current, "overflow/incorrect maths");
+
+            this._index  = this._functionTableLengthPointer;
+            this.writeBE!int(size);
+            this._index  = current;
+        }
+
+        void writeBody()
+        {
+            this._bodyPointer = this._index;
+
+            foreach(child; this._code.opcodes)
+                this.writeOpcode(child);
+        }
+
+        void writeOpcode(NodeMneumonic node)
+        {
+            // Assign labels
+            // TODO: Move this before the code generation step, so code can reference labels that are below
+            foreach(label; node.labels)
+            {
+                if((label in this._labels) !is null)
+                    throw new Exception(label); // TODO: Improve message.
+
+                this._labels[label] = Label(label, this._index - this._bodyPointer);
+            }
+
+            // Write the opcode
+            this.write(cast(ubyte)node.opcode);
+
+            // Write the operands.
+            foreach(operand; node.operands)
+                this.writeValue(operand, node.opcode == NodeMneumonic.Instruction.Jump);
+        }
+
+        void writeValue(NodeValue value, bool isJumpCommand = false)
+        {
+            switch(value.type) with(Node.Type)
+            {
+                case Value_I32: 
+                    this.write(value.type);
+                    this.writeBE!int(value.value!int);
+                    break;
+
+                case Value_U32:
+                    this.write(value.type);
+                    this.writeBE!uint(value.value!uint);
+                    break;
+
+                case Value_I8:
+                    this.write(value.type);
+                    this.write(value.value!byte);
+                    break;
+
+                case Value_U8:
+                    this.write(value.type);
+                    this.write(value.value!ubyte);
+                    break;
+
+                case Value_String:
+                    auto str = value.value!string;
+
+                    this.write(value.type);
+                    this.write(cast(ubyte)str.length); // TODO: Size check.
+                    this.write(cast(immutable(ubyte[]))str);
+                    break;
+
+                case Value_Float32:
+                    this.write(value.type);
+                    this.writeBE!float(value.value!float);
+                    break;
+
+                case Value_Label:
+                    auto name = value.value!string;
+                    auto ptr  = (name in this._labels);
+
+                    if(ptr is null)
+                        throw new Exception(name); // TODO
+
+                    // Special case: Jump doesn't expect this
+                    if(!isJumpCommand)
+                        this.write(Node.Type.Value_I32);
+
+                    this.writeBE!int(ptr.offset);
+                    break;
+
+                case Value_Variable_Ptr:
+                case Value_Variable_Stack:
+                    auto ptr = (value.value!string in this._variables);
+                    assert(ptr !is null, "Add an exception + error message here");
+
+                    this.write(MagicalStuff.VarOpcode); // Variable
+                    this.write(MagicalStuff.VarGet);    // Get
+                    this.write(value.type == Value_Variable_Ptr ? MagicalStuff.VarPtr 
+                                                                : MagicalStuff.VarStack); // Whether it's in the stack or pointer table
+                    this.writeBE!uint(ptr.offset);
+                    break;
+
+                default:
+                    throw new Exception("TODO");
+            }
+        }
+
+        // Helper functions
+
+        void write(ubyte value)
+        {
+            this.write([value]);
+        }
+
+        void write(const ubyte[] value)
+        {
+            auto end = cast(uint)(this._index + value.length);
+
+            if(this._binary.length < end)
+                this._binary.length = end;
+
+            this._binary[this._index..end] = value[];
+            this._index = end;
+        }
+
+        void writeBE(T)(T value)
+        {
+            import std.bitmanip : nativeToBigEndian;
+            this.write(nativeToBigEndian(value)[]);
+        }
+    }
+}
