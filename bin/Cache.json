@@ -1,0 +1,530 @@
+{
+    "https:\/\/euw.api.pvp.net\/api\/lol\/euw\/v1.4\/summoner\/47480873,32128823\/?api_key=": {
+        "32128823": {
+            "id": 32128823,
+            "name": "LewThaPro",
+            "profileIconId": 959,
+            "revisionDate": 1447836323000,
+            "summonerLevel": 30
+        },
+        "47480873": {
+            "id": 47480873,
+            "name": "SealabJaster",
+            "profileIconId": 641,
+            "revisionDate": 1447581238000,
+            "summonerLevel": 30
+        },
+        "__Time": 635834994350152552
+    },
+    "https:\/\/euw.api.pvp.net\/api\/lol\/euw\/v1.4\/summoner\/47480873\/masteries\/?api_key=": {
+        "47480873": {
+            "pages": [
+                {
+                    "current": false,
+                    "id": 34163841,
+                    "name": "Sona"
+                },
+                {
+                    "current": false,
+                    "id": 34163844,
+                    "name": "Kennen Mid"
+                },
+                {
+                    "current": false,
+                    "id": 34163846,
+                    "name": "Kennen Aggro Support"
+                },
+                {
+                    "current": false,
+                    "id": 34163847,
+                    "name": "Leona no shi no uta"
+                },
+                {
+                    "current": false,
+                    "id": 34163848,
+                    "name": "Kennen AP Top"
+                },
+                {
+                    "current": false,
+                    "id": 34163849,
+                    "name": "AP Mid"
+                },
+                {
+                    "current": true,
+                    "id": 34163850,
+                    "masteries": [
+                        {
+                            "id": 6121,
+                            "rank": 1
+                        },
+                        {
+                            "id": 6311,
+                            "rank": 5
+                        },
+                        {
+                            "id": 6131,
+                            "rank": 5
+                        },
+                        {
+                            "id": 6321,
+                            "rank": 1
+                        },
+                        {
+                            "id": 6111,
+                            "rank": 5
+                        },
+                        {
+                            "id": 6141,
+                            "rank": 1
+                        },
+                        {
+                            "id": 6332,
+                            "rank": 1
+                        },
+                        {
+                            "id": 6161,
+                            "rank": 1
+                        },
+                        {
+                            "id": 6331,
+                            "rank": 4
+                        },
+                        {
+                            "id": 6151,
+                            "rank": 5
+                        }
+                    ],
+                    "name": "ADC"
+                },
+                {
+                    "current": false,
+                    "id": 34163852,
+                    "name": "TF Mid"
+                },
+                {
+                    "current": false,
+                    "id": 34163853,
+                    "name": "Mantheon\/AD Jung"
+                },
+                {
+                    "current": false,
+                    "id": 34163854,
+                    "name": "AP Jungle"
+                },
+                {
+                    "current": false,
+                    "id": 34163855,
+                    "name": "Tank Jungle"
+                }
+            ],
+            "summonerId": 47480873
+        },
+        "__Time": 635834854074821873
+    },
+    "https:\/\/euw.api.pvp.net\/api\/lol\/euw\/v1.4\/summoner\/47480873\/runes\/?api_key=": {
+        "47480873": {
+            "pages": [
+                {
+                    "current": false,
+                    "id": 59723386,
+                    "name": "AP Mid(A lot of AD atm)",
+                    "slots": [
+                        {
+                            "runeId": 5402,
+                            "runeSlotId": 1
+                        },
+                        {
+                            "runeId": 5402,
+                            "runeSlotId": 2
+                        },
+                        {
+                            "runeId": 5273,
+                            "runeSlotId": 3
+                        },
+                        {
+                            "runeId": 5273,
+                            "runeSlotId": 4
+                        },
+                        {
+                            "runeId": 5245,
+                            "runeSlotId": 5
+                        },
+                        {
+                            "runeId": 5245,
+                            "runeSlotId": 6
+                        },
+                        {
+                            "runeId": 5245,
+                            "runeSlotId": 7
+                        },
+                        {
+                            "runeId": 5245,
+                            "runeSlotId": 8
+                        },
+                        {
+                            "runeId": 5245,
+                            "runeSlotId": 9
+                        },
+                        {
+                            "runeId": 5317,
+                            "runeSlotId": 10
+                        },
+                        {
+                            "runeId": 5317,
+                            "runeSlotId": 11
+                        },
+                        {
+                            "runeId": 5317,
+                            "runeSlotId": 12
+                        },
+                        {
+                            "runeId": 5317,
+                            "runeSlotId": 13
+                        },
+                        {
+                            "runeId": 5317,
+                            "runeSlotId": 14
+                        },
+                        {
+                            "runeId": 5317,
+                            "runeSlotId": 15
+                        },
+                        {
+                            "runeId": 5317,
+                            "runeSlotId": 16
+                        },
+                        {
+                            "runeId": 5317,
+                            "runeSlotId": 17
+                        },
+                        {
+                            "runeId": 5317,
+                            "runeSlotId": 18
+                        },
+                        {
+                            "runeId": 5297,
+                            "runeSlotId": 19
+                        },
+                        {
+                            "runeId": 5297,
+                            "runeSlotId": 20
+                        },
+                        {
+                            "runeId": 5297,
+                            "runeSlotId": 21
+                        },
+                        {
+                            "runeId": 5297,
+                            "runeSlotId": 22
+                        },
+                        {
+                            "runeId": 5290,
+                            "runeSlotId": 23
+                        },
+                        {
+                            "runeId": 5290,
+                            "runeSlotId": 24
+                        },
+                        {
+                            "runeId": 5290,
+                            "runeSlotId": 25
+                        },
+                        {
+                            "runeId": 5290,
+                            "runeSlotId": 26
+                        },
+                        {
+                            "runeId": 5290,
+                            "runeSlotId": 27
+                        },
+                        {
+                            "runeId": 5335,
+                            "runeSlotId": 28
+                        },
+                        {
+                            "runeId": 5335,
+                            "runeSlotId": 29
+                        },
+                        {
+                            "runeId": 5335,
+                            "runeSlotId": 30
+                        }
+                    ]
+                },
+                {
+                    "current": true,
+                    "id": 59723387,
+                    "name": "AD Top(CDR)",
+                    "slots": [
+                        {
+                            "runeId": 5245,
+                            "runeSlotId": 1
+                        },
+                        {
+                            "runeId": 5245,
+                            "runeSlotId": 2
+                        },
+                        {
+                            "runeId": 5245,
+                            "runeSlotId": 3
+                        },
+                        {
+                            "runeId": 5245,
+                            "runeSlotId": 4
+                        },
+                        {
+                            "runeId": 5245,
+                            "runeSlotId": 5
+                        },
+                        {
+                            "runeId": 5245,
+                            "runeSlotId": 6
+                        },
+                        {
+                            "runeId": 5245,
+                            "runeSlotId": 7
+                        },
+                        {
+                            "runeId": 5245,
+                            "runeSlotId": 8
+                        },
+                        {
+                            "runeId": 5245,
+                            "runeSlotId": 9
+                        },
+                        {
+                            "runeId": 5317,
+                            "runeSlotId": 10
+                        },
+                        {
+                            "runeId": 5317,
+                            "runeSlotId": 11
+                        },
+                        {
+                            "runeId": 5317,
+                            "runeSlotId": 12
+                        },
+                        {
+                            "runeId": 5317,
+                            "runeSlotId": 13
+                        },
+                        {
+                            "runeId": 5317,
+                            "runeSlotId": 14
+                        },
+                        {
+                            "runeId": 5317,
+                            "runeSlotId": 15
+                        },
+                        {
+                            "runeId": 5317,
+                            "runeSlotId": 16
+                        },
+                        {
+                            "runeId": 5317,
+                            "runeSlotId": 17
+                        },
+                        {
+                            "runeId": 5317,
+                            "runeSlotId": 18
+                        },
+                        {
+                            "runeId": 5289,
+                            "runeSlotId": 19
+                        },
+                        {
+                            "runeId": 5296,
+                            "runeSlotId": 20
+                        },
+                        {
+                            "runeId": 5289,
+                            "runeSlotId": 21
+                        },
+                        {
+                            "runeId": 5296,
+                            "runeSlotId": 22
+                        },
+                        {
+                            "runeId": 5296,
+                            "runeSlotId": 23
+                        },
+                        {
+                            "runeId": 5289,
+                            "runeSlotId": 24
+                        },
+                        {
+                            "runeId": 5296,
+                            "runeSlotId": 25
+                        },
+                        {
+                            "runeId": 5296,
+                            "runeSlotId": 26
+                        },
+                        {
+                            "runeId": 5296,
+                            "runeSlotId": 27
+                        },
+                        {
+                            "runeId": 5335,
+                            "runeSlotId": 28
+                        },
+                        {
+                            "runeId": 5335,
+                            "runeSlotId": 29
+                        },
+                        {
+                            "runeId": 5335,
+                            "runeSlotId": 30
+                        }
+                    ]
+                },
+                {
+                    "current": false,
+                    "id": 70537643,
+                    "name": "AD Jungle",
+                    "slots": [
+                        {
+                            "runeId": 5245,
+                            "runeSlotId": 1
+                        },
+                        {
+                            "runeId": 5245,
+                            "runeSlotId": 2
+                        },
+                        {
+                            "runeId": 5245,
+                            "runeSlotId": 3
+                        },
+                        {
+                            "runeId": 5245,
+                            "runeSlotId": 4
+                        },
+                        {
+                            "runeId": 5245,
+                            "runeSlotId": 5
+                        },
+                        {
+                            "runeId": 5245,
+                            "runeSlotId": 6
+                        },
+                        {
+                            "runeId": 5245,
+                            "runeSlotId": 7
+                        },
+                        {
+                            "runeId": 5245,
+                            "runeSlotId": 8
+                        },
+                        {
+                            "runeId": 5245,
+                            "runeSlotId": 9
+                        },
+                        {
+                            "runeId": 5317,
+                            "runeSlotId": 10
+                        },
+                        {
+                            "runeId": 5317,
+                            "runeSlotId": 11
+                        },
+                        {
+                            "runeId": 5317,
+                            "runeSlotId": 12
+                        },
+                        {
+                            "runeId": 5317,
+                            "runeSlotId": 13
+                        },
+                        {
+                            "runeId": 5317,
+                            "runeSlotId": 14
+                        },
+                        {
+                            "runeId": 5317,
+                            "runeSlotId": 15
+                        },
+                        {
+                            "runeId": 5317,
+                            "runeSlotId": 16
+                        },
+                        {
+                            "runeId": 5317,
+                            "runeSlotId": 17
+                        },
+                        {
+                            "runeId": 5317,
+                            "runeSlotId": 18
+                        },
+                        {
+                            "runeId": 5289,
+                            "runeSlotId": 19
+                        },
+                        {
+                            "runeId": 5289,
+                            "runeSlotId": 20
+                        },
+                        {
+                            "runeId": 5289,
+                            "runeSlotId": 21
+                        },
+                        {
+                            "runeId": 5289,
+                            "runeSlotId": 22
+                        },
+                        {
+                            "runeId": 5289,
+                            "runeSlotId": 23
+                        },
+                        {
+                            "runeId": 5289,
+                            "runeSlotId": 24
+                        },
+                        {
+                            "runeId": 5289,
+                            "runeSlotId": 25
+                        },
+                        {
+                            "runeId": 5289,
+                            "runeSlotId": 26
+                        },
+                        {
+                            "runeId": 5289,
+                            "runeSlotId": 27
+                        },
+                        {
+                            "runeId": 5335,
+                            "runeSlotId": 28
+                        },
+                        {
+                            "runeId": 5335,
+                            "runeSlotId": 29
+                        },
+                        {
+                            "runeId": 5335,
+                            "runeSlotId": 30
+                        }
+                    ]
+                }
+            ],
+            "summonerId": 47480873
+        },
+        "__Time": 635834871331876506
+    },
+    "https:\/\/euw.api.pvp.net\/api\/lol\/euw\/v1.4\/summoner\/by-name\/sealabjaster,lewthapro\/?api_key=": {
+        "__Time": 635834994339655039,
+        "lewthapro": {
+            "id": 32128823,
+            "name": "LewThaPro",
+            "profileIconId": 959,
+            "revisionDate": 1447836323000,
+            "summonerLevel": 30
+        },
+        "sealabjaster": {
+            "id": 47480873,
+            "name": "SealabJaster",
+            "profileIconId": 641,
+            "revisionDate": 1447581238000,
+            "summonerLevel": 30
+        }
+    }
+}
