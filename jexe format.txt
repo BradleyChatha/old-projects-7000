@@ -1,0 +1,107 @@
+File format: [Header][NamespaceDef[] namespaces][Opcodes[] program][String16[] string table]
+
+The system's native endianess is used.
+
+An array is defined as follows:
+	[uint, length][T[length], data]
+
+<Header>
+Format:  [char[4], JEXE][ushort, version][ubyte, flags]
+Example: JEXE,0x0001,0x00
+Description:
+	This is where the general information about the JEXE is.
+
+<String8>
+Format:  [ubyte, length][char[length], string data]
+Example: 0x09,Soupworld
+Description:
+	Contains some text, where the length is specified by a prefixed byte.
+	
+<String16>
+Format:  [ushort, length][char[length], string data]
+Example: 0x0009,Soupworld
+Description:
+	Contains some text, where the length is specified by a prefixed ushort.
+	
+<Function Definition(FuncDef)>
+Format:  [String16, name_and_paramtypes][String16, localTypes][ubyte, flags][uint, pointer][uint, size]
+Example: 0x001C,MyFunction&int32&string$void,0x000D,&string&int32,0x00,0x000001EF,0xDEADBEEF
+Description:
+	Contains a defintion about a function.
+	
+	"name_and_paramtypes" contains the name of the function, as well as the parameters (Seperted by &), and ending with the return type,
+	which is seperated with $.
+	
+	The `localTypes` string contains the types of the function's local variables, delimited by an & sign.
+	
+	It should be noted that the pointer is relative to the first opcode, not relative to the beginning of the file.
+	
+	"size" is the amount of space, in bytes, the function's code takes up in the JEXE.
+	
+	The function used in the example would be expressed as
+	{		
+		.function MyFunction(&int32 &string) &void
+		{
+			.locals
+			{
+				&string
+				&int32
+			}
+			/// Code here...
+		}
+	}
+Flags:
+	0x01 = Is Static (Uses a static instance of it's class, instead of one passed to it)
+	0x02 = Is Entry point (This function is the function the VM will call to start the program. Can only be one)
+	
+<Class Definition(ClassDef)>
+Format:  [String8, name][ubyte, flags][FuncDef[] functionDefinitions]
+Example: 0x14,MyClass,0x00,0x00000001,[Imagine the example for FuncDef is here]
+Description:
+	Contains a definition about a class.
+	
+	This also contains the definitions of all the functions inside the class.
+	
+	The above example would be expressed as
+	{
+		.class MyClass
+		{
+			.function MyFunction(&int32 &string) &void
+			{
+				.locals
+				{
+					&string
+					&int32
+				}
+				/// Code here...
+			}
+		}
+	}
+Flags:
+	0x01 = Is static (There is only one instance of the class)
+
+<Namespace Definition(NamespaceDef)>
+Format:  [String8, name][ClassDef[] classDefinitions]
+Example: 0x0F,Test/Namespace,0x00000001,[Imagine the example for ClassDef here]
+Description:
+	Contains a definition about a namespace.
+	
+	This also contains the definitions of all the clsases inside the namespace.
+	
+	The above example would be expressed as
+	{
+		.namespace Test/Namespace
+	
+		.class MyClass
+		{
+			.function MyFunction(&int32 &string) &void
+			{
+				.locals
+				{
+					&string
+					&int32
+				}
+				/// Code here...
+			}
+		}
+	}

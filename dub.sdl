@@ -1,0 +1,9 @@
+name "jasm"
+description "A minimal D application."
+copyright "Copyright © 2016, Sealab"
+authors "Sealab"
+
+targetType "library"
+targetPath "lib"
+
+dependency "pegged" version="~>0.3.2"
