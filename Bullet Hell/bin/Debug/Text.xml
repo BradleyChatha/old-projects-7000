@@ -1,0 +1,7 @@
+<Entity Name = "Test Entity" Speed = "10">
+    <Entity-Texture>Assets\\Test.png</Entity-Texture>
+    <Entity-Health>100</Entity-Health>
+    <Entity-Bullet>Assets\\TestBullets.png</Entity-Bullet>
+    <Entity-Fire-Rate Pattern = "Single">3</Entity-Fire-Rate>
+    <Entity-Fire-Position X = "5.5" Y = "60" Distance = "400"></Entity-Fire-Position>
+</Entity>

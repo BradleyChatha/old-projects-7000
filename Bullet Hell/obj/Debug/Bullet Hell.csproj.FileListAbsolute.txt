@@ -1,0 +1,10 @@
+c:\users\sherb\documents\visual studio 2017\Projects\Bullet Hell\Bullet Hell\bin\Debug\Bullet Hell.exe.config
+c:\users\sherb\documents\visual studio 2017\Projects\Bullet Hell\Bullet Hell\bin\Debug\Bullet Hell.exe
+c:\users\sherb\documents\visual studio 2017\Projects\Bullet Hell\Bullet Hell\bin\Debug\Bullet Hell.pdb
+c:\users\sherb\documents\visual studio 2017\Projects\Bullet Hell\Bullet Hell\obj\Debug\Bullet Hell.csprojResolveAssemblyReference.cache
+c:\users\sherb\documents\visual studio 2017\Projects\Bullet Hell\Bullet Hell\obj\Debug\Bullet Hell.exe
+c:\users\sherb\documents\visual studio 2017\Projects\Bullet Hell\Bullet Hell\obj\Debug\Bullet Hell.pdb
+c:\users\sherb\documents\visual studio 2017\Projects\Bullet Hell\Bullet Hell\bin\Debug\sfmlnet-audio-2.dll
+c:\users\sherb\documents\visual studio 2017\Projects\Bullet Hell\Bullet Hell\bin\Debug\sfmlnet-graphics-2.dll
+c:\users\sherb\documents\visual studio 2017\Projects\Bullet Hell\Bullet Hell\bin\Debug\sfmlnet-system-2.dll
+c:\users\sherb\documents\visual studio 2017\Projects\Bullet Hell\Bullet Hell\bin\Debug\sfmlnet-window-2.dll
