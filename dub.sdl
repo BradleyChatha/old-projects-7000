@@ -1,0 +1,10 @@
+name "sealbot"
+description "A bot for the weebs unite server."
+authors "Sealab"
+copyright "Copyright © 2016, Sealab"
+license "MIT"
+dependency "dscord" version="~>0.0.9"
+dependency "vibe-d" version="~>0.7.29"
+dependency "dcad" version="~>0.0.4"
+
+targetPath "bin"
